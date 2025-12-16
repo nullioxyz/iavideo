@@ -79,7 +79,7 @@ class AuthTest extends TestCase
 
         $response->assertForbidden(403);
         $response->assertJson([
-            'message' => 'Usuário inativo.',
+            'message' => __('validation.inactive_user'),
         ]);
     }
 
@@ -95,5 +95,65 @@ class AuthTest extends TestCase
                 'password',
             ],
         ]);
+    }
+
+    public function test_login_inactive_user_message_in_portuguese_when_accept_language_pt_br(): void
+    {
+        $user = User::factory()->create([
+            'active' => false,
+            'password' => bcrypt('password'),
+        ]);
+
+        $response = $this->withHeader('Accept-Language', 'pt-BR')
+            ->postJson('/api/auth/login', [
+                'email' => $user->email,
+                'password' => 'password',
+            ]);
+
+        $response->assertStatus(403);
+        $response->assertJson([
+            'message' => 'Usuário inativo.',
+        ]);
+    }
+
+    public function test_login_inactive_user_message_in_english_when_accept_language_en(): void
+    {
+        $user = User::factory()->create([
+            'active' => false,
+            'password' => bcrypt('password'),
+        ]);
+
+        $response = $this->withHeader('Accept-Language', 'en')
+            ->postJson('/api/auth/login', [
+                'email' => $user->email,
+                'password' => 'password',
+            ]);
+
+        $response->assertStatus(403);
+        $response->assertJson([
+            'message' => 'User is inactive.',
+        ]);
+    }
+
+    public function test_login_validation_messages_in_portuguese(): void
+    {
+        $response = $this->withHeader('Accept-Language', 'pt-BR')
+            ->postJson('/api/auth/login', []);
+
+        $response->assertStatus(422);
+
+        $response->assertJsonPath('errors.email.0', 'Informe o e-mail.');
+        $response->assertJsonPath('errors.password.0', 'Informe a senha.');
+    }
+
+    public function test_login_validation_messages_in_english(): void
+    {
+        $response = $this->withHeader('Accept-Language', 'en')
+            ->postJson('/api/auth/login', []);
+
+        $response->assertStatus(422);
+
+        $response->assertJsonPath('errors.email.0', 'Email is required.');
+        $response->assertJsonPath('errors.password.0', 'Password is required.');
     }
 }

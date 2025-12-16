@@ -36,11 +36,12 @@ class AuthRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.required' => 'Informe o e-mail.',
-            'email.email' => 'Informe um e-mail válido.',
-            'email.exists' => 'E-mail não encontrado.',
-            'password.required' => 'Informe a senha.',
-            'password.min' => 'A senha deve ter no mínimo 8 caracteres.',
+            'email.required' => __('validation.custom.email.required'),
+            'email.email' => __('validation.custom.email.email'),
+            'email.exists' => __('validation.custom.email.exists'),
+            'password.required' => __('validation.custom.password.required'),
+            'password.min' => __('validation.custom.password.min'),
         ];
     }
+
 }

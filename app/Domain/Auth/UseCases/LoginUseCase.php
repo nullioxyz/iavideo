@@ -19,14 +19,16 @@ final class LoginUseCase
         $token = $this->auth->attempt($credentials->email, $credentials->password);
 
         if (!$token) {
-            throw new InvalidCredentialsException('Invalid credentials.');
+            throw new InvalidCredentialsException(
+                __('validation.invalid_credentials')
+            );
         }
 
         $user = $this->auth->user();
 
         if (!$user || !$user->isActive()) {
             $this->auth->logout();
-            abort(403, 'Usuário inativo.');
+            abort(403, __('validation.inactive_user'));
         }
 
         return new TokenDTO(

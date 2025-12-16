@@ -19,12 +19,13 @@ final class AuthController extends Controller
     public function __invoke(AuthRequest $request)
     {
         try {
-            
             $dto = CredentialsDTO::fromArray($request->validated());
             $tokenDto = $this->login->execute($dto);
 
         } catch (InvalidCredentialsException $e) {
-            throw ValidationException::withMessages(['email' => ['Credenciais inválidas.']]);
+            throw ValidationException::withMessages([
+                'email' => [__('validation.invalid_credentials')],
+            ]);
         }
 
         return new TokenResource($tokenDto);
