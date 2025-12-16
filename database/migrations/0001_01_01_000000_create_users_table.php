@@ -21,7 +21,7 @@ return new class extends Migration
             $table->timestamp('phone_number_verified_at');
             $table->string('password');
             $table->boolean('active')->default(1);
-            $table->integer('credits');
+            $table->integer('credit_balance');
             $table->integer('invited_by_user_id')->nullable();
             $table->timestamp('last_login_at')->nullable();
             $table->timestamp('suspended_at')->nullable();

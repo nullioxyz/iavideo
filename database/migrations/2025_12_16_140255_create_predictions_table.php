@@ -24,8 +24,7 @@ return new class extends Migration
 
             $table->enum('status', ['queued', 'submitting', 'processing', 'succeeded', 'failed', 'canceled', 'refunded'])->default('queued');
 
-            // web | admin | api
-            $table->string('source')->default('web');
+            $table->enum('source', ['web', 'admin', 'api'])->default('web');
 
             // tentativa / retry
             $table->unsignedInteger('attempt')->default(1);

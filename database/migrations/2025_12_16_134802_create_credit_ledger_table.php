@@ -15,6 +15,7 @@ return new class extends Migration
                 ->constrained('users')
                 ->cascadeOnDelete();
 
+            // alteração no saldo: +3, -1, +1, etc.
             $table->integer('delta');
 
             $table->integer('balance_after');
