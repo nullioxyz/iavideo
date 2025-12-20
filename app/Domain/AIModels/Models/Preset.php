@@ -4,10 +4,10 @@ namespace App\Domain\AIModels\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Notifications\Notifiable;
 
-class Model extends EloquentModel
+class Preset extends EloquentModel
 {
     use HasFactory, Notifiable;
 
@@ -17,10 +17,14 @@ class Model extends EloquentModel
      * @var list<string>
      */
     protected $fillable = [
-        'platform_id',
         'name',
-        'slug',
-        'version',
+        'prompt',
+        'negative_prompt',
+        'aspect_ratio',
+        'duration_seconds',
+        'default_model_id',
+        'cost_estimate_usd',
+        'preview_video_url',
         'active',
         'created_at',
         'updated_at',
@@ -44,16 +48,16 @@ class Model extends EloquentModel
         return $this->active;
     }
 
-    public function presets(): HasMany
+    public function model(): BelongsTo
     {
-        return $this->hasMany(Preset::class, 'defaul_model_id');
+        return $this->belongsTo(Model::class, 'default_model_id');
     }
 
     /**
-     * @return \App\Domain\AIModels\Database\Factories\ModelFactory
+     * @return \App\Domain\AIModels\Database\Factories\PresetFactory
      */
     protected static function newFactory()
     {
-        return \App\Domain\AIModels\Database\Factories\ModelFactory::new();
+        return \App\Domain\AIModels\Database\Factories\PresetFactory::new();
     }
 }
