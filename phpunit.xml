@@ -14,6 +14,9 @@
         <testsuite name="Auth">
             <directory>App/Domain/Auth</directory>
         </testsuite>
+        <testsuite name="AIModels">
+            <directory>App/Domain/AIModels</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>
