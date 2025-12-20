@@ -21,7 +21,7 @@ return new class extends Migration
 
             // input armazenado no DO Spaces (privado)
             // (mesmo se você usar Spatie Media Library, guardar o "path/key" ajuda muito)
-            $table->string('start_image_path');
+            $table->string('start_image_path')->nullable();
 
             // metadata (auditoria)
             $table->string('original_filename')->nullable();
