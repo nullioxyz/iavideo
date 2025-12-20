@@ -17,6 +17,9 @@
         <testsuite name="AIModels">
             <directory>App/Domain/AIModels</directory>
         </testsuite>
+        <testsuite name="Videos">
+            <directory>App/Domain/Videos</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>
