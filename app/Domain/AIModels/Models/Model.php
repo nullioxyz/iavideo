@@ -2,8 +2,10 @@
 
 namespace App\Domain\AIModels\Models;
 
+use App\Domain\Platforms\Models\Platform;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 
@@ -47,6 +49,11 @@ class Model extends EloquentModel
     public function presets(): HasMany
     {
         return $this->hasMany(Preset::class, 'defaul_model_id');
+    }
+
+    public function platform(): BelongsTo
+    {
+        return $this->belongsTo(Platform::class, 'platform_id');
     }
 
     /**
