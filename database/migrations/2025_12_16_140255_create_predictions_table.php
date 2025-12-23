@@ -22,7 +22,7 @@ return new class extends Migration
             // ID externo do provider (Replicate prediction id)
             $table->string('external_id')->nullable()->unique();
 
-            $table->enum('status', ['queued', 'submitting', 'processing', 'succeeded', 'failed', 'canceled', 'refunded'])->default('queued');
+            $table->enum('status', ['queued', 'starting', 'submitting', 'processing', 'succeeded', 'failed', 'canceled', 'refunded'])->default('queued');
 
             $table->enum('source', ['web', 'admin', 'api'])->default('web');
 
@@ -49,17 +49,14 @@ return new class extends Migration
             $table->decimal('cost_estimate_usd', 10, 4)->nullable();
             $table->decimal('cost_actual_usd', 10, 4)->nullable();
 
-            // erro
             $table->string('error_code')->nullable();
             $table->text('error_message')->nullable();
 
-            // debug
             $table->json('request_payload')->nullable();
             $table->json('response_payload')->nullable();
 
             $table->timestamps();
 
-            // índices úteis
             $table->index(['input_id', 'attempt']);
             $table->index(['status', 'created_at']);
             $table->index(['model_id']);

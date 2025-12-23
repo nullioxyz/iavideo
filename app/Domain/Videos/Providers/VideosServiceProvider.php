@@ -6,6 +6,8 @@ use App\Domain\AIModels\Contracts\Repositories\AIModelsRepositoryInterface;
 use App\Domain\AIModels\Contracts\Repositories\PresetRepositoryInterface;
 use App\Domain\AIModels\Repositories\AIModelsRepository;
 use App\Domain\AIModels\Repositories\PresetsRepository;
+use App\Domain\AIProviders\Infra\ProviderRegistry;
+use App\Domain\AIProviders\Infra\Replicate\ReplicateClient;
 use App\Domain\Videos\Contracts\Repositories\InputRepositoryInterface;
 use App\Domain\Videos\Repositories\InputRepository;
 use App\Infra\Contracts\InputImageIngestionInterface;
@@ -21,7 +23,12 @@ class VideosServiceProvider extends ServiceProvider
     {
         $this->app->bind(InputRepositoryInterface::class, InputRepository::class);
         $this->app->bind(InputImageIngestionInterface::class, InputImageIngestionService::class);
-
+        
+        $this->app->bind(ProviderRegistry::class, function($app) {
+            return new ProviderRegistry([
+                'replicate' => $app->make(ReplicateClient::class),
+            ]);
+        });
     }
 
     /**

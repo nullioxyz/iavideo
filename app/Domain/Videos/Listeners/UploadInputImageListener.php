@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Storage;
 
-class UploadInputImage implements ShouldQueue
+class UploadInputImageListener implements ShouldQueue
 {
     use InteractsWithQueue;
 
@@ -19,7 +19,7 @@ class UploadInputImage implements ShouldQueue
         /** @var Input $input */
         $input = Input::query()->findOrFail($event->inputId);
 
-        $absolutePath = storage_path('app/'.$event->tempPath);
+        $absolutePath = Storage::disk('local')->path($event->tempPath);
 
         if (!file_exists($absolutePath)) {
             $input->update(['status' => 'failed']);
