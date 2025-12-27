@@ -38,10 +38,8 @@ final class CreatePredictionForInputUseCase
         $providerSlug = (string) $model->platform->slug;
         $modelSlug = (string) $model->slug;
         $modelVersion = $model->version;
-
-        // imageUrl: para o curl do Kling, não é necessário.
-        // Mesmo assim, já deixo preparado para quando você usar models que exigem image.
-        $imageUrl = $input->start_image_path ?: 'https://example.test/input.png';
+        
+        $imageUrl = app()->environment('local', 'testing') ? 'https://solztt.com/lang/images?uuid=cc4f5b50-8f13-4ef9-9ad1-ecc0452e4ae6&size=lg&format=avif' : $input->getFirstMediaUrl();
 
         $normalized = new CreateVideoFromImageRequestDTO(
             modelSlug: $modelSlug,
@@ -51,7 +49,9 @@ final class CreatePredictionForInputUseCase
             negativePrompt: $preset->negative_prompt ?: null,
             aspectRatio: (string) ($preset->aspect_ratio ?? '9:16'),
             durationSeconds: (int) ($preset->duration_seconds ?? 5),
-            extra: []
+            extra: [
+                'webhook' => route('webhook.replicate')
+            ]
         );
 
         $adapter = $this->adapters->video($providerSlug, $modelSlug);
@@ -82,7 +82,6 @@ final class CreatePredictionForInputUseCase
             'response_payload' => $result->responsePayload,
         ]);
 
-        // opcional: move input para processing quando cria prediction
         $input->update(['status' => 'processing']);
 
         return $prediction->refresh();

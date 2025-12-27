@@ -29,11 +29,10 @@ final class KlingV25TurboProAdapter implements VideoModelAdapterInterface
                 'aspect_ratio' => $request->aspectRatio,
                 'duration' => $request->durationSeconds,
             ], fn ($v) => $v !== null && $v !== ''),
+            ...$request->extra,
         ];
 
-        $headers = [
-            'Prefer' => 'wait',
-        ];
+        $headers = [];
 
         return new ModelCreateCommandDTO($payload, $headers);
     }

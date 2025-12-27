@@ -20,6 +20,9 @@
         <testsuite name="Videos">
             <directory>App/Domain/Videos</directory>
         </testsuite>
+        <testsuite name="AIProviders">
+            <directory>App/Domain/AIProviders</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>

@@ -35,6 +35,5 @@ class InputCreateController extends Controller
         );
 
         return new InputResource($input);
-
     }
 }

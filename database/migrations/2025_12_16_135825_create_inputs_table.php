@@ -12,12 +12,10 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('user_id')
-                ->constrained('users')
-                ->cascadeOnDelete();
+                ->constrained('users');
 
             $table->foreignId('preset_id')
-                ->constrained('presets')
-                ->restrictOnDelete();
+                ->constrained('presets');
 
             // input armazenado no DO Spaces (privado)
             // (mesmo se você usar Spatie Media Library, guardar o "path/key" ajuda muito)
