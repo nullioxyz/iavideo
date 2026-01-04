@@ -39,7 +39,7 @@ final class CreatePredictionForInputUseCase
         $modelSlug = (string) $model->slug;
         $modelVersion = $model->version;
         
-        $imageUrl = app()->environment('local', 'testing') ? 'https://solztt.com/lang/images?uuid=cc4f5b50-8f13-4ef9-9ad1-ecc0452e4ae6&size=lg&format=avif' : $input->getFirstMediaUrl();
+        $imageUrl = app()->environment('local', 'testing') ? 'https://solztt.com/lang/images?uuid=e5a4c343-b7cb-4d02-bf7a-9b23c09e44a8&size=lg&format=avif' : $input->getFirstMediaUrl();
 
         $normalized = new CreateVideoFromImageRequestDTO(
             modelSlug: $modelSlug,

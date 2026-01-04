@@ -45,7 +45,7 @@ class CreatePredictionForInputUseCaseTest extends TestCase
             $this->assertSame([
                 'input' => [
                     'prompt' => 'Go until to the start of the universe. Go to the Big Bang.',
-                    "image" => "https://solztt.com/lang/images?uuid=cc4f5b50-8f13-4ef9-9ad1-ecc0452e4ae6&size=lg&format=avif",
+                    "image" => "https://solztt.com/lang/images?uuid=e5a4c343-b7cb-4d02-bf7a-9b23c09e44a8&size=lg&format=avif",
                     "aspect_ratio" => "9:16",
                     "duration" => 5,
                 ],

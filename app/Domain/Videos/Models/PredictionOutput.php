@@ -5,10 +5,12 @@ namespace App\Domain\Videos\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class PredictionOutput extends EloquentModel
+class PredictionOutput extends EloquentModel implements HasMedia
 {
-    use HasFactory;
+    use HasFactory, InteractsWithMedia;
 
     /**
      * The attributes that are mass assignable.
@@ -51,5 +53,16 @@ class PredictionOutput extends EloquentModel
         return \App\Domain\Videos\Database\Factories\PredictionOutputFactory::new();
     }
 
+    public function registerMediaCollections(): void
+    {
+        $this
+            ->addMediaCollection('file')
+            ->singleFile();
+    }
+
+    public function getMediaFile(): ?\Spatie\MediaLibrary\MediaCollections\Models\Media
+    {
+        return $this->getFirstMedia('file');
+    }
 
 }

@@ -17,10 +17,14 @@ class ReplicateWebHookController extends Controller
 
     public function __invoke(ReplicateWebhookRequest $request): Response
     {
-        $this->useCase->execute(
-            PredictionWebhookDTO::fromArray($request->all())
-        );
+        try {
+            $this->useCase->execute(
+                PredictionWebhookDTO::fromArray($request->all())
+            );
 
-        return response()->noContent();
+            return response()->noContent();   
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Internal Server Error'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }

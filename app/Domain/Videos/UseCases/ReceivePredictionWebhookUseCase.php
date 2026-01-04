@@ -6,6 +6,7 @@ use App\Domain\Videos\DTO\PredictionWebhookDTO;
 use App\Domain\Videos\Models\Prediction;
 use App\Domain\Videos\Models\PredictionOutput;
 use Illuminate\Support\Carbon;
+use App\Domain\Videos\Jobs\DownloadPredictionOutputsJob;
 
 final class ReceivePredictionWebhookUseCase
 {
@@ -47,8 +48,15 @@ final class ReceivePredictionWebhookUseCase
             PredictionOutput::create([
                 'prediction_id' => $prediction->getKey(),
                 'kind' => 'video',
-                'path' => $dto->getUrls()['get'],
+                'path' => $dto->getOutput() ?? 'empty-path',
             ]);
+
+            $prediction->input()->update([
+                'status' => 'done'
+            ]);
+
+            DownloadPredictionOutputsJob::dispatch($prediction->id)->onQueue('downloads');
+
         }
 
         return $prediction->refresh();
