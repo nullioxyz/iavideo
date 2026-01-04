@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\AIModels\Providers;
+namespace App\Domain\AIProviders\Providers;
 
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 
@@ -12,7 +12,7 @@ class AIProvidersRouteServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadRoutesFrom(
-            base_path('app/Domain/AIModels/Routes/api.php')
+            base_path('app/Domain/AIProviders/Routes/api.php')
         );
 
         parent::boot();

@@ -20,6 +20,9 @@
         <testsuite name="Videos">
             <directory>App/Domain/Videos</directory>
         </testsuite>
+        <testsuite name="AIProviders">
+            <directory>App/Domain/AIProviders</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>
@@ -39,5 +42,8 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="MEDIA_DISK" value="media"/>
+        <env name="FILESYSTEM_DISK" value="media"/>
+
     </php>
 </phpunit>

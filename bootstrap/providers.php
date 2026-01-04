@@ -8,5 +8,6 @@ return [
     App\Domain\AIModels\Providers\IAModelsRouteServiceProvider::class,
     App\Domain\Videos\Providers\VideosServiceProvider::class,
     App\Domain\Videos\Providers\VideosRouteServiceProvider::class,
-    App\Domain\Videos\Providers\EventServiceProvider::class
+    App\Domain\Videos\Providers\EventServiceProvider::class,
+    App\Domain\AIProviders\Providers\AIProvidersRouteServiceProvider::class
 ];

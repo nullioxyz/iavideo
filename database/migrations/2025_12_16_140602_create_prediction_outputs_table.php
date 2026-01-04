@@ -15,11 +15,8 @@ return new class extends Migration
                 ->constrained('predictions')
                 ->cascadeOnDelete();
 
-            //
             $table->enum('kind', ['video', 'thumbnail', 'gif'])->default('video');
 
-            // armazenar no DO Spaces (privado)
-            // (mesmo com Media Library, guardar o "path/key" ajuda na auditoria e links assinados)
             $table->string('path');
 
             $table->string('mime_type')->nullable();

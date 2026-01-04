@@ -8,6 +8,7 @@ use App\Domain\Auth\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Prediction extends EloquentModel
 {
@@ -66,6 +67,11 @@ class Prediction extends EloquentModel
     public function model(): BelongsTo
     {
         return $this->belongsTo(Model::class, 'model_id');
+    }
+
+    public function outputs(): HasMany
+    {
+        return $this->hasMany(PredictionOutput::class);
     }
 
     /**

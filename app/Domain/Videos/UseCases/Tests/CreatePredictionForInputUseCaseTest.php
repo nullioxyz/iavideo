@@ -6,23 +6,15 @@ use App\Domain\AIModels\Contracts\Adapters\ModelAdapterRegistryInterface as Adap
 use App\Domain\AIModels\Contracts\Infra\VideoModelAdapterInterface as InfraVideoModelAdapterInterface;
 use App\Domain\AIModels\Infra\Replicate\KlingV25TurboProAdapter as ReplicateKlingV25TurboProAdapter;
 use App\Domain\AIModels\Models\Model as AIModel;
-use App\Domain\AIModels\Models\Platform;
 use App\Domain\AIModels\Models\Preset;
-use App\Domain\AIProviders\Contracts\ModelAdapterRegistryInterface;
-use App\Domain\AIProviders\Contracts\ProviderClientRegistryInterface;
 use App\Domain\AIProviders\Contracts\ProviderClientInterface;
-use App\Domain\AIProviders\Contracts\ProviderRegistryInterface;
-use App\Domain\AIProviders\Contracts\VideoModelAdapterInterface;
 use App\Domain\AIProviders\DTO\ProviderCreateResultDTO;
 use App\Domain\AIProviders\DTO\ProviderGetResultDTO;
-use App\Domain\AIProviders\Infra\ProviderRegistry;
-use App\Domain\AIProviders\Infra\Replicate\ReplicateClient;
 use App\Domain\Auth\Models\User;
 use App\Domain\Platforms\Models\Platform as ModelsPlatform;
 use App\Domain\Videos\Models\Input;
 use App\Domain\Videos\Models\Prediction;
 use App\Domain\Videos\UseCases\CreatePredictionForInputUseCase;
-use App\Infrastructure\AIProviders\Replicate\Models\KlingV25TurboProAdapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
@@ -47,17 +39,17 @@ class CreatePredictionForInputUseCaseTest extends TestCase
 
             $this->assertSame('Bearer test-token', $request->header('Authorization')[0] ?? null);
             $this->assertSame('application/json', $request->header('Content-Type')[0] ?? null);
-            $this->assertSame('wait', $request->header('Prefer')[0] ?? null);
 
             $body = $request->data();
 
             $this->assertSame([
                 'input' => [
                     'prompt' => 'Go until to the start of the universe. Go to the Big Bang.',
-                    "image" => "https://example.test/input.png",
+                    "image" => "https://solztt.com/lang/images?uuid=e5a4c343-b7cb-4d02-bf7a-9b23c09e44a8&size=lg&format=avif",
                     "aspect_ratio" => "9:16",
                     "duration" => 5,
                 ],
+                'webhook' => route('webhook.replicate')
             ], $body);
 
             return Http::response(

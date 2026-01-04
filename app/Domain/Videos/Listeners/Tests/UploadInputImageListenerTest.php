@@ -2,11 +2,13 @@
 
 namespace App\Domain\Videos\Listeners\Tests;
 
+use App\Domain\Videos\Events\CreatePredictionForInput;
 use App\Domain\Videos\Events\InputCreated;
 use App\Domain\Videos\Listeners\UploadInputImageListener;
 use App\Domain\Videos\Models\Input;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -22,6 +24,7 @@ class UploadInputImageListenerTest extends TestCase
 
     public function test_it_attaches_media_updates_input_and_deletes_temp_file(): void
     {
+        Event::fake([CreatePredictionForInput::class]);
         Storage::disk('local')->deleteDirectory('tmp/inputs');
 
         $input = Input::factory()->create([

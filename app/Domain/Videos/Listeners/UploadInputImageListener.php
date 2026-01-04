@@ -2,6 +2,7 @@
 
 namespace App\Domain\Videos\Listeners;
 
+use App\Domain\Videos\Events\CreatePredictionForInput;
 use App\Domain\Videos\Events\InputCreated;
 use App\Domain\Videos\Models\Input;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -39,5 +40,7 @@ class UploadInputImageListener implements ShouldQueue
         ]);
 
         Storage::disk('local')->delete($event->tempPath);
+
+        CreatePredictionForInput::dispatch($input->getKey());
     }
 }
