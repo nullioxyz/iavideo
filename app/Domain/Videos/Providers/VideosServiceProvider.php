@@ -2,10 +2,6 @@
 
 namespace App\Domain\Videos\Providers;
 
-use App\Domain\AIModels\Contracts\Repositories\AIModelsRepositoryInterface;
-use App\Domain\AIModels\Contracts\Repositories\PresetRepositoryInterface;
-use App\Domain\AIModels\Repositories\AIModelsRepository;
-use App\Domain\AIModels\Repositories\PresetsRepository;
 use App\Domain\AIProviders\Infra\ProviderRegistry;
 use App\Domain\AIProviders\Infra\Replicate\ReplicateClient;
 use App\Domain\Videos\Contracts\Repositories\InputRepositoryInterface;
