@@ -38,7 +38,7 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'admin',
         ],
         'api' => [
             'driver' => 'jwt',
@@ -69,10 +69,10 @@ return [
             'model' => env('AUTH_MODEL', App\Domain\Auth\Models\User::class),
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'admin' => [
+            'driver' => 'eloquent',
+            'model' => env('AUTH_ADMIN_MODEL', App\Domain\Auth\Models\Admin::class),
+        ],
     ],
 
     /*
