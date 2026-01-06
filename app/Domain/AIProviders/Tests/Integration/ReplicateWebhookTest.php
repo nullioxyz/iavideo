@@ -71,6 +71,7 @@ class ReplicateWebhookTest extends TestCase
 
     public function test_receive_replicate_prediction_completed_data(): void
     {
+        Queue::fake();
         $user = User::factory()->create([
             'active' => true,
             'password' => bcrypt('password'),
@@ -109,7 +110,7 @@ class ReplicateWebhookTest extends TestCase
                 "total_time" => 130.611986008
             ],
             "model" => "kwaivgi/kling-v2.5-turbo-pro",
-            "output" => null,
+            "output" => 'https://cdn.replicate.com/fake/video.mp4',
             "source" => "api",
             "started_at" => "2025-12-28T17:04:51.450737Z",
             "status" => "succeeded",
@@ -125,6 +126,10 @@ class ReplicateWebhookTest extends TestCase
         $response->assertNoContent();
 
         $prediction->refresh();
+
+        Queue::assertPushed(DownloadPredictionOutputsJob::class, function ($job) use ($prediction) {
+            return $job->predictionId === $prediction->id;
+        });
 
 
         $this->assertEquals('succeeded', $prediction->status);
