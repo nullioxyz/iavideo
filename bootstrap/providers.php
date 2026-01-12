@@ -11,4 +11,5 @@ return [
     App\Domain\Videos\Providers\VideosServiceProvider::class,
     App\Providers\AppServiceProvider::class,
     App\Providers\Filament\AdminPanelProvider::class,
+    App\Domain\Credits\Providers\CreditServiceProvider::class,
 ];

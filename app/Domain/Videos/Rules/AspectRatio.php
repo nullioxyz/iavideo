@@ -36,7 +36,6 @@ class AspectRatio implements ValidationRule
             return;
         }
 
-        // Para 9:16 portrait, normalmente width/height ≈ 9/16 = 0.5625
         $expected = $this->w / $this->h;
         $actual = $width / $height;
 

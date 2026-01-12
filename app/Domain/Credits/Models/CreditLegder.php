@@ -2,17 +2,17 @@
 
 namespace App\Domain\Credits\Models;
 
-use App\Domain\AIModels\Models\Preset;
 use App\Domain\Auth\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Notifications\Notifiable;
 
-class CreditLagder extends EloquentModel
+class CreditLegder extends EloquentModel
 {
-    use HasFactory, Notifiable;
+    use HasFactory;
+
+    protected $table = 'credit_ledger';
+    const UPDATED_AT = null;
 
     /**
      * The attributes that are mass assignable.
@@ -27,7 +27,6 @@ class CreditLagder extends EloquentModel
         'reference_type',
         'reference_id',
         'created_at',
-        'updated_at'
     ];
 
     /**
@@ -39,7 +38,6 @@ class CreditLagder extends EloquentModel
     {
         return [
             'created_at' => 'datetime',
-            'updated_at' => 'datetime',
         ];
     }
 
@@ -54,10 +52,10 @@ class CreditLagder extends EloquentModel
     }
 
     /**
-     * @return \App\Domain\Credits\Database\Factories\CreditLadger
+     * @return \App\Domain\Credits\Database\Factories\CreditLedgerFactory
      */
     protected static function newFactory()
     {
-        return \App\Domain\Credits\Database\Factories\CreditLadgerFactory::new();
+        return \App\Domain\Credits\Database\Factories\CreditLedgerFactory::new();
     }
 }
