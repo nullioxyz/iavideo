@@ -1,59 +1,67 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# inkai.video
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**inkai.video** is a backend MVP project that integrates with the **Replicate API** to generate AI videos from images, focused on the **tattoo artist niche**.
 
-## About Laravel
+This repository contains **only the backend** of the MVP and is currently under active development.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🚀 Project Overview
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+The goal of **inkai.video** is to provide a clean and scalable backend architecture for generating videos through AI, using images as input.  
+It is designed as the first step of a larger platform that will evolve in the future.
 
-## Learning Laravel
+This MVP focuses on building a solid foundation to support future growth, new features, and additional integrations.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🧱 Tech Stack
 
-## Laravel Sponsors
+- **PHP / Laravel**
+- **PHPUnit** (automated testing)
+- **Filament** (admin panel / internal tools)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## 🧠 Architecture & Concepts
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+This project follows a **Domain-Oriented architecture**, where each domain is responsible for its own:
 
-## Contributing
+- Contracts (interfaces)
+- Implementations
+- Business rules
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Domains can relate to and interact with each other, but the architecture encourages separation of responsibilities and clear boundaries.
 
-## Code of Conduct
+### Interface-driven development
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+A key goal of this project is to drive development using **interfaces** as much as possible.  
+This approach makes it easier to:
 
-## Security Vulnerabilities
+- Replace Replicate with another generative AI provider in the future
+- Support multiple providers (multi-provider architecture)
+- Extend the platform without rewriting core business logic
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## 🧪 Tests & Quality
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project includes automated tests and maintains test coverage as a core standard.
+
+Writing tests is treated as a non-negotiable practice and part of a personal commitment, following a pattern adopted in recent backend projects.
+
+- Tests are written using **PHPUnit**
+- New features are expected to include tests as part of the development workflow
+
+---
+
+## 📌 Project Status
+
+🛠️ **MVP in development**  
+This project is not production-ready yet and may change frequently.
+
+---
+
+## 📄 License
+
+License details will be added later
