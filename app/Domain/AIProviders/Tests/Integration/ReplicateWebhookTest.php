@@ -201,6 +201,5 @@ class ReplicateWebhookTest extends TestCase
             return $job->predictionId === $prediction->id;
         });
     }
-
     
 }

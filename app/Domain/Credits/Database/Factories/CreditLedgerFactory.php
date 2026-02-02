@@ -3,13 +3,14 @@
 namespace App\Domain\Credits\Database\Factories;
 
 use App\Domain\Auth\Models\User;
+use App\Domain\Credits\Models\CreditLegder;
 use App\Domain\Videos\Models\Input;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class CreditLadgerFactory extends Factory
+class CreditLedgerFactory extends Factory
 {
-    protected $model = Input::class;
+    protected $model = CreditLegder::class;
 
     /**
      * Define the model's default state.
@@ -26,7 +27,6 @@ class CreditLadgerFactory extends Factory
             'reference_type' => Input::class,
             'reference_id' => Input::factory()->create(),
             'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now(),
         ];
     }
 }

@@ -23,6 +23,9 @@
         <testsuite name="AIProviders">
             <directory>App/Domain/AIProviders</directory>
         </testsuite>
+        <testsuite name="Credits">
+            <directory>App/Domain/Credits</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>

@@ -3,7 +3,6 @@
 namespace App\Domain\Videos\UseCases;
 
 use App\Domain\AIModels\Contracts\Adapters\ModelAdapterRegistryInterface;
-use App\Domain\AIProviders\Contracts\ProviderClientInterface;
 use App\Domain\AIProviders\DTO\CreateVideoFromImageRequestDTO;
 use App\Domain\AIProviders\Infra\ProviderRegistry;
 use App\Domain\Videos\Models\Input;

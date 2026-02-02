@@ -2,14 +2,11 @@
 
 namespace App\Domain\Videos\Controllers;
 
-use App\Domain\Videos\Events\InputCreated;
 use App\Domain\Videos\Requests\InputCreateRequest;
 use App\Domain\Videos\Resources\InputResource;
 use App\Domain\Videos\UseCases\CreateInputUseCase;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class InputCreateController extends Controller
 {
@@ -29,7 +26,7 @@ class InputCreateController extends Controller
         );
         
         $input = $this->useCase->execute(
-            $userId,
+            $request->user('api'),
             $dto,
             $file
         );

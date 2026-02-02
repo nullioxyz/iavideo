@@ -25,6 +25,7 @@ class InputCreationTest extends TestCase
         $user = User::factory()->create([
             'active' => true,
             'password' => bcrypt('password'),
+            'credit_balance' => 5,
         ]);
 
         $token = $this->loginAndGetToken($user);
