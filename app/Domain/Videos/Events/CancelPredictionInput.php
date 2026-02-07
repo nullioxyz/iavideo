@@ -5,7 +5,7 @@ namespace App\Domain\Videos\Events;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class InputCreated
+class CancelPredictionInput
 {
     use Dispatchable, SerializesModels;
 
@@ -14,7 +14,6 @@ class InputCreated
      */
     public function __construct(
         public readonly int $inputId,
-        public readonly string $tempPath // path relativo dentro do storage/app
     ) {}
 
 }

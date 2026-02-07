@@ -19,14 +19,12 @@ return new class extends Migration
                 ->constrained('models')
                 ->restrictOnDelete();
 
-            // ID externo do provider (Replicate prediction id)
             $table->string('external_id')->nullable()->unique();
 
-            $table->enum('status', ['queued', 'starting', 'submitting', 'processing', 'succeeded', 'failed', 'canceled', 'refunded'])->default('queued');
+            $table->enum('status', ['queued', 'starting', 'submitting', 'processing', 'succeeded', 'failed', 'cancelled', 'refunded'])->default('queued');
 
             $table->enum('source', ['web', 'admin', 'api'])->default('web');
 
-            // tentativa / retry
             $table->unsignedInteger('attempt')->default(1);
 
             $table->foreignId('retry_of_prediction_id')

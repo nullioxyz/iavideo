@@ -14,67 +14,59 @@ use App\Domain\Auth\Models\User;
 use App\Domain\Platforms\Models\Platform as ModelsPlatform;
 use App\Domain\Videos\Models\Input;
 use App\Domain\Videos\Models\Prediction;
-use App\Domain\Videos\UseCases\CreatePredictionForInputUseCase;
+use App\Domain\Videos\UseCases\CancelInputPredictionUseCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
-class CreatePredictionForInputUseCaseTest extends TestCase
+class CancelPredictionUseCaseTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_it_creates_prediction_via_replicate_using_model_adapter_and_persists_payloads(): void
+    public function test_it_cancel_prediction_via_replicate(): void
     {
         Config::set('services.replicate.token', 'test-token');
 
         $user = User::factory()->create();
-        // Http fake simulando o curl do Replicate (endpoint por model + Prefer: wait)
+
         Http::fake(function ($request) {
             $this->assertSame(
-                'https://api.replicate.com/v1/models/kwaivgi/kling-v2.5-turbo-pro/predictions',
+                'https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4/cancel',
                 (string) $request->url()
             );
 
             $this->assertSame('Bearer test-token', $request->header('Authorization')[0] ?? null);
-            $this->assertSame('application/json', $request->header('Content-Type')[0] ?? null);
-
-            $body = $request->data();
-
-            $this->assertSame([
-                'input' => [
-                    'prompt' => 'Go until to the start of the universe. Go to the Big Bang.',
-                    'image' => 'https://solztt.com/lang/images?uuid=e5a4c343-b7cb-4d02-bf7a-9b23c09e44a8&size=lg&format=avif',
-                    'aspect_ratio' => '9:16',
-                    'duration' => 5,
-                ],
-                'webhook' => route('webhook.replicate'),
-            ], $body);
+            $this->assertSame('application/json', $request->header('Accept')[0] ?? null);
 
             return Http::response(
                 [
                     'id' => '2wbzrawha9rmw0cv9h5ajeyyn4',
                     'model' => 'kwaivgi/kling-v2.5-turbo-pro',
                     'version' => 'hidden',
-                    'input' => [
-                        'image' => 'https://images.unsplash.com/photo-1758567088839-15860fb2a081',
-                        'prompt' => 'Go until to the start of the universe. Go to the Big Bang.',
-                    ],
+                    'input' => [],
                     'logs' => '',
                     'output' => null,
-                    'data_removed' => false,
+                    'data_removed' => true,
                     'error' => null,
                     'source' => 'api',
-                    'status' => 'starting',
+                    'status' => 'cancelled',
                     'created_at' => '2025-12-23T17:38:33.938Z',
+                    'started_at' => '2025-12-23T17:38:33.972135Z',
+                    'completed_at' => '2025-12-23T17:40:50.521287Z',
                     'urls' => [
                         'cancel' => 'https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4/cancel',
                         'get' => 'https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4',
                         'stream' => 'https://stream.replicate.com/v1/files/jbxs-znpew3x3sep5lghqeu5bogxmlkilpxxchyri73edm6bgqg72p3wq',
                         'web' => 'https://replicate.com/p/2wbzrawha9rmw0cv9h5ajeyyn4',
                     ],
-                ], 201);
+                    'metrics' => [
+                        'predict_time' => 136.549151731,
+                        'total_time' => 136.5832877,
+                    ],
+                ], Response::HTTP_OK);
         });
 
         $platform = ModelsPlatform::query()->create([
@@ -120,6 +112,16 @@ class CreatePredictionForInputUseCaseTest extends TestCase
             'updated_at' => now(),
         ]);
 
+        $prediction = Prediction::factory()->create([
+            'input_id' => $input->getKey(),
+            'model_id' => $model->getKey(),
+            'external_id' => '2wbzrawha9rmw0cv9h5ajeyyn4',
+            'status' => 'starting',
+            'source' => 'web',
+            'attempt' => 1,
+            'queued_at' => Carbon::now(),
+        ]);
+
         $this->app->singleton(ProviderClientInterface::class, function ($app) {
             $replicate = new class implements ProviderClientInterface
             {
@@ -133,35 +135,48 @@ class CreatePredictionForInputUseCaseTest extends TestCase
                     return new ProviderCreateResultDTO(
                         '2wbzrawha9rmw0cv9h5ajeyyn4',
                         Response::HTTP_CREATED,
+                        []
+                    );
+                }
+
+                public function get(string $externalId): ProviderGetResultDTO
+                {
+                    return new ProviderGetResultDTO(
+                        Response::HTTP_OK,
+                        []
+                    );
+                }
+
+                public function cancel(string $externalId): ProviderGetResultDTO
+                {
+                    return new ProviderGetResultDTO(
+                        Response::HTTP_OK,
                         [
                             'id' => '2wbzrawha9rmw0cv9h5ajeyyn4',
                             'model' => 'kwaivgi/kling-v2.5-turbo-pro',
                             'version' => 'hidden',
-                            'input' => [
-                                'image' => 'https://images.unsplash.com/photo-1758567088839-15860fb2a081',
-                                'prompt' => 'Go until to the start of the universe. Go to the Big Bang.',
-                            ],
+                            'input' => [],
                             'logs' => '',
                             'output' => null,
-                            'data_removed' => false,
+                            'data_removed' => true,
                             'error' => null,
                             'source' => 'api',
-                            'status' => 'starting',
+                            'status' => 'cancelled',
                             'created_at' => '2025-12-23T17:38:33.938Z',
+                            'started_at' => '2025-12-23T17:38:33.972135Z',
+                            'completed_at' => '2025-12-23T17:40:50.521287Z',
                             'urls' => [
                                 'cancel' => 'https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4/cancel',
                                 'get' => 'https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4',
                                 'stream' => 'https://stream.replicate.com/v1/files/jbxs-znpew3x3sep5lghqeu5bogxmlkilpxxchyri73edm6bgqg72p3wq',
                                 'web' => 'https://replicate.com/p/2wbzrawha9rmw0cv9h5ajeyyn4',
                             ],
+                            'metrics' => [
+                                'predict_time' => 136.549151731,
+                                'total_time' => 136.5832877,
+                            ],
                         ]
-
                     );
-                }
-
-                public function get(string $externalId): ProviderGetResultDTO
-                {
-                    throw new \LogicException('not needed');
                 }
             };
         });
@@ -182,29 +197,26 @@ class CreatePredictionForInputUseCaseTest extends TestCase
             };
         });
 
-        /** @var CreatePredictionForInputUseCase $useCase */
-        $useCase = $this->app->make(CreatePredictionForInputUseCase::class);
+        /** @var CancelInputPredictionUseCase $useCase */
+        $useCase = $this->app->make(CancelInputPredictionUseCase::class);
 
-        $prediction = $useCase->execute($input->id);
+        $prediction = $useCase->execute($input->getKey());
 
         $this->assertInstanceOf(Prediction::class, $prediction);
         $this->assertSame('2wbzrawha9rmw0cv9h5ajeyyn4', $prediction->external_id);
-        $this->assertSame('starting', $prediction->status);
+        $this->assertSame(Prediction::CANCELLED, $prediction->status);
         $this->assertSame($input->id, $prediction->input_id);
         $this->assertSame($model->id, $prediction->model_id);
+
+        $this->assertDatabaseHas('inputs', [
+            'id' => $input->id,
+            'status' => Input::CANCELLED,
+        ]);
 
         $this->assertDatabaseHas('predictions', [
             'id' => $prediction->id,
             'external_id' => '2wbzrawha9rmw0cv9h5ajeyyn4',
-            'status' => 'starting',
+            'status' => Prediction::CANCELLED,
         ]);
-
-        // Assert payloads (debug)
-        $this->assertSame('Go until to the start of the universe. Go to the Big Bang.', $prediction->request_payload['input']['prompt']);
-        $this->assertSame('2wbzrawha9rmw0cv9h5ajeyyn4', $prediction->response_payload['id']);
-
-        // Input virou processing
-        $input->refresh();
-        $this->assertSame('processing', $input->status);
     }
 }

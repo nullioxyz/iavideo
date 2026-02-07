@@ -15,8 +15,8 @@ use Tests\TestCase;
 
 class InputCreationTest extends TestCase
 {
-    use RefreshDatabase;
     use AuthenticatesWithJwt;
+    use RefreshDatabase;
 
     public function test_create_input_dispatches_event_and_persists_input(): void
     {

@@ -4,8 +4,8 @@ namespace App\Filament\Resources\Predictions\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
 class PredictionForm
@@ -23,15 +23,15 @@ class PredictionForm
                 TextInput::make('external_id'),
                 Select::make('status')
                     ->options([
-            'queued' => 'Queued',
-            'starting' => 'Starting',
-            'submitting' => 'Submitting',
-            'processing' => 'Processing',
-            'succeeded' => 'Succeeded',
-            'failed' => 'Failed',
-            'canceled' => 'Canceled',
-            'refunded' => 'Refunded',
-        ])
+                        'queued' => 'Queued',
+                        'starting' => 'Starting',
+                        'submitting' => 'Submitting',
+                        'processing' => 'Processing',
+                        'succeeded' => 'Succeeded',
+                        'failed' => 'Failed',
+                        'canceled' => 'Canceled',
+                        'refunded' => 'Refunded',
+                    ])
                     ->default('queued')
                     ->required(),
                 Select::make('source')

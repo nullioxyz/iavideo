@@ -9,9 +9,7 @@ use InvalidArgumentException;
 final class ModelAdapterRegistry implements ModelAdapterRegistryInterface
 {
     /** @param VideoModelAdapterInterface[] $videoAdapters */
-    public function __construct(private readonly array $videoAdapters)
-    {
-    }
+    public function __construct(private readonly array $videoAdapters) {}
 
     public function video(string $providerSlug, string $modelSlug): VideoModelAdapterInterface
     {

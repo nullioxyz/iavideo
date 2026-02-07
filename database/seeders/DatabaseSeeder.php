@@ -43,7 +43,7 @@ class DatabaseSeeder extends Seeder
         // platform
         $platform = Platform::factory()->create([
             'name' => 'Replicate',
-            'slug' => 'replicate'
+            'slug' => 'replicate',
         ]);
 
         $model = Model::factory()->create([

@@ -12,6 +12,7 @@ class CreditLegder extends EloquentModel
     use HasFactory;
 
     protected $table = 'credit_ledger';
+
     const UPDATED_AT = null;
 
     /**

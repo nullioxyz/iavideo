@@ -45,7 +45,7 @@ class UploadInputImageListenerTest extends TestCase
         $this->assertTrue(file_exists($absolute));
 
         $event = new InputCreated($input->id, $tempPath);
-        $listener = new UploadInputImageListener();
+        $listener = new UploadInputImageListener;
 
         $listener->handle($event);
 
@@ -70,7 +70,7 @@ class UploadInputImageListenerTest extends TestCase
         $missingPath = "tmp/inputs/{$input->id}/missing.png";
 
         $event = new InputCreated($input->id, $missingPath);
-        $listener = new UploadInputImageListener();
+        $listener = new UploadInputImageListener;
 
         $listener->handle($event);
 

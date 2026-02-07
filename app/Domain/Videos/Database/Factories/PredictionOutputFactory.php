@@ -23,7 +23,7 @@ class PredictionOutputFactory extends Factory
 
             'created_at' => $now->copy()->subMinutes($this->faker->numberBetween(1, 60)),
             'updated_at' => $now,
-            'mime_type' => 'video/mp4'
+            'mime_type' => 'video/mp4',
         ];
     }
 }

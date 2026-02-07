@@ -28,8 +28,8 @@ class CreditWalletRepository implements \App\Domain\Credits\Contracts\Repositori
     {
         $user->creditLedger()->create(
             array_merge($data, [
-                'delta' => !$isRefund ? -$amount : +$amount,
-                'balance_after' => !$isRefund ? $currentCreditBalance - $amount : $currentCreditBalance + $amount,
+                'delta' => ! $isRefund ? -$amount : +$amount,
+                'balance_after' => ! $isRefund ? $currentCreditBalance - $amount : $currentCreditBalance + $amount,
             ])
         );
 
@@ -37,11 +37,11 @@ class CreditWalletRepository implements \App\Domain\Credits\Contracts\Repositori
     }
 
     public function refund(User $user, int $amount, array $data = []): User
-    {   
+    {
         $this->createCreditLedgerEntry($user, $amount, $user->credit_balance, $data, true);
         $user->credit_balance += $amount;
         $user->save();
-        
+
         return $user;
     }
 

@@ -48,15 +48,15 @@ class InputCreateRequest extends FormRequest
     {
         return [
             'preset_id.required' => __('validation.custom.preset_id.required'),
-            'preset_id.integer'  => __('validation.custom.preset_id.integer'),
-            'preset_id.exists'   => __('validation.custom.preset_id.exists'),
+            'preset_id.integer' => __('validation.custom.preset_id.integer'),
+            'preset_id.exists' => __('validation.custom.preset_id.exists'),
 
-            'image.required'     => __('validation.custom.image.required'),
-            'image.file'         => __('validation.custom.image.file'),
-            'image.image'        => __('validation.custom.image.image'),
-            'image.mimes'        => __('validation.custom.image.mimes'),
-            'image.max'          => __('validation.custom.image.max'),
-            'image.dimensions'   => __('validation.custom.image.dimensions'),
+            'image.required' => __('validation.custom.image.required'),
+            'image.file' => __('validation.custom.image.file'),
+            'image.image' => __('validation.custom.image.image'),
+            'image.mimes' => __('validation.custom.image.mimes'),
+            'image.max' => __('validation.custom.image.max'),
+            'image.dimensions' => __('validation.custom.image.dimensions'),
         ];
     }
 }

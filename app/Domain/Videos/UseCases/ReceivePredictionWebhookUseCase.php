@@ -4,17 +4,17 @@ namespace App\Domain\Videos\UseCases;
 
 use App\Domain\Credits\UseCases\RefundCreditUseCase;
 use App\Domain\Videos\DTO\PredictionWebhookDTO;
+use App\Domain\Videos\Jobs\DownloadPredictionOutputsJob;
 use App\Domain\Videos\Models\Prediction;
 use App\Domain\Videos\Models\PredictionOutput;
 use Illuminate\Support\Carbon;
-use App\Domain\Videos\Jobs\DownloadPredictionOutputsJob;
 
 final class ReceivePredictionWebhookUseCase
 {
     public function __construct(
         private readonly RefundCreditUseCase $refundCreditUseCase,
     ) {}
-    
+
     public function execute(PredictionWebhookDTO $dto): Prediction
     {
         $prediction = Prediction::where('external_id', $dto->getId())->first();
@@ -33,7 +33,7 @@ final class ReceivePredictionWebhookUseCase
             $prediction->attempt,
             $dto->getOutput()
         );
-        
+
         if (in_array($status, ['processing', 'starting']) && ! $prediction->started_at) {
             $update['started_at'] = Carbon::now();
         }
@@ -68,7 +68,7 @@ final class ReceivePredictionWebhookUseCase
             ]);
 
             $prediction->input()->update([
-                'status' => 'done'
+                'status' => 'done',
             ]);
 
             DownloadPredictionOutputsJob::dispatch($prediction->id)->onQueue('downloads');
@@ -76,20 +76,20 @@ final class ReceivePredictionWebhookUseCase
 
         if ($isFailed) {
             $prediction->input()->update([
-                'status' => 'failed'
+                'status' => 'failed',
             ]);
 
             $prediction->update([
-                'status' => 'failed'
+                'status' => 'failed',
             ]);
 
             $wasDebited = $prediction->input->credit_debited;
 
-            if($wasDebited) {
+            if ($wasDebited) {
                 $this->refundCreditUseCase->execute($prediction->input->user, [
                     'reference_type' => 'input_video_generation_failed',
                     'reason' => 'Failed video generation',
-                    'reference_id' => $prediction->input->id
+                    'reference_id' => $prediction->input->id,
                 ]);
             }
         }

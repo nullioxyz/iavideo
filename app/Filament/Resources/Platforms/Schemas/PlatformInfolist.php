@@ -14,7 +14,7 @@ class PlatformInfolist
                 TextEntry::make('name')
                     ->label('Name'),
                 TextEntry::make('slug')
-                    ->label('Slug')
+                    ->label('Slug'),
             ]);
     }
 }

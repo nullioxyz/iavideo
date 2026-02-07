@@ -22,8 +22,9 @@ class UploadInputImageListener implements ShouldQueue
 
         $absolutePath = Storage::disk('local')->path($event->tempPath);
 
-        if (!file_exists($absolutePath)) {
+        if (! file_exists($absolutePath)) {
             $input->update(['status' => 'failed']);
+
             return;
         }
 

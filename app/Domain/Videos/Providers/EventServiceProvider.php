@@ -15,7 +15,7 @@ class EventServiceProvider extends ServiceProvider
             UploadInputImageListener::class,
         ],
         CreatePredictionForInput::class => [
-            CreatePredictionForInputListener::class
-        ]
+            CreatePredictionForInputListener::class,
+        ],
     ];
 }

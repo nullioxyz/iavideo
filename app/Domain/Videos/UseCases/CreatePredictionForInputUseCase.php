@@ -25,19 +25,19 @@ final class CreatePredictionForInputUseCase
             ->findOrFail($inputId);
 
         $preset = $input->preset;
-        if (!$preset) {
+        if (! $preset) {
             throw new RuntimeException("Preset not found for input {$inputId}");
         }
 
         $model = $preset->model;
-        if (!$model || !$model->platform) {
+        if (! $model || ! $model->platform) {
             throw new RuntimeException("Model/platform not configured for preset {$preset->id}");
         }
 
         $providerSlug = (string) $model->platform->slug;
         $modelSlug = (string) $model->slug;
         $modelVersion = $model->version;
-        
+
         $imageUrl = app()->environment('local', 'testing') ? 'https://solztt.com/lang/images?uuid=e5a4c343-b7cb-4d02-bf7a-9b23c09e44a8&size=lg&format=avif' : $input->getFirstMediaUrl();
 
         $normalized = new CreateVideoFromImageRequestDTO(
@@ -49,7 +49,7 @@ final class CreatePredictionForInputUseCase
             aspectRatio: (string) ($preset->aspect_ratio ?? '9:16'),
             durationSeconds: (int) ($preset->duration_seconds ?? 5),
             extra: [
-                'webhook' => route('webhook.replicate')
+                'webhook' => route('webhook.replicate'),
             ]
         );
 

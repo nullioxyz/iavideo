@@ -22,7 +22,7 @@ final class CreateInputUseCase
 
     public function execute(User $user, InputCreateDTO $dto, UploadedFile $file): Input
     {
-        if($this->reserveCreditUseCase->canCharge($user) === false) {
+        if ($this->reserveCreditUseCase->canCharge($user) === false) {
             throw new \Exception('Insufficient balance');
         }
 
@@ -33,7 +33,7 @@ final class CreateInputUseCase
         $this->reserveCreditUseCase->execute($user, [
             'reason' => 'Charge for input creation',
             'reference_type' => 'input_creation',
-            'reference_id' => $input->getKey()
+            'reference_id' => $input->getKey(),
         ]);
 
         $tempPath = $this->ingestion->ingest($input->getKey(), $file);

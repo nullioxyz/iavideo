@@ -35,7 +35,7 @@ class InputRepository implements InputRepositoryInterface
         $dataToCreate = array_merge(
             $data,
             [
-                'status' => 'created'
+                'status' => 'created',
             ]
         );
         /** @var Input $input */

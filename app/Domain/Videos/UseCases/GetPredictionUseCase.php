@@ -2,16 +2,9 @@
 
 namespace App\Domain\Videos\UseCases;
 
-use App\Domain\AIModels\Contracts\Adapters\ModelAdapterRegistryInterface;
-use App\Domain\AIProviders\Contracts\ProviderClientInterface;
-use App\Domain\AIProviders\DTO\CreateVideoFromImageRequestDTO;
 use App\Domain\AIProviders\Infra\ProviderRegistry;
-use App\Domain\Videos\Models\Input;
 use App\Domain\Videos\Models\Prediction;
-use Illuminate\Support\Carbon;
-use League\Uri\Http;
 use RuntimeException;
-use Symfony\Component\HttpFoundation\Response;
 
 final class GetPredictionUseCase
 {
@@ -29,7 +22,7 @@ final class GetPredictionUseCase
 
         $model = $prediction->model;
         $providerSlug = (string) $model->platform->slug;
-        
+
         $client = $this->providerClients->get($providerSlug);
         $result = $client->get($prediction->external_id);
 

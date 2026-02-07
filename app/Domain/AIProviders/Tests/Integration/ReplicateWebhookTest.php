@@ -5,7 +5,6 @@ namespace App\Domain\AIProviders\Tests\Integration;
 use App\Domain\AIModels\Models\Model;
 use App\Domain\AIModels\Models\Preset;
 use App\Domain\Auth\Models\User;
-use App\Domain\Auth\Tests\Traits\AuthenticatesWithJwt;
 use App\Domain\Videos\Jobs\DownloadPredictionOutputsJob;
 use App\Domain\Videos\Models\Input;
 use App\Domain\Videos\Models\Prediction;
@@ -44,21 +43,21 @@ class ReplicateWebhookTest extends TestCase
             'status' => 'submitting',
             'source' => 'web',
         ]);
-        
+
         $response = $this->post('/api/webhook/replicate', [
-            "id" => "ufawqhfynnddngldkgtslldrkq",
-            "version" => "5c7d5dc6dd8bf75c1acaa8565735e7986bc5b66206b55cca93cb72c9bf15ccaa",
-            "created_at" => "2022-04-26T22:13:06.224088Z",
-            "started_at" => null,
-            "completed_at" => null,
-            "status" => "starting",
-            "input" => [
-                "text" => "Alice"
+            'id' => 'ufawqhfynnddngldkgtslldrkq',
+            'version' => '5c7d5dc6dd8bf75c1acaa8565735e7986bc5b66206b55cca93cb72c9bf15ccaa',
+            'created_at' => '2022-04-26T22:13:06.224088Z',
+            'started_at' => null,
+            'completed_at' => null,
+            'status' => 'starting',
+            'input' => [
+                'text' => 'Alice',
             ],
-            "output" => null,
-            "error" => null,
-            "logs" => null,
-            "metrics" => []
+            'output' => null,
+            'error' => null,
+            'logs' => null,
+            'metrics' => [],
         ]);
 
         $response->assertNoContent();
@@ -97,30 +96,30 @@ class ReplicateWebhookTest extends TestCase
             'status' => 'starting',
             'source' => 'web',
         ]);
-        
+
         $response = $this->post('/api/webhook/replicate', [
-            "completed_at" => "2025-12-28T17:07:02.050986Z",
-            "created_at" => "2025-12-28T17:04:51.439000Z",
-            "data_removed" => true,
-            "error" => null,
-            "id" => "rqgf4j40xxrmt0cvcqnrf0329m",
-            "input" => [],
-            "metrics" => [
-                "predict_time" => 130.600248305,
-                "total_time" => 130.611986008
+            'completed_at' => '2025-12-28T17:07:02.050986Z',
+            'created_at' => '2025-12-28T17:04:51.439000Z',
+            'data_removed' => true,
+            'error' => null,
+            'id' => 'rqgf4j40xxrmt0cvcqnrf0329m',
+            'input' => [],
+            'metrics' => [
+                'predict_time' => 130.600248305,
+                'total_time' => 130.611986008,
             ],
-            "model" => "kwaivgi/kling-v2.5-turbo-pro",
-            "output" => 'https://cdn.replicate.com/fake/video.mp4',
-            "source" => "api",
-            "started_at" => "2025-12-28T17:04:51.450737Z",
-            "status" => "succeeded",
-            "urls" => [
-                "stream" => "https://stream.replicate.com/v1/files/jbxs-c4b5dqladlrvzlybu5awscrjpskhciw2fhrpn3tdl35v76ogjpxq",
-                "get" => "https://api.replicate.com/v1/predictions/rqgf4j40xxrmt0cvcqnrf0329m",
-                "cancel" => "https://api.replicate.com/v1/predictions/rqgf4j40xxrmt0cvcqnrf0329m/cancel",
-                "web" => "https://replicate.com/p/rqgf4j40xxrmt0cvcqnrf0329m"
+            'model' => 'kwaivgi/kling-v2.5-turbo-pro',
+            'output' => 'https://cdn.replicate.com/fake/video.mp4',
+            'source' => 'api',
+            'started_at' => '2025-12-28T17:04:51.450737Z',
+            'status' => 'succeeded',
+            'urls' => [
+                'stream' => 'https://stream.replicate.com/v1/files/jbxs-c4b5dqladlrvzlybu5awscrjpskhciw2fhrpn3tdl35v76ogjpxq',
+                'get' => 'https://api.replicate.com/v1/predictions/rqgf4j40xxrmt0cvcqnrf0329m',
+                'cancel' => 'https://api.replicate.com/v1/predictions/rqgf4j40xxrmt0cvcqnrf0329m/cancel',
+                'web' => 'https://replicate.com/p/rqgf4j40xxrmt0cvcqnrf0329m',
             ],
-            "version" => "hidden"
+            'version' => 'hidden',
         ]);
 
         $response->assertNoContent();
@@ -130,7 +129,6 @@ class ReplicateWebhookTest extends TestCase
         Queue::assertPushed(DownloadPredictionOutputsJob::class, function ($job) use ($prediction) {
             return $job->predictionId === $prediction->id;
         });
-
 
         $this->assertEquals('succeeded', $prediction->status);
         $this->assertCount(1, $prediction->outputs);
@@ -165,24 +163,24 @@ class ReplicateWebhookTest extends TestCase
         $videoUrl = 'https://cdn.replicate.com/fake/video.mp4';
 
         $response = $this->postJson('/api/webhook/replicate', [
-            "completed_at" => "2025-12-28T17:07:02.050986Z",
-            "created_at" => "2025-12-28T17:04:51.439000Z",
-            "error" => null,
-            "id" => "rqgf4j40xxrmt0cvcqnrf0329m",
-            "input" => [],
-            "metrics" => [
-                "predict_time" => 130.600248305,
-                "total_time" => 130.611986008
+            'completed_at' => '2025-12-28T17:07:02.050986Z',
+            'created_at' => '2025-12-28T17:04:51.439000Z',
+            'error' => null,
+            'id' => 'rqgf4j40xxrmt0cvcqnrf0329m',
+            'input' => [],
+            'metrics' => [
+                'predict_time' => 130.600248305,
+                'total_time' => 130.611986008,
             ],
-            "model" => "kwaivgi/kling-v2.5-turbo-pro",
-            "output" => $videoUrl,
-            "started_at" => "2025-12-28T17:04:51.450737Z",
-            "status" => "succeeded",
-            "urls" => [
-                "get" => "https://api.replicate.com/v1/predictions/rqgf4j40xxrmt0cvcqnrf0329m",
-                "web" => "https://replicate.com/p/rqgf4j40xxrmt0cvcqnrf0329m"
+            'model' => 'kwaivgi/kling-v2.5-turbo-pro',
+            'output' => $videoUrl,
+            'started_at' => '2025-12-28T17:04:51.450737Z',
+            'status' => 'succeeded',
+            'urls' => [
+                'get' => 'https://api.replicate.com/v1/predictions/rqgf4j40xxrmt0cvcqnrf0329m',
+                'web' => 'https://replicate.com/p/rqgf4j40xxrmt0cvcqnrf0329m',
             ],
-            "version" => "hidden"
+            'version' => 'hidden',
         ]);
 
         $response->assertNoContent();
@@ -201,5 +199,4 @@ class ReplicateWebhookTest extends TestCase
             return $job->predictionId === $prediction->id;
         });
     }
-    
 }

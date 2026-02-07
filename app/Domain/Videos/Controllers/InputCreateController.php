@@ -24,7 +24,7 @@ class InputCreateController extends Controller
             mimeType: $request->file('image')?->getMimeType(),
             sizeBytes: $request->file('image')?->getSize(),
         );
-        
+
         $input = $this->useCase->execute(
             $request->user('api'),
             $dto,

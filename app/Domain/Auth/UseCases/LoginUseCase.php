@@ -6,7 +6,6 @@ use App\Domain\Auth\Contracts\Infra\JwtAuthGatewayInterface;
 use App\Domain\Auth\DTO\CredentialsDTO;
 use App\Domain\Auth\DTO\TokenDTO;
 use App\Domain\Auth\Exceptions\InvalidCredentialsException;
-use Illuminate\Validation\ValidationException;
 
 final class LoginUseCase
 {
@@ -18,7 +17,7 @@ final class LoginUseCase
     {
         $token = $this->auth->attempt($credentials->email, $credentials->password);
 
-        if (!$token) {
+        if (! $token) {
             throw new InvalidCredentialsException(
                 __('validation.invalid_credentials')
             );
@@ -26,7 +25,7 @@ final class LoginUseCase
 
         $user = $this->auth->user();
 
-        if (!$user || !$user->isActive()) {
+        if (! $user || ! $user->isActive()) {
             $this->auth->logout();
             abort(403, __('validation.inactive_user'));
         }

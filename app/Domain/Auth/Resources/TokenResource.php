@@ -10,7 +10,7 @@ class TokenResource extends JsonResource
     {
         /** @var TokenDTO $token */
         $token = $this->resource;
-        
+
         return [
             'access_token' => $token->accessToken,
             'token_type' => $token->tokenType,

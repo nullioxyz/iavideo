@@ -24,7 +24,7 @@ class PredictionOutput extends EloquentModel implements HasMedia
         'mime_type',
         'size_bytes',
         'created_at',
-        'updated_at'
+        'updated_at',
     ];
 
     /**
@@ -64,5 +64,4 @@ class PredictionOutput extends EloquentModel implements HasMedia
     {
         return $this->getFirstMedia('file');
     }
-
 }

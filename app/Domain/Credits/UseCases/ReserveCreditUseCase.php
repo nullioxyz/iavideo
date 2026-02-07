@@ -14,7 +14,7 @@ class ReserveCreditUseCase
 
     public function execute(User $user, array $data = []): void
     {
-        if($this->creditWallet->canCharge($user, self::AMOUNT) === false) {
+        if ($this->creditWallet->canCharge($user, self::AMOUNT) === false) {
             throw new \Exception('Insufficient balance');
         }
 

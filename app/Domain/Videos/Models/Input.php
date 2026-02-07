@@ -7,14 +7,14 @@ use App\Domain\Auth\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Notifications\Notifiable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Input extends EloquentModel implements HasMedia
 {
-    use HasFactory, Notifiable, InteractsWithMedia;
+    use HasFactory, InteractsWithMedia, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -32,8 +32,18 @@ class Input extends EloquentModel implements HasMedia
         'credit_ledger_id',
         'status',
         'created_at',
-        'updated_at'
+        'updated_at',
     ];
+
+    const CREATED = 'created';
+
+    const PROCESSING = 'processing';
+
+    const DONE = 'done';
+
+    const FAILED = 'failed';
+
+    const CANCELLED = 'cancelled';
 
     /**
      * Get the attributes that should be cast.
@@ -61,6 +71,11 @@ class Input extends EloquentModel implements HasMedia
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function prediction(): HasOne
+    {
+        return $this->hasOne(Prediction::class, 'input_id');
     }
 
     /**
