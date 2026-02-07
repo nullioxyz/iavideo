@@ -26,7 +26,7 @@ class InputForm
                     ->searchable()
                     ->preload()
                     ->required(),
-                    
+
                 TextInput::make('start_image_path')
                     ->label('Start Image Path')
                     ->required(),

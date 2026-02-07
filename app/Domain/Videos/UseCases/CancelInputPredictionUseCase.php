@@ -20,17 +20,17 @@ final class CancelInputPredictionUseCase
             ->with(['preset', 'preset.model', 'preset.model.platform', 'prediction'])
             ->findOrFail($inputId);
 
-        if(!$input->prediction?->external_id) {
+        if (! $input->prediction?->external_id) {
             throw new RuntimeException("External ID not found for input {$inputId}");
         }
 
         $preset = $input->preset;
-        if (!$preset) {
+        if (! $preset) {
             throw new RuntimeException("Preset not found for input {$inputId}");
         }
 
         $model = $preset->model;
-        if (!$model || !$model->platform) {
+        if (! $model || ! $model->platform) {
             throw new RuntimeException("Model/platform not configured for preset {$preset->id}");
         }
 
@@ -38,8 +38,8 @@ final class CancelInputPredictionUseCase
 
         $client = $this->providerClients->get($providerSlug);
         $result = $client->cancel($input->prediction->external_id);
-        
-        if($result->statusCode !== 200) {
+
+        if ($result->statusCode !== 200) {
             throw new RuntimeException('Failed to cancel prediction.');
         }
 

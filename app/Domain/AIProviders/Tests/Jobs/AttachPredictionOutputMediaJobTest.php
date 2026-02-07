@@ -7,11 +7,10 @@ use App\Domain\Videos\Models\Prediction;
 use App\Domain\Videos\Models\PredictionOutput;
 use App\Domain\Videos\Support\FakeHttpDownloader;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
-use Illuminate\Support\Facades\Config;
-
 
 class AttachPredictionOutputMediaJobTest extends TestCase
 {
@@ -27,7 +26,7 @@ class AttachPredictionOutputMediaJobTest extends TestCase
         Storage::disk('media')->makeDirectory('/');
     }
 
-     protected function tearDown(): void
+    protected function tearDown(): void
     {
         // limpa artefatos do medialibrary no disk (ajuste conforme seu root)
         Storage::disk('media')->deleteDirectory('/');
@@ -38,7 +37,7 @@ class AttachPredictionOutputMediaJobTest extends TestCase
     {
         $prediction = Prediction::factory()->create([
             'source' => 'web',
-            'status' => 'starting'
+            'status' => 'starting',
         ]);
 
         // URL "fake" (vai ser interceptada pelo Http::fake)

@@ -23,8 +23,7 @@ class PresetsTable
                 TextColumn::make('name')
                     ->sortable()
                     ->searchable(),
-                
-    
+
                 TextColumn::make('aspect_ratio')
                     ->label('Aspect Ratio'),
 
@@ -36,11 +35,11 @@ class PresetsTable
 
                 TextColumn::make('preview_video_url')
                     ->label('Preview Video URL'),
-                    
+
                 TextColumn::make('active'),
 
                 TextColumn::make('created_at'),
-                TextColumn::make('updated_at')
+                TextColumn::make('updated_at'),
             ])
             ->filters([
                 //

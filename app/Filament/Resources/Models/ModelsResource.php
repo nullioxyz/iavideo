@@ -10,7 +10,6 @@ use App\Filament\Resources\Models\Pages\ViewModels;
 use App\Filament\Resources\Models\Schemas\ModelsForm;
 use App\Filament\Resources\Models\Schemas\ModelsInfolist;
 use App\Filament\Resources\Models\Tables\ModelsTable;
-use App\Models\Models;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;

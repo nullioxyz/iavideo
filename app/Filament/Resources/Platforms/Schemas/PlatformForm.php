@@ -2,10 +2,8 @@
 
 namespace App\Filament\Resources\Platforms\Schemas;
 
-use Dom\Text;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TextInput;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 
 class PlatformForm

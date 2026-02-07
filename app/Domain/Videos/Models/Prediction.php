@@ -3,8 +3,6 @@
 namespace App\Domain\Videos\Models;
 
 use App\Domain\AIModels\Models\Model;
-use App\Domain\AIModels\Models\Preset;
-use App\Domain\Auth\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -38,17 +36,24 @@ class Prediction extends EloquentModel
         'request_payload',
         'response_payload',
         'created_at',
-        'updated_at'
+        'updated_at',
     ];
 
-    public const QUEUED     = 'queued';
-    public const STARTING   = 'starting';
+    public const QUEUED = 'queued';
+
+    public const STARTING = 'starting';
+
     public const SUBMITTING = 'submitting';
+
     public const PROCESSING = 'processing';
-    public const SUCCEEDED  = 'succeeded';
-    public const FAILED     = 'failed';
-    public const CANCELLED  = 'cancelled';
-    public const REFUNDED   = 'refunded';
+
+    public const SUCCEEDED = 'succeeded';
+
+    public const FAILED = 'failed';
+
+    public const CANCELLED = 'cancelled';
+
+    public const REFUNDED = 'refunded';
 
     /**
      * Get the attributes that should be cast.
@@ -90,6 +95,4 @@ class Prediction extends EloquentModel
     {
         return \App\Domain\Videos\Database\Factories\PredictionFactory::new();
     }
-
-
 }

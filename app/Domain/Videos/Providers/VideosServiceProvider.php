@@ -19,8 +19,8 @@ class VideosServiceProvider extends ServiceProvider
     {
         $this->app->bind(InputRepositoryInterface::class, InputRepository::class);
         $this->app->bind(InputImageIngestionInterface::class, InputImageIngestionService::class);
-        
-        $this->app->bind(ProviderRegistry::class, function($app) {
+
+        $this->app->bind(ProviderRegistry::class, function ($app) {
             return new ProviderRegistry([
                 'replicate' => $app->make(ReplicateClient::class),
             ]);

@@ -14,5 +14,4 @@ interface ProviderClientInterface
     public function get(string $externalId): ProviderGetResultDTO;
 
     public function cancel(string $externalId): ProviderGetResultDTO;
-
 }

@@ -14,10 +14,11 @@ use Tests\TestCase;
 class LoginUseCaseTest extends TestCase
 {
     use RefreshDatabase;
-    
+
     public function test_returns_token_dto_when_credentials_are_valid_and_user_is_active(): void
     {
-        $gateway = new class implements JwtAuthGatewayInterface {
+        $gateway = new class implements JwtAuthGatewayInterface
+        {
             public function attempt(string $email, string $password): ?string
             {
                 return 'token123';
@@ -25,8 +26,9 @@ class LoginUseCaseTest extends TestCase
 
             public function user(): ?User
             {
-                $u = new User();
+                $u = new User;
                 $u->active = true;
+
                 return $u;
             }
 
@@ -55,7 +57,8 @@ class LoginUseCaseTest extends TestCase
     {
         $this->expectException(InvalidCredentialsException::class);
 
-        $gateway = new class implements JwtAuthGatewayInterface {
+        $gateway = new class implements JwtAuthGatewayInterface
+        {
             public function attempt(string $email, string $password): ?string
             {
                 return null;

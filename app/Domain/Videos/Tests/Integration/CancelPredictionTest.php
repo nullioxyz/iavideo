@@ -8,19 +8,17 @@ use App\Domain\Auth\Models\User;
 use App\Domain\Auth\Tests\Traits\AuthenticatesWithJwt;
 use App\Domain\Platforms\Models\Platform;
 use App\Domain\Videos\Events\CancelPredictionInput;
-use App\Domain\Videos\Events\InputCreated;
 use App\Domain\Videos\Models\Input;
 use App\Domain\Videos\Models\Prediction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 
 class CancelPredictionTest extends TestCase
 {
-    use RefreshDatabase;
     use AuthenticatesWithJwt;
+    use RefreshDatabase;
 
     public function test_cancel_input_prediction_dispatches_event_and_persists_input(): void
     {

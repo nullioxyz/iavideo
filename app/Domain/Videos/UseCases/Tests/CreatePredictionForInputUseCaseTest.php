@@ -45,37 +45,36 @@ class CreatePredictionForInputUseCaseTest extends TestCase
             $this->assertSame([
                 'input' => [
                     'prompt' => 'Go until to the start of the universe. Go to the Big Bang.',
-                    "image" => "https://solztt.com/lang/images?uuid=e5a4c343-b7cb-4d02-bf7a-9b23c09e44a8&size=lg&format=avif",
-                    "aspect_ratio" => "9:16",
-                    "duration" => 5,
+                    'image' => 'https://solztt.com/lang/images?uuid=e5a4c343-b7cb-4d02-bf7a-9b23c09e44a8&size=lg&format=avif',
+                    'aspect_ratio' => '9:16',
+                    'duration' => 5,
                 ],
-                'webhook' => route('webhook.replicate')
+                'webhook' => route('webhook.replicate'),
             ], $body);
 
             return Http::response(
                 [
-                    "id" => "2wbzrawha9rmw0cv9h5ajeyyn4",
-                    "model" => "kwaivgi/kling-v2.5-turbo-pro",
-                    "version" => "hidden",
-                    "input" => [
-                        "image" => "https://images.unsplash.com/photo-1758567088839-15860fb2a081",
-                        "prompt" => "Go until to the start of the universe. Go to the Big Bang.",
+                    'id' => '2wbzrawha9rmw0cv9h5ajeyyn4',
+                    'model' => 'kwaivgi/kling-v2.5-turbo-pro',
+                    'version' => 'hidden',
+                    'input' => [
+                        'image' => 'https://images.unsplash.com/photo-1758567088839-15860fb2a081',
+                        'prompt' => 'Go until to the start of the universe. Go to the Big Bang.',
                     ],
-                    "logs" => "",
-                    "output" => null,
-                    "data_removed" => false,
-                    "error" => null,
-                    "source" => "api",
-                    "status" => "starting",
-                    "created_at" => "2025-12-23T17:38:33.938Z",
-                    "urls" => [
-                        "cancel" => "https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4/cancel",
-                        "get" => "https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4",
-                        "stream" => "https://stream.replicate.com/v1/files/jbxs-znpew3x3sep5lghqeu5bogxmlkilpxxchyri73edm6bgqg72p3wq",
-                        "web" => "https://replicate.com/p/2wbzrawha9rmw0cv9h5ajeyyn4"
-                    ]
-                ]
-            , 201);
+                    'logs' => '',
+                    'output' => null,
+                    'data_removed' => false,
+                    'error' => null,
+                    'source' => 'api',
+                    'status' => 'starting',
+                    'created_at' => '2025-12-23T17:38:33.938Z',
+                    'urls' => [
+                        'cancel' => 'https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4/cancel',
+                        'get' => 'https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4',
+                        'stream' => 'https://stream.replicate.com/v1/files/jbxs-znpew3x3sep5lghqeu5bogxmlkilpxxchyri73edm6bgqg72p3wq',
+                        'web' => 'https://replicate.com/p/2wbzrawha9rmw0cv9h5ajeyyn4',
+                    ],
+                ], 201);
         });
 
         $platform = ModelsPlatform::query()->create([
@@ -122,48 +121,57 @@ class CreatePredictionForInputUseCaseTest extends TestCase
         ]);
 
         $this->app->singleton(ProviderClientInterface::class, function ($app) {
-            $replicate = new class implements ProviderClientInterface {
-                public function providerSlug(): string { return 'replicate'; }
+            $replicate = new class implements ProviderClientInterface
+            {
+                public function providerSlug(): string
+                {
+                    return 'replicate';
+                }
+
                 public function create(string $modelSlug, array $payload, array $headers = []): ProviderCreateResultDTO
                 {
                     return new ProviderCreateResultDTO(
                         '2wbzrawha9rmw0cv9h5ajeyyn4',
                         Response::HTTP_CREATED,
                         [
-                            "id" => "2wbzrawha9rmw0cv9h5ajeyyn4",
-                            "model" => "kwaivgi/kling-v2.5-turbo-pro",
-                            "version" => "hidden",
-                            "input" => [
-                                "image" => "https://images.unsplash.com/photo-1758567088839-15860fb2a081",
-                                "prompt" => "Go until to the start of the universe. Go to the Big Bang.",
+                            'id' => '2wbzrawha9rmw0cv9h5ajeyyn4',
+                            'model' => 'kwaivgi/kling-v2.5-turbo-pro',
+                            'version' => 'hidden',
+                            'input' => [
+                                'image' => 'https://images.unsplash.com/photo-1758567088839-15860fb2a081',
+                                'prompt' => 'Go until to the start of the universe. Go to the Big Bang.',
                             ],
-                            "logs" => "",
-                            "output" => null,
-                            "data_removed" => false,
-                            "error" => null,
-                            "source" => "api",
-                            "status" => "starting",
-                            "created_at" => "2025-12-23T17:38:33.938Z",
-                            "urls" => [
-                                "cancel" => "https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4/cancel",
-                                "get" => "https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4",
-                                "stream" => "https://stream.replicate.com/v1/files/jbxs-znpew3x3sep5lghqeu5bogxmlkilpxxchyri73edm6bgqg72p3wq",
-                                "web" => "https://replicate.com/p/2wbzrawha9rmw0cv9h5ajeyyn4"
-                            ]
+                            'logs' => '',
+                            'output' => null,
+                            'data_removed' => false,
+                            'error' => null,
+                            'source' => 'api',
+                            'status' => 'starting',
+                            'created_at' => '2025-12-23T17:38:33.938Z',
+                            'urls' => [
+                                'cancel' => 'https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4/cancel',
+                                'get' => 'https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4',
+                                'stream' => 'https://stream.replicate.com/v1/files/jbxs-znpew3x3sep5lghqeu5bogxmlkilpxxchyri73edm6bgqg72p3wq',
+                                'web' => 'https://replicate.com/p/2wbzrawha9rmw0cv9h5ajeyyn4',
+                            ],
                         ]
 
                     );
                 }
+
                 public function get(string $externalId): ProviderGetResultDTO
-                { throw new \LogicException('not needed'); }
+                {
+                    throw new \LogicException('not needed');
+                }
             };
         });
 
         $this->app->singleton(AdaptersModelAdapterRegistryInterface::class, function () {
-            return new class implements AdaptersModelAdapterRegistryInterface {
+            return new class implements AdaptersModelAdapterRegistryInterface
+            {
                 public function video(string $providerSlug, string $modelSlug): InfraVideoModelAdapterInterface
                 {
-                    $adapter = new ReplicateKlingV25TurboProAdapter();
+                    $adapter = new ReplicateKlingV25TurboProAdapter;
 
                     if ($providerSlug !== $adapter->providerSlug() || $modelSlug !== $adapter->modelSlug()) {
                         throw new \InvalidArgumentException("Adapter not found for {$providerSlug}:{$modelSlug}");

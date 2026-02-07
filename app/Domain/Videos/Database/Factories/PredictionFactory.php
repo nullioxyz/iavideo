@@ -2,9 +2,9 @@
 
 namespace App\Domain\Videos\Database\Factories;
 
-use App\Domain\Videos\Models\Prediction;
-use App\Domain\Videos\Models\Input;
 use App\Domain\AIModels\Models\Model;
+use App\Domain\Videos\Models\Input;
+use App\Domain\Videos\Models\Prediction;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 

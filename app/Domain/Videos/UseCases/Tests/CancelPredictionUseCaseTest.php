@@ -15,7 +15,6 @@ use App\Domain\Platforms\Models\Platform as ModelsPlatform;
 use App\Domain\Videos\Models\Input;
 use App\Domain\Videos\Models\Prediction;
 use App\Domain\Videos\UseCases\CancelInputPredictionUseCase;
-use App\Domain\Videos\UseCases\GetPredictionUseCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Config;
@@ -32,7 +31,7 @@ class CancelPredictionUseCaseTest extends TestCase
         Config::set('services.replicate.token', 'test-token');
 
         $user = User::factory()->create();
-        
+
         Http::fake(function ($request) {
             $this->assertSame(
                 'https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4/cancel',
@@ -44,31 +43,30 @@ class CancelPredictionUseCaseTest extends TestCase
 
             return Http::response(
                 [
-                    "id" => "2wbzrawha9rmw0cv9h5ajeyyn4",
-                    "model" => "kwaivgi/kling-v2.5-turbo-pro",
-                    "version" => "hidden",
-                    "input" => [],
-                    "logs" => "",
-                    "output" => null,
-                    "data_removed" => true,
-                    "error" => null,
-                    "source" => "api",
-                    "status" => "cancelled",
-                    "created_at" => "2025-12-23T17:38:33.938Z",
-                    "started_at" => "2025-12-23T17:38:33.972135Z",
-                    "completed_at" => "2025-12-23T17:40:50.521287Z",
-                    "urls" => [
-                        "cancel" => "https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4/cancel",
-                        "get" => "https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4",
-                        "stream" => "https://stream.replicate.com/v1/files/jbxs-znpew3x3sep5lghqeu5bogxmlkilpxxchyri73edm6bgqg72p3wq",
-                        "web" => "https://replicate.com/p/2wbzrawha9rmw0cv9h5ajeyyn4"
+                    'id' => '2wbzrawha9rmw0cv9h5ajeyyn4',
+                    'model' => 'kwaivgi/kling-v2.5-turbo-pro',
+                    'version' => 'hidden',
+                    'input' => [],
+                    'logs' => '',
+                    'output' => null,
+                    'data_removed' => true,
+                    'error' => null,
+                    'source' => 'api',
+                    'status' => 'cancelled',
+                    'created_at' => '2025-12-23T17:38:33.938Z',
+                    'started_at' => '2025-12-23T17:38:33.972135Z',
+                    'completed_at' => '2025-12-23T17:40:50.521287Z',
+                    'urls' => [
+                        'cancel' => 'https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4/cancel',
+                        'get' => 'https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4',
+                        'stream' => 'https://stream.replicate.com/v1/files/jbxs-znpew3x3sep5lghqeu5bogxmlkilpxxchyri73edm6bgqg72p3wq',
+                        'web' => 'https://replicate.com/p/2wbzrawha9rmw0cv9h5ajeyyn4',
                     ],
-                    "metrics" => [
-                        "predict_time" => 136.549151731,
-                        "total_time" => 136.5832877
-                    ]
-                ]
-            , Response::HTTP_OK);
+                    'metrics' => [
+                        'predict_time' => 136.549151731,
+                        'total_time' => 136.5832877,
+                    ],
+                ], Response::HTTP_OK);
         });
 
         $platform = ModelsPlatform::query()->create([
@@ -125,8 +123,13 @@ class CancelPredictionUseCaseTest extends TestCase
         ]);
 
         $this->app->singleton(ProviderClientInterface::class, function ($app) {
-            $replicate = new class implements ProviderClientInterface {
-                public function providerSlug(): string { return 'replicate'; }
+            $replicate = new class implements ProviderClientInterface
+            {
+                public function providerSlug(): string
+                {
+                    return 'replicate';
+                }
+
                 public function create(string $modelSlug, array $payload, array $headers = []): ProviderCreateResultDTO
                 {
                     return new ProviderCreateResultDTO(
@@ -135,7 +138,7 @@ class CancelPredictionUseCaseTest extends TestCase
                         []
                     );
                 }
-                
+
                 public function get(string $externalId): ProviderGetResultDTO
                 {
                     return new ProviderGetResultDTO(
@@ -149,29 +152,29 @@ class CancelPredictionUseCaseTest extends TestCase
                     return new ProviderGetResultDTO(
                         Response::HTTP_OK,
                         [
-                            "id" => "2wbzrawha9rmw0cv9h5ajeyyn4",
-                            "model" => "kwaivgi/kling-v2.5-turbo-pro",
-                            "version" => "hidden",
-                            "input" => [],
-                            "logs" => "",
-                            "output" => null,
-                            "data_removed" => true,
-                            "error" => null,
-                            "source" => "api",
-                            "status" => "cancelled",
-                            "created_at" => "2025-12-23T17:38:33.938Z",
-                            "started_at" => "2025-12-23T17:38:33.972135Z",
-                            "completed_at" => "2025-12-23T17:40:50.521287Z",
-                            "urls" => [
-                                "cancel" => "https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4/cancel",
-                                "get" => "https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4",
-                                "stream" => "https://stream.replicate.com/v1/files/jbxs-znpew3x3sep5lghqeu5bogxmlkilpxxchyri73edm6bgqg72p3wq",
-                                "web" => "https://replicate.com/p/2wbzrawha9rmw0cv9h5ajeyyn4"
+                            'id' => '2wbzrawha9rmw0cv9h5ajeyyn4',
+                            'model' => 'kwaivgi/kling-v2.5-turbo-pro',
+                            'version' => 'hidden',
+                            'input' => [],
+                            'logs' => '',
+                            'output' => null,
+                            'data_removed' => true,
+                            'error' => null,
+                            'source' => 'api',
+                            'status' => 'cancelled',
+                            'created_at' => '2025-12-23T17:38:33.938Z',
+                            'started_at' => '2025-12-23T17:38:33.972135Z',
+                            'completed_at' => '2025-12-23T17:40:50.521287Z',
+                            'urls' => [
+                                'cancel' => 'https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4/cancel',
+                                'get' => 'https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4',
+                                'stream' => 'https://stream.replicate.com/v1/files/jbxs-znpew3x3sep5lghqeu5bogxmlkilpxxchyri73edm6bgqg72p3wq',
+                                'web' => 'https://replicate.com/p/2wbzrawha9rmw0cv9h5ajeyyn4',
                             ],
-                            "metrics" => [
-                                "predict_time" => 136.549151731,
-                                "total_time" => 136.5832877
-                            ]
+                            'metrics' => [
+                                'predict_time' => 136.549151731,
+                                'total_time' => 136.5832877,
+                            ],
                         ]
                     );
                 }
@@ -179,10 +182,11 @@ class CancelPredictionUseCaseTest extends TestCase
         });
 
         $this->app->singleton(AdaptersModelAdapterRegistryInterface::class, function () {
-            return new class implements AdaptersModelAdapterRegistryInterface {
+            return new class implements AdaptersModelAdapterRegistryInterface
+            {
                 public function video(string $providerSlug, string $modelSlug): InfraVideoModelAdapterInterface
                 {
-                    $adapter = new ReplicateKlingV25TurboProAdapter();
+                    $adapter = new ReplicateKlingV25TurboProAdapter;
 
                     if ($providerSlug !== $adapter->providerSlug() || $modelSlug !== $adapter->modelSlug()) {
                         throw new \InvalidArgumentException("Adapter not found for {$providerSlug}:{$modelSlug}");

@@ -12,8 +12,7 @@ class PresetsInfolist
         return $schema
             ->components([
                 TextEntry::make('name'),
-                
-    
+
                 TextEntry::make('aspect_ratio')
                     ->label('Aspect Ratio'),
 
@@ -22,10 +21,10 @@ class PresetsInfolist
 
                 TextEntry::make('cost_estimate_usd')
                     ->label('Cost Estimate (USD)'),
-                    
+
                 TextEntry::make('preview_video_url')
                     ->label('Preview Video URL'),
-                    
+
                 TextEntry::make('active'),
 
                 TextEntry::make('created_at'),

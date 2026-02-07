@@ -16,17 +16,17 @@ class AspectRatio implements ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (!$value instanceof UploadedFile) {
+        if (! $value instanceof UploadedFile) {
             return;
         }
 
         $path = $value->getRealPath();
-        if (!$path) {
+        if (! $path) {
             return;
         }
 
         $size = @getimagesize($path);
-        if (!$size || !isset($size[0], $size[1])) {
+        if (! $size || ! isset($size[0], $size[1])) {
             return;
         }
 

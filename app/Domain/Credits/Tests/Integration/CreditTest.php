@@ -2,24 +2,24 @@
 
 namespace App\Domain\Credits\Tests\Integration;
 
+use App\Domain\AIModels\Models\Model;
 use App\Domain\AIModels\Models\Model as AIModel;
 use App\Domain\AIModels\Models\Preset;
 use App\Domain\Auth\Models\User;
 use App\Domain\Auth\Tests\Traits\AuthenticatesWithJwt;
+use App\Domain\Credits\Models\CreditLegder;
 use App\Domain\Videos\Events\InputCreated;
 use App\Domain\Videos\Models\Input;
+use App\Domain\Videos\Models\Prediction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
-use App\Domain\AIModels\Models\Model;
-use App\Domain\Credits\Models\CreditLegder;
-use App\Domain\Videos\Models\Prediction;
 use Tests\TestCase;
 
 class CreditTest extends TestCase
 {
-    use RefreshDatabase;
     use AuthenticatesWithJwt;
+    use RefreshDatabase;
 
     public function test_create_input_and_credit_ledger_and_charge_credit(): void
     {
@@ -28,7 +28,7 @@ class CreditTest extends TestCase
         $user = User::factory()->create([
             'active' => true,
             'password' => bcrypt('password'),
-            'credit_balance' => 3
+            'credit_balance' => 3,
         ]);
 
         $token = $this->loginAndGetToken($user);
@@ -77,7 +77,7 @@ class CreditTest extends TestCase
             'reference_id' => $inputId,
             'reference_type' => 'input_creation',
             'delta' => -1,
-            'balance_after' => 2
+            'balance_after' => 2,
         ]);
 
         $this->assertEquals(2, $user->fresh()->credit_balance);
@@ -135,19 +135,19 @@ class CreditTest extends TestCase
         $user->save();
 
         $response = $this->post('/api/webhook/replicate', [
-            "id" => "ufawqhfynnddngldkgtslldrkq",
-            "version" => "5c7d5dc6dd8bf75c1acaa8565735e7986bc5b66206b55cca93cb72c9bf15ccaa",
-            "created_at" => "2022-04-26T22:13:06.224088Z",
-            "started_at" => null,
-            "completed_at" => null,
-            "status" => "failed",
-            "input" => [
-                "text" => "Alice"
+            'id' => 'ufawqhfynnddngldkgtslldrkq',
+            'version' => '5c7d5dc6dd8bf75c1acaa8565735e7986bc5b66206b55cca93cb72c9bf15ccaa',
+            'created_at' => '2022-04-26T22:13:06.224088Z',
+            'started_at' => null,
+            'completed_at' => null,
+            'status' => 'failed',
+            'input' => [
+                'text' => 'Alice',
             ],
-            "output" => null,
-            "error" => null,
-            "logs" => null,
-            "metrics" => []
+            'output' => null,
+            'error' => null,
+            'logs' => null,
+            'metrics' => [],
         ]);
 
         $response->assertNoContent();
@@ -180,7 +180,6 @@ class CreditTest extends TestCase
             'delta' => 1,
             'balance_after' => 3,
         ]);
-
 
         $prediction->refresh();
         $this->assertEquals('failed', $prediction->status);

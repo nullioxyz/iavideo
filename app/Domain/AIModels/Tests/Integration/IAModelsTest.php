@@ -10,8 +10,8 @@ use Tests\TestCase;
 
 class IAModelsTest extends TestCase
 {
-    use RefreshDatabase;
     use AuthenticatesWithJwt;
+    use RefreshDatabase;
 
     public function test_fetch_ia_models_pagination_returns_only_active_models(): void
     {

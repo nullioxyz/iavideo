@@ -22,7 +22,7 @@ class ReplicateWebhookRequest extends FormRequest
         return [
             'id' => 'required',
             'version' => 'required',
-            'status' => 'required'
+            'status' => 'required',
         ];
     }
 }

@@ -15,10 +15,10 @@ class ModelsForm
         return $schema
             ->components([
                 Select::make('platform_id')
-                ->relationship('platform', 'name')
-                ->searchable()
-                ->preload()
-                ->required(),
+                    ->relationship('platform', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->required(),
                 TextInput::make('name')
                     ->required(),
                 TextInput::make('slug')

@@ -47,12 +47,12 @@ class DownloadPredictionOutputsJob implements ShouldQueue
             ->usingName('prediction_output')
             ->usingFileName($filename)
             ->withCustomProperties([
-                'mime_type' => $res->header('Content-type')
+                'mime_type' => $res->header('Content-type'),
             ])
             ->toMediaCollection('file');
 
         $output->getMediaFile()->update([
-            'mime_type' => $res->header('Content-type')
+            'mime_type' => $res->header('Content-type'),
         ]);
 
         $output->update([

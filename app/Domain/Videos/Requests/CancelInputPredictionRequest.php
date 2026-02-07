@@ -31,8 +31,8 @@ class CancelInputPredictionRequest extends FormRequest
     {
         return [
             'input_id.required' => __('validation.custom.input_id.required'),
-            'input_id.integer'  => __('validation.custom.input_id.integer'),
-            'input_id.exists'   => __('validation.custom.input_id.exists'),
+            'input_id.integer' => __('validation.custom.input_id.integer'),
+            'input_id.exists' => __('validation.custom.input_id.exists'),
         ];
     }
 }

@@ -6,24 +6,15 @@ use App\Domain\AIModels\Contracts\Adapters\ModelAdapterRegistryInterface as Adap
 use App\Domain\AIModels\Contracts\Infra\VideoModelAdapterInterface as InfraVideoModelAdapterInterface;
 use App\Domain\AIModels\Infra\Replicate\KlingV25TurboProAdapter as ReplicateKlingV25TurboProAdapter;
 use App\Domain\AIModels\Models\Model as AIModel;
-use App\Domain\AIModels\Models\Platform;
 use App\Domain\AIModels\Models\Preset;
-use App\Domain\AIProviders\Contracts\ModelAdapterRegistryInterface;
-use App\Domain\AIProviders\Contracts\ProviderClientRegistryInterface;
 use App\Domain\AIProviders\Contracts\ProviderClientInterface;
-use App\Domain\AIProviders\Contracts\ProviderRegistryInterface;
-use App\Domain\AIProviders\Contracts\VideoModelAdapterInterface;
 use App\Domain\AIProviders\DTO\ProviderCreateResultDTO;
 use App\Domain\AIProviders\DTO\ProviderGetResultDTO;
-use App\Domain\AIProviders\Infra\ProviderRegistry;
-use App\Domain\AIProviders\Infra\Replicate\ReplicateClient;
 use App\Domain\Auth\Models\User;
 use App\Domain\Platforms\Models\Platform as ModelsPlatform;
 use App\Domain\Videos\Models\Input;
 use App\Domain\Videos\Models\Prediction;
-use App\Domain\Videos\UseCases\CreatePredictionForInputUseCase;
 use App\Domain\Videos\UseCases\GetPredictionUseCase;
-use App\Infrastructure\AIProviders\Replicate\Models\KlingV25TurboProAdapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Config;
@@ -52,31 +43,30 @@ class GetPredictionUseCaseTest extends TestCase
 
             return Http::response(
                 [
-                    "id" => "2wbzrawha9rmw0cv9h5ajeyyn4",
-                    "model" => "kwaivgi/kling-v2.5-turbo-pro",
-                    "version" => "hidden",
-                    "input" => [],
-                    "logs" => "",
-                    "output" => null,
-                    "data_removed" => true,
-                    "error" => null,
-                    "source" => "api",
-                    "status" => "succeeded",
-                    "created_at" => "2025-12-23T17:38:33.938Z",
-                    "started_at" => "2025-12-23T17:38:33.972135Z",
-                    "completed_at" => "2025-12-23T17:40:50.521287Z",
-                    "urls" => [
-                        "cancel" => "https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4/cancel",
-                        "get" => "https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4",
-                        "stream" => "https://stream.replicate.com/v1/files/jbxs-znpew3x3sep5lghqeu5bogxmlkilpxxchyri73edm6bgqg72p3wq",
-                        "web" => "https://replicate.com/p/2wbzrawha9rmw0cv9h5ajeyyn4"
+                    'id' => '2wbzrawha9rmw0cv9h5ajeyyn4',
+                    'model' => 'kwaivgi/kling-v2.5-turbo-pro',
+                    'version' => 'hidden',
+                    'input' => [],
+                    'logs' => '',
+                    'output' => null,
+                    'data_removed' => true,
+                    'error' => null,
+                    'source' => 'api',
+                    'status' => 'succeeded',
+                    'created_at' => '2025-12-23T17:38:33.938Z',
+                    'started_at' => '2025-12-23T17:38:33.972135Z',
+                    'completed_at' => '2025-12-23T17:40:50.521287Z',
+                    'urls' => [
+                        'cancel' => 'https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4/cancel',
+                        'get' => 'https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4',
+                        'stream' => 'https://stream.replicate.com/v1/files/jbxs-znpew3x3sep5lghqeu5bogxmlkilpxxchyri73edm6bgqg72p3wq',
+                        'web' => 'https://replicate.com/p/2wbzrawha9rmw0cv9h5ajeyyn4',
                     ],
-                    "metrics" => [
-                        "predict_time" => 136.549151731,
-                        "total_time" => 136.5832877
-                    ]
-                ]
-            , 201);
+                    'metrics' => [
+                        'predict_time' => 136.549151731,
+                        'total_time' => 136.5832877,
+                    ],
+                ], 201);
         });
 
         $platform = ModelsPlatform::query()->create([
@@ -133,66 +123,72 @@ class GetPredictionUseCaseTest extends TestCase
         ]);
 
         $this->app->singleton(ProviderClientInterface::class, function ($app) {
-            $replicate = new class implements ProviderClientInterface {
-                public function providerSlug(): string { return 'replicate'; }
+            $replicate = new class implements ProviderClientInterface
+            {
+                public function providerSlug(): string
+                {
+                    return 'replicate';
+                }
+
                 public function create(string $modelSlug, array $payload, array $headers = []): ProviderCreateResultDTO
                 {
                     return new ProviderCreateResultDTO(
                         '2wbzrawha9rmw0cv9h5ajeyyn4',
                         Response::HTTP_CREATED,
                         [
-                            "id" => "2wbzrawha9rmw0cv9h5ajeyyn4",
-                            "model" => "kwaivgi/kling-v2.5-turbo-pro",
-                            "version" => "hidden",
-                            "input" => [
-                                "image" => "https://images.unsplash.com/photo-1758567088839-15860fb2a081",
-                                "prompt" => "Go until to the start of the universe. Go to the Big Bang.",
+                            'id' => '2wbzrawha9rmw0cv9h5ajeyyn4',
+                            'model' => 'kwaivgi/kling-v2.5-turbo-pro',
+                            'version' => 'hidden',
+                            'input' => [
+                                'image' => 'https://images.unsplash.com/photo-1758567088839-15860fb2a081',
+                                'prompt' => 'Go until to the start of the universe. Go to the Big Bang.',
                             ],
-                            "logs" => "",
-                            "output" => null,
-                            "data_removed" => false,
-                            "error" => null,
-                            "source" => "api",
-                            "status" => "starting",
-                            "created_at" => "2025-12-23T17:38:33.938Z",
-                            "urls" => [
-                                "cancel" => "https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4/cancel",
-                                "get" => "https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4",
-                                "stream" => "https://stream.replicate.com/v1/files/jbxs-znpew3x3sep5lghqeu5bogxmlkilpxxchyri73edm6bgqg72p3wq",
-                                "web" => "https://replicate.com/p/2wbzrawha9rmw0cv9h5ajeyyn4"
-                            ]
+                            'logs' => '',
+                            'output' => null,
+                            'data_removed' => false,
+                            'error' => null,
+                            'source' => 'api',
+                            'status' => 'starting',
+                            'created_at' => '2025-12-23T17:38:33.938Z',
+                            'urls' => [
+                                'cancel' => 'https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4/cancel',
+                                'get' => 'https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4',
+                                'stream' => 'https://stream.replicate.com/v1/files/jbxs-znpew3x3sep5lghqeu5bogxmlkilpxxchyri73edm6bgqg72p3wq',
+                                'web' => 'https://replicate.com/p/2wbzrawha9rmw0cv9h5ajeyyn4',
+                            ],
                         ]
 
                     );
                 }
+
                 public function get(string $externalId): ProviderGetResultDTO
                 {
                     return new ProviderGetResultDTO(
                         Response::HTTP_OK,
                         [
-                            "id" => "2wbzrawha9rmw0cv9h5ajeyyn4",
-                            "model" => "kwaivgi/kling-v2.5-turbo-pro",
-                            "version" => "hidden",
-                            "input" => [],
-                            "logs" => "",
-                            "output" => null,
-                            "data_removed" => true,
-                            "error" => null,
-                            "source" => "api",
-                            "status" => "succeeded",
-                            "created_at" => "2025-12-23T17:38:33.938Z",
-                            "started_at" => "2025-12-23T17:38:33.972135Z",
-                            "completed_at" => "2025-12-23T17:40:50.521287Z",
-                            "urls" => [
-                                "cancel" => "https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4/cancel",
-                                "get" => "https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4",
-                                "stream" => "https://stream.replicate.com/v1/files/jbxs-znpew3x3sep5lghqeu5bogxmlkilpxxchyri73edm6bgqg72p3wq",
-                                "web" => "https://replicate.com/p/2wbzrawha9rmw0cv9h5ajeyyn4"
+                            'id' => '2wbzrawha9rmw0cv9h5ajeyyn4',
+                            'model' => 'kwaivgi/kling-v2.5-turbo-pro',
+                            'version' => 'hidden',
+                            'input' => [],
+                            'logs' => '',
+                            'output' => null,
+                            'data_removed' => true,
+                            'error' => null,
+                            'source' => 'api',
+                            'status' => 'succeeded',
+                            'created_at' => '2025-12-23T17:38:33.938Z',
+                            'started_at' => '2025-12-23T17:38:33.972135Z',
+                            'completed_at' => '2025-12-23T17:40:50.521287Z',
+                            'urls' => [
+                                'cancel' => 'https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4/cancel',
+                                'get' => 'https://api.replicate.com/v1/predictions/2wbzrawha9rmw0cv9h5ajeyyn4',
+                                'stream' => 'https://stream.replicate.com/v1/files/jbxs-znpew3x3sep5lghqeu5bogxmlkilpxxchyri73edm6bgqg72p3wq',
+                                'web' => 'https://replicate.com/p/2wbzrawha9rmw0cv9h5ajeyyn4',
                             ],
-                            "metrics" => [
-                                "predict_time" => 136.549151731,
-                                "total_time" => 136.5832877
-                            ]
+                            'metrics' => [
+                                'predict_time' => 136.549151731,
+                                'total_time' => 136.5832877,
+                            ],
                         ]
                     );
                 }
@@ -200,10 +196,11 @@ class GetPredictionUseCaseTest extends TestCase
         });
 
         $this->app->singleton(AdaptersModelAdapterRegistryInterface::class, function () {
-            return new class implements AdaptersModelAdapterRegistryInterface {
+            return new class implements AdaptersModelAdapterRegistryInterface
+            {
                 public function video(string $providerSlug, string $modelSlug): InfraVideoModelAdapterInterface
                 {
-                    $adapter = new ReplicateKlingV25TurboProAdapter();
+                    $adapter = new ReplicateKlingV25TurboProAdapter;
 
                     if ($providerSlug !== $adapter->providerSlug() || $modelSlug !== $adapter->modelSlug()) {
                         throw new \InvalidArgumentException("Adapter not found for {$providerSlug}:{$modelSlug}");

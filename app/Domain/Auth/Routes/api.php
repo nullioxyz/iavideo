@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('api')
     ->middleware(['api', \App\Http\Middleware\SetLocale::class])
     ->group(function () {
-    Route::prefix('auth')->name('auth.')->group(function () {
-        Route::post('/login', AuthController::class)->name('login');
+        Route::prefix('auth')->name('auth.')->group(function () {
+            Route::post('/login', AuthController::class)->name('login');
+        });
     });
-});

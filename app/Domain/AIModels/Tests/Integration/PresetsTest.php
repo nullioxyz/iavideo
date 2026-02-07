@@ -11,8 +11,8 @@ use Tests\TestCase;
 
 class PresetsTest extends TestCase
 {
-    use RefreshDatabase;
     use AuthenticatesWithJwt;
+    use RefreshDatabase;
 
     public function test_fetch_presets_by_model_pagination(): void
     {
@@ -26,7 +26,7 @@ class PresetsTest extends TestCase
         ]);
 
         $preset = Preset::factory()->create([
-            'default_model_id' => $activeModel->getKey()
+            'default_model_id' => $activeModel->getKey(),
         ]);
 
         $inactivePreset = Preset::factory()->create([

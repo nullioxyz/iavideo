@@ -24,8 +24,7 @@ class InputsTable
                     ->label('User')
                     ->sortable()
                     ->searchable(),
-                
-    
+
                 TextColumn::make('start_image_path')
                     ->label('Start Image Path'),
 
@@ -45,7 +44,7 @@ class InputsTable
                     ->label('Status'),
 
                 TextColumn::make('created_at'),
-                TextColumn::make('updated_at')
+                TextColumn::make('updated_at'),
             ])
             ->filters([
                 //

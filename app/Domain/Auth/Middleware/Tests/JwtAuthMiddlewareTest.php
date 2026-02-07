@@ -6,8 +6,8 @@ use App\Domain\Auth\Middleware\JwtAuth;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Tests\TestCase;
-use Tymon\JWTAuth\Facades\JWTAuth as IJWTAuth;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use Tymon\JWTAuth\Facades\JWTAuth as IJWTAuth;
 
 class JwtAuthMiddlewareTest extends TestCase
 {
@@ -15,7 +15,7 @@ class JwtAuthMiddlewareTest extends TestCase
 
     public function test_returns_401_when_missing_bearer_token(): void
     {
-        $middleware = new JwtAuth();
+        $middleware = new JwtAuth;
 
         $request = Request::create('/anything', 'GET'); // sem Authorization
 
@@ -30,7 +30,7 @@ class JwtAuthMiddlewareTest extends TestCase
 
     public function test_returns_401_when_token_is_invalid(): void
     {
-        $middleware = new JwtAuth();
+        $middleware = new JwtAuth;
 
         $request = Request::create('/anything', 'GET', server: [
             'HTTP_AUTHORIZATION' => 'Bearer invalid-token',
@@ -51,7 +51,7 @@ class JwtAuthMiddlewareTest extends TestCase
 
     public function test_allows_request_when_token_is_valid(): void
     {
-        $middleware = new JwtAuth();
+        $middleware = new JwtAuth;
 
         $request = Request::create('/anything', 'GET', server: [
             'HTTP_AUTHORIZATION' => 'Bearer valid-token',

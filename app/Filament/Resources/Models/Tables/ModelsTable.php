@@ -16,9 +16,9 @@ class ModelsTable
         return $table
             ->columns([
                 TextColumn::make('platform.name')
-                ->label('Platform')
-                ->sortable()
-                ->searchable(),
+                    ->label('Platform')
+                    ->sortable()
+                    ->searchable(),
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('slug')

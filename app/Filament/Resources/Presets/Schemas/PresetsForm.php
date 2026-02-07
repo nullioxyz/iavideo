@@ -8,7 +8,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
 
 class PresetsForm
 {
@@ -16,16 +15,16 @@ class PresetsForm
     {
         return $schema
             ->components([
-                
+
                 Select::make('default_model_id')
                     ->relationship('model', 'name')
                     ->searchable()
                     ->preload()
                     ->required(),
-                    
+
                 TextInput::make('name')
                     ->required(),
-                
+
                 Textarea::make('prompt')
                     ->label('Prompt')
                     ->required(),
@@ -33,7 +32,7 @@ class PresetsForm
                 Textarea::make('negative_prompt')
                     ->label('Negative prompt')
                     ->required(),
-        
+
                 TextInput::make('aspect_ratio')
                     ->label('Aspect Ratio')
                     ->required(),

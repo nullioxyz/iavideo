@@ -11,8 +11,8 @@ Route::prefix('api')
         \App\Domain\Auth\Middleware\JwtAuth::class,
     ])
     ->group(function () {
-    Route::prefix('models')->name('models.')->group(function () {
-        Route::get('/', AIModelsController::class)->name('list');
-        Route::get('{model}/presets', PresetsController::class)->name('presets');
+        Route::prefix('models')->name('models.')->group(function () {
+            Route::get('/', AIModelsController::class)->name('list');
+            Route::get('{model}/presets', PresetsController::class)->name('presets');
+        });
     });
-});

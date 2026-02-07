@@ -25,7 +25,7 @@ class InputFactory extends Factory
             'start_image_path' => fake()->url(),
             'original_filename' => 'fakefilename.jpg',
             'mime_type' => 'image/jpeg',
-            'size_bytes' => 10, //2KB
+            'size_bytes' => 10, // 2KB
             'credit_debited' => 1,
             'credit_ledger_id' => null,
             'status' => 'created',

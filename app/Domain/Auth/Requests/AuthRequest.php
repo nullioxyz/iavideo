@@ -43,5 +43,4 @@ class AuthRequest extends FormRequest
             'password.min' => __('validation.custom.password.min'),
         ];
     }
-
 }

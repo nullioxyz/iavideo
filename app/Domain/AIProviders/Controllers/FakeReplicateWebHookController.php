@@ -12,8 +12,7 @@ class FakeReplicateWebHookController extends Controller
 {
     public function __construct(
         public readonly ReceivePredictionWebhookUseCase $useCase
-    )
-    {}
+    ) {}
 
     public function __invoke(ReplicateWebhookRequest $request): Response
     {
@@ -26,7 +25,7 @@ class FakeReplicateWebHookController extends Controller
                 PredictionWebhookDTO::fromArray($request->all())
             );
 
-            return response()->noContent();   
+            return response()->noContent();
         } catch (\Exception $e) {
             return response()->json(['error' => 'Internal Server Error'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
