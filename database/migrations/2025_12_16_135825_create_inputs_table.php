@@ -17,16 +17,12 @@ return new class extends Migration
             $table->foreignId('preset_id')
                 ->constrained('presets');
 
-            // input armazenado no DO Spaces (privado)
-            // (mesmo se você usar Spatie Media Library, guardar o "path/key" ajuda muito)
             $table->string('start_image_path')->nullable();
 
-            // metadata (auditoria)
             $table->string('original_filename')->nullable();
             $table->string('mime_type')->nullable();
             $table->unsignedBigInteger('size_bytes')->nullable();
 
-            // gestão de crédito por pedido
             $table->boolean('credit_debited')->default(false);
 
             $table->foreignId('credit_ledger_id')
@@ -34,12 +30,10 @@ return new class extends Migration
                 ->constrained('credit_ledger')
                 ->nullOnDelete();
 
-            // lifecycle do request
             $table->enum('status', ['created', 'processing', 'done', 'failed'])->default('created');
 
             $table->timestamps();
 
-            // índices úteis
             $table->index(['user_id', 'created_at']);
             $table->index(['preset_id', 'created_at']);
             $table->index(['status']);

@@ -30,5 +30,11 @@ return [
             'max'        => 'A imagem não pode ter mais que :max KB.',
             'dimensions' => 'As dimensões da imagem não são permitidas.',
         ],
+
+        'input_id' => [
+            'required' => 'O ID de entrada é obrigatório.',
+            'integer'  => 'O ID de entrada deve ser um número inteiro válido.',
+            'exists'   => 'O ID de entrada não foi encontrado ou está inativo.',
+        ],
     ],
 ];

@@ -41,6 +41,15 @@ class Prediction extends EloquentModel
         'updated_at'
     ];
 
+    public const QUEUED     = 'queued';
+    public const STARTING   = 'starting';
+    public const SUBMITTING = 'submitting';
+    public const PROCESSING = 'processing';
+    public const SUCCEEDED  = 'succeeded';
+    public const FAILED     = 'failed';
+    public const CANCELLED  = 'cancelled';
+    public const REFUNDED   = 'refunded';
+
     /**
      * Get the attributes that should be cast.
      *

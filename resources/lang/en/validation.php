@@ -30,5 +30,11 @@ return [
             'max'        => 'Image must not be larger than :max KB.',
             'dimensions' => 'Image dimensions are not allowed.',
         ],
+
+        'input_id' => [
+            'required' => 'Input ID is required.',
+            'integer'  => 'Input ID must be a valid integer.',
+            'exists'   => 'Input ID not found or inactive.',
+        ],
     ],
 ];

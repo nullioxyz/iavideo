@@ -27,7 +27,6 @@ final class ReplicateClient implements ProviderClientInterface
 
         $json = $res->json() ?? [];
 
-        // você pode lançar exception em caso de erro; aqui deixei simples
         return new ProviderCreateResultDTO(
             externalId: (string) ($json['id'] ?? ''),
             status: (string) ($json['status'] ?? ($res->successful() ? 'submitting' : 'failed')),
@@ -42,6 +41,20 @@ final class ReplicateClient implements ProviderClientInterface
         $res = Http::withToken(config('services.replicate.token'))
             ->acceptJson()
             ->get($url);
+
+        return new ProviderGetResultDTO(
+            statusCode: $res->status(),
+            payload: $res->json() ?? []
+        );
+    }
+
+    public function cancel(string $externalId): ProviderGetResultDTO
+    {
+        $url = "https://api.replicate.com/v1/predictions/{$externalId}/cancel";
+
+        $res = Http::withToken(config('services.replicate.token'))
+            ->acceptJson()
+            ->post($url);
 
         return new ProviderGetResultDTO(
             statusCode: $res->status(),
