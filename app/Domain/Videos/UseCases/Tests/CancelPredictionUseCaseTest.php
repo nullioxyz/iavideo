@@ -30,7 +30,9 @@ class CancelPredictionUseCaseTest extends TestCase
     {
         Config::set('services.replicate.token', 'test-token');
 
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'credit_balance' => 2,
+        ]);
 
         Http::fake(function ($request) {
             $this->assertSame(
@@ -106,7 +108,7 @@ class CancelPredictionUseCaseTest extends TestCase
             'original_filename' => 'tattoo.png',
             'mime_type' => 'image/png',
             'size_bytes' => 12345,
-            'credit_debited' => false,
+            'credit_debited' => true,
             'status' => 'created',
             'created_at' => now(),
             'updated_at' => now(),
@@ -218,5 +220,20 @@ class CancelPredictionUseCaseTest extends TestCase
             'external_id' => '2wbzrawha9rmw0cv9h5ajeyyn4',
             'status' => Prediction::CANCELLED,
         ]);
+
+        $this->assertDatabaseHas('inputs', [
+            'id' => $input->id,
+            'credit_debited' => false,
+        ]);
+
+        $this->assertDatabaseHas('credit_ledger', [
+            'user_id' => $user->getKey(),
+            'reference_id' => $input->getKey(),
+            'reference_type' => 'input_video_generation_canceled',
+            'delta' => 1,
+            'balance_after' => 3,
+        ]);
+
+        $this->assertSame(3, $user->fresh()->credit_balance);
     }
 }

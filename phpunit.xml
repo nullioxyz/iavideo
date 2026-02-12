@@ -12,19 +12,19 @@
             <directory>tests/Feature</directory>
         </testsuite>
         <testsuite name="Auth">
-            <directory>App/Domain/Auth</directory>
+            <directory>app/Domain/Auth</directory>
         </testsuite>
         <testsuite name="AIModels">
-            <directory>App/Domain/AIModels</directory>
+            <directory>app/Domain/AIModels</directory>
         </testsuite>
         <testsuite name="Videos">
-            <directory>App/Domain/Videos</directory>
+            <directory>app/Domain/Videos</directory>
         </testsuite>
         <testsuite name="AIProviders">
-            <directory>App/Domain/AIProviders</directory>
+            <directory>app/Domain/AIProviders</directory>
         </testsuite>
         <testsuite name="Credits">
-            <directory>App/Domain/Credits</directory>
+            <directory>app/Domain/Credits</directory>
         </testsuite>
     </testsuites>
     <source>
@@ -34,6 +34,7 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <env name="APP_URL" value="http://localhost"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
