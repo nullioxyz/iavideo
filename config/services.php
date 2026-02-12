@@ -37,6 +37,7 @@ return [
 
     'replicate' => [
         'token' => env('REPLICATE_API_TOKEN', null),
+        'webhook_secret' => env('REPLICATE_WEBHOOK_SECRET', null),
     ],
 
 ];

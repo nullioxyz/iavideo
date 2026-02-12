@@ -5,7 +5,9 @@ namespace App\Domain\Videos\Services;
 use App\Domain\Credits\UseCases\RefundCreditUseCase;
 use App\Domain\Videos\Contracts\PredictionWebhookEffectsInterface;
 use App\Domain\Videos\Jobs\DownloadPredictionOutputsJob;
+use App\Domain\Videos\Models\Input;
 use App\Domain\Videos\Models\Prediction;
+use Illuminate\Support\Facades\DB;
 
 class PredictionWebhookEffects implements PredictionWebhookEffectsInterface
 {
@@ -20,16 +22,26 @@ class PredictionWebhookEffects implements PredictionWebhookEffectsInterface
 
     public function refundFailedGenerationIfDebited(Prediction $prediction): void
     {
-        $prediction->loadMissing('input.user');
+        DB::transaction(function () use ($prediction): void {
+            $input = Input::query()
+                ->whereKey($prediction->input_id)
+                ->lockForUpdate()
+                ->with('user')
+                ->first();
 
-        if (! $prediction->input?->credit_debited) {
-            return;
-        }
+            if (! $input || ! $input->credit_debited) {
+                return;
+            }
 
-        $this->refundCreditUseCase->execute($prediction->input->user, [
-            'reference_type' => 'input_video_generation_failed',
-            'reason' => 'Failed video generation',
-            'reference_id' => $prediction->input->id,
-        ]);
+            $input->update([
+                'credit_debited' => false,
+            ]);
+
+            $this->refundCreditUseCase->execute($input->user, [
+                'reference_type' => 'input_video_generation_failed',
+                'reason' => 'Failed video generation',
+                'reference_id' => $input->id,
+            ]);
+        });
     }
 }

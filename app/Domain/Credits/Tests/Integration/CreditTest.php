@@ -162,7 +162,7 @@ class CreditTest extends TestCase
             'user_id' => $user->getKey(),
             'preset_id' => $preset->getKey(),
             'status' => 'failed',
-            'credit_debited' => true,
+            'credit_debited' => false,
         ]);
 
         $this->assertDatabaseHas('credit_ledger', [

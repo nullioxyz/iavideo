@@ -31,11 +31,14 @@ class PredictionWebhookRepository implements PredictionWebhookRepositoryInterfac
 
     public function createOutput(Prediction $prediction, string $path, string $kind = 'video'): void
     {
-        $this->predictionOutputModel->newQuery()->create([
-            'prediction_id' => $prediction->getKey(),
-            'kind' => $kind,
-            'path' => $path,
-        ]);
+        $this->predictionOutputModel->newQuery()->firstOrCreate(
+            [
+                'prediction_id' => $prediction->getKey(),
+                'kind' => $kind,
+                'path' => $path,
+            ],
+            []
+        );
     }
 
     public function updateInputStatus(Prediction $prediction, string $status): void

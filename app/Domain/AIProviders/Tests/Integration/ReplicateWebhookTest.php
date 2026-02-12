@@ -9,12 +9,27 @@ use App\Domain\Videos\Jobs\DownloadPredictionOutputsJob;
 use App\Domain\Videos\Models\Input;
 use App\Domain\Videos\Models\Prediction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class ReplicateWebhookTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_rejects_webhook_when_secret_is_invalid(): void
+    {
+        Config::set('services.replicate.webhook_secret', 'test-webhook-secret');
+
+        $response = $this->post(route('webhook.replicate', [], false), [
+            'id' => 'unknown-prediction',
+            'version' => 'hidden',
+            'status' => 'starting',
+        ]);
+
+        $response->assertUnauthorized();
+        $response->assertJsonPath('error.code', 'unauthorized_webhook');
+    }
 
     public function test_receive_replicate_prediction_starting_data(): void
     {
