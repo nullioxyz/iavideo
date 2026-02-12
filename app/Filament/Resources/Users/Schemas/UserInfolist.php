@@ -26,8 +26,12 @@ class UserInfolist
                     ->boolean(),
                 TextEntry::make('credit_balance')
                     ->numeric(),
-                TextEntry::make('invited_by_user_id')
-                    ->numeric()
+                TextEntry::make('invitedBy.name')
+                    ->label('Invited by')
+                    ->placeholder('-'),
+                TextEntry::make('invites_sent_count')
+                    ->label('Invites sent')
+                    ->state(fn ($record) => $record->invitesSent()->count())
                     ->placeholder('-'),
                 TextEntry::make('last_login_at')
                     ->dateTime()

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
@@ -35,8 +36,11 @@ class UserForm
                 TextInput::make('credit_balance')
                     ->required()
                     ->numeric(),
-                TextInput::make('invited_by_user_id')
-                    ->numeric(),
+                Select::make('invited_by_user_id')
+                    ->label('Invited by')
+                    ->relationship('invitedBy', 'name')
+                    ->searchable()
+                    ->preload(),
                 DateTimePicker::make('last_login_at'),
                 DateTimePicker::make('suspended_at'),
                 DateTimePicker::make('last_activity_at'),

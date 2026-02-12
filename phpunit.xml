@@ -26,6 +26,9 @@
         <testsuite name="Credits">
             <directory>app/Domain/Credits</directory>
         </testsuite>
+        <testsuite name="Invites">
+            <directory>app/Domain/Invites</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>

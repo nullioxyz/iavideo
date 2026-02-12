@@ -4,10 +4,13 @@ namespace App\Domain\Auth\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Domain\Invites\Models\Invite;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasName;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -82,6 +85,21 @@ class Admin extends Authenticatable implements FilamentUser, HasName
     public function canAccessPanel(Panel $panel): bool
     {
         return true;
+    }
+
+    public function invitedBy(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'invited_by_user_id');
+    }
+
+    public function invitedUsers(): HasMany
+    {
+        return $this->hasMany(self::class, 'invited_by_user_id');
+    }
+
+    public function invitesSent(): HasMany
+    {
+        return $this->hasMany(Invite::class, 'invited_by_user_id');
     }
 
     /**
