@@ -12,13 +12,6 @@ class CreditWalletRepository implements \App\Domain\Credits\Contracts\Repositori
         $user->credit_balance -= $amount;
         $user->save();
 
-        $user->creditLedger()->create(
-            array_merge($data, [
-                'delta' => -$amount,
-                'balance_after' => $currentCreditBalance - $amount,
-            ])
-        );
-
         $this->createCreditLedgerEntry($user, $amount, $currentCreditBalance, $data);
 
         return $user->refresh();

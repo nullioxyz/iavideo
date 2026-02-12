@@ -25,7 +25,7 @@ class CreditWallet implements \App\Domain\Credits\Contracts\CreditWalletInterfac
         return $this->repository->getBalance($user);
     }
 
-    public function canCharge(\App\Domain\Auth\Models\User $user, int $amount): int
+    public function canCharge(\App\Domain\Auth\Models\User $user, int $amount): bool
     {
         return $this->getBalance($user) >= $amount;
     }

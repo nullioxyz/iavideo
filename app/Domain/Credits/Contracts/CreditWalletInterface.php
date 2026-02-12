@@ -12,5 +12,5 @@ interface CreditWalletInterface
 
     public function getBalance(User $user): int;
 
-    public function canCharge(User $user, int $amount): int;
+    public function canCharge(User $user, int $amount): bool;
 }
