@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Users\Tables;
+namespace App\Filament\Resources\Invites\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -8,52 +8,44 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
-class UsersTable
+class InvitesTable
 {
     public static function configure(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('name')
-                    ->searchable(),
                 TextColumn::make('email')
-                    ->label('Email address')
                     ->searchable(),
-                TextColumn::make('email_verified_at')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('username')
-                    ->searchable(),
-                TextColumn::make('phone_number')
-                    ->searchable(),
-                TextColumn::make('phone_number_verified_at')
-                    ->dateTime()
-                    ->sortable(),
-                IconColumn::make('active')
-                    ->boolean(),
-                TextColumn::make('credit_balance')
+                TextColumn::make('token')
+                    ->searchable()
+                    ->copyable(),
+                TextColumn::make('share_url')
+                    ->label('Share link')
+                    ->copyable()
+                    ->url(fn ($record) => $record->share_url)
+                    ->openUrlInNewTab()
+                    ->wrap(),
+                TextColumn::make('copy_share_link')
+                    ->label('Copy link')
+                    ->state('Copy')
+                    ->badge()
+                    ->copyable()
+                    ->copyableState(fn ($record) => $record->share_url),
+                TextColumn::make('credits_granted')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('invitedBy.name')
                     ->label('Invited by')
                     ->searchable(),
-                TextColumn::make('invites_sent_count')
-                    ->label('Invites sent')
-                    ->counts('invitesSent')
-                    ->sortable(),
-                TextColumn::make('last_login_at')
+                IconColumn::make('used_at')
+                    ->label('Used')
+                    ->boolean(fn ($record) => $record->used_at !== null),
+                TextColumn::make('expires_at')
                     ->dateTime()
                     ->sortable(),
-                TextColumn::make('suspended_at')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('last_activity_at')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('user_agent')
-                    ->searchable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -64,7 +56,9 @@ class UsersTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                TernaryFilter::make('used_at')
+                    ->label('Used')
+                    ->nullable(),
             ])
             ->recordActions([
                 ViewAction::make(),
