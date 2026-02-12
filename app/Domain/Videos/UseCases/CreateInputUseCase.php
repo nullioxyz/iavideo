@@ -36,6 +36,10 @@ final class CreateInputUseCase
             'reference_id' => $input->getKey(),
         ]);
 
+        $input->update([
+            'credit_debited' => true,
+        ]);
+
         $tempPath = $this->ingestion->ingest($input->getKey(), $file);
         InputCreated::dispatch($input->getKey(), $tempPath);
 
