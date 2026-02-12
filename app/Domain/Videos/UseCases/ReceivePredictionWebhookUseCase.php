@@ -2,35 +2,56 @@
 
 namespace App\Domain\Videos\UseCases;
 
-use App\Domain\Credits\UseCases\RefundCreditUseCase;
+use App\Domain\Videos\Contracts\PredictionWebhookEffectsInterface;
+use App\Domain\Videos\Contracts\Repositories\PredictionWebhookRepositoryInterface;
 use App\Domain\Videos\DTO\PredictionWebhookDTO;
-use App\Domain\Videos\Jobs\DownloadPredictionOutputsJob;
+use App\Domain\Videos\Enums\PredictionStatus;
+use App\Domain\Videos\Models\Input;
 use App\Domain\Videos\Models\Prediction;
-use App\Domain\Videos\Models\PredictionOutput;
 use Illuminate\Support\Carbon;
 
 final class ReceivePredictionWebhookUseCase
 {
     public function __construct(
-        private readonly RefundCreditUseCase $refundCreditUseCase,
+        private readonly PredictionWebhookRepositoryInterface $repository,
+        private readonly PredictionWebhookEffectsInterface $effects,
     ) {}
 
     public function execute(PredictionWebhookDTO $dto): Prediction
     {
-        $prediction = Prediction::where('external_id', $dto->getId())->first();
+        $prediction = $this->repository->findByExternalId($dto->getId());
         if (! $prediction) {
             throw new \RuntimeException('Prediction not found for webhook payload.');
         }
 
         $payload = $dto->toArray();
+        $status = PredictionStatus::fromWebhook($payload['status'] ?? null);
 
-        $status = (string) ($payload['status'] ?? 'processing');
-        $status = $status === 'canceled' ? 'cancelled' : $status;
-
-        if (in_array($prediction->status, ['succeeded', 'failed', 'cancelled', 'refunded'], true)) {
+        if ($this->isTerminal($prediction->status)) {
             return $prediction;
         }
 
+        $update = $this->buildUpdatePayload($prediction, $dto, $status, $payload);
+        $prediction = $this->repository->updatePrediction($prediction, $update);
+
+        $this->handleSideEffects($prediction, $status, $dto);
+
+        return $prediction;
+    }
+
+    private function isTerminal(string $status): bool
+    {
+        return PredictionStatus::tryFrom($status)?->isTerminal() ?? false;
+    }
+
+    private function buildUpdatePayload(
+        Prediction $prediction,
+        PredictionWebhookDTO $dto,
+        PredictionStatus $status,
+        array $payload
+    ): array
+    {
+        $now = Carbon::now();
         $update = $dto->prepareToSave(
             $prediction->input_id,
             $prediction->model_id,
@@ -39,66 +60,40 @@ final class ReceivePredictionWebhookUseCase
             $dto->getOutput()
         );
 
-        if (in_array($status, ['processing', 'starting']) && ! $prediction->started_at) {
-            $update['started_at'] = Carbon::now();
-        }
+        $update['status'] = $status->value;
 
-        $isFailed = false;
-        $isCanceled = false;
+        $update = array_merge(
+            $update,
+            $status->startsProcessingWindow() && ! $prediction->started_at ? ['started_at' => $now] : [],
+            $status->shouldMarkFinished() ? ['finished_at' => $now] : [],
+            $status->outcomeUpdate($now, $payload['error'] ?? null)
+        );
 
-        if (in_array($status, ['succeeded', 'failed', 'cancelled'], true)) {
-            $update['finished_at'] = Carbon::now();
-            $isFailed = $status === 'failed';
-            $isCanceled = $status === 'cancelled';
+        return $update;
+    }
 
-            if ($isFailed) {
-                $update['failed_at'] = Carbon::now();
-                $update['error_message'] = $payload['error'] ?? null;
-                $update['status'] = 'failed';
-            }
+    private function handleSideEffects(Prediction $prediction, PredictionStatus $status, PredictionWebhookDTO $dto): void
+    {
+        match ($status) {
+            PredictionStatus::SUCCEEDED => $this->handleSucceeded($prediction, $dto),
+            PredictionStatus::FAILED => $this->handleFailed($prediction),
+            default => null,
+        };
+    }
 
-            if ($isCanceled) {
-                $update['canceled_at'] = Carbon::now();
-                $update['status'] = 'cancelled';
-            }
-        }
+    private function handleSucceeded(Prediction $prediction, PredictionWebhookDTO $dto): void
+    {
+        $this->repository->createOutput(
+            $prediction,
+            (string) ($dto->getOutput() ?? 'empty-path')
+        );
+        $this->repository->updateInputStatus($prediction, Input::DONE);
+        $this->effects->dispatchDownloadOutputs($prediction);
+    }
 
-        $prediction->update($update);
-
-        if ($status === 'succeeded') {
-            PredictionOutput::create([
-                'prediction_id' => $prediction->getKey(),
-                'kind' => 'video',
-                'path' => $dto->getOutput() ?? 'empty-path',
-            ]);
-
-            $prediction->input()->update([
-                'status' => 'done',
-            ]);
-
-            DownloadPredictionOutputsJob::dispatch($prediction->id)->onQueue('downloads');
-        }
-
-        if ($isFailed) {
-            $prediction->input()->update([
-                'status' => 'failed',
-            ]);
-
-            $prediction->update([
-                'status' => 'failed',
-            ]);
-
-            $wasDebited = $prediction->input->credit_debited;
-
-            if ($wasDebited) {
-                $this->refundCreditUseCase->execute($prediction->input->user, [
-                    'reference_type' => 'input_video_generation_failed',
-                    'reason' => 'Failed video generation',
-                    'reference_id' => $prediction->input->id,
-                ]);
-            }
-        }
-
-        return $prediction->refresh();
+    private function handleFailed(Prediction $prediction): void
+    {
+        $this->repository->updateInputStatus($prediction, Input::FAILED);
+        $this->effects->refundFailedGenerationIfDebited($prediction);
     }
 }
