@@ -29,7 +29,7 @@ class PredictionForm
                         'processing' => 'Processing',
                         'succeeded' => 'Succeeded',
                         'failed' => 'Failed',
-                        'canceled' => 'Canceled',
+                        'cancelled' => 'Cancelled',
                         'refunded' => 'Refunded',
                     ])
                     ->default('queued')

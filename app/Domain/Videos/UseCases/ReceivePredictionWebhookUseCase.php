@@ -18,11 +18,16 @@ final class ReceivePredictionWebhookUseCase
     public function execute(PredictionWebhookDTO $dto): Prediction
     {
         $prediction = Prediction::where('external_id', $dto->getId())->first();
+        if (! $prediction) {
+            throw new \RuntimeException('Prediction not found for webhook payload.');
+        }
+
         $payload = $dto->toArray();
 
         $status = (string) ($payload['status'] ?? 'processing');
+        $status = $status === 'canceled' ? 'cancelled' : $status;
 
-        if (in_array($prediction->status, ['succeeded', 'failed', 'canceled', 'refunded'], true)) {
+        if (in_array($prediction->status, ['succeeded', 'failed', 'cancelled', 'refunded'], true)) {
             return $prediction;
         }
 
@@ -41,10 +46,10 @@ final class ReceivePredictionWebhookUseCase
         $isFailed = false;
         $isCanceled = false;
 
-        if (in_array($status, ['succeeded', 'failed', 'canceled'], true)) {
+        if (in_array($status, ['succeeded', 'failed', 'cancelled'], true)) {
             $update['finished_at'] = Carbon::now();
             $isFailed = $status === 'failed';
-            $isCanceled = $status === 'canceled';
+            $isCanceled = $status === 'cancelled';
 
             if ($isFailed) {
                 $update['failed_at'] = Carbon::now();
@@ -54,7 +59,7 @@ final class ReceivePredictionWebhookUseCase
 
             if ($isCanceled) {
                 $update['canceled_at'] = Carbon::now();
-                $update['status'] = 'canceled';
+                $update['status'] = 'cancelled';
             }
         }
 
