@@ -2,6 +2,7 @@
 
 namespace App\Domain\Videos\UseCases;
 
+use App\Domain\Credits\UseCases\RefundCreditUseCase;
 use App\Domain\AIProviders\Infra\ProviderRegistry;
 use App\Domain\Videos\Models\Input;
 use App\Domain\Videos\Models\Prediction;
@@ -11,6 +12,7 @@ final class CancelInputPredictionUseCase
 {
     public function __construct(
         private readonly ProviderRegistry $providerClients,
+        private readonly RefundCreditUseCase $refundCreditUseCase,
     ) {}
 
     public function execute(int $inputId): Prediction
@@ -45,6 +47,18 @@ final class CancelInputPredictionUseCase
 
         $input->update(['status' => Input::CANCELLED]);
         $input->prediction()->update(['status' => Prediction::CANCELLED]);
+
+        if ($input->credit_debited) {
+            $this->refundCreditUseCase->execute($input->user, [
+                'reference_type' => 'input_video_generation_canceled',
+                'reason' => 'Canceled video generation',
+                'reference_id' => $input->id,
+            ]);
+
+            $input->update([
+                'credit_debited' => false,
+            ]);
+        }
 
         return $input->prediction->refresh();
     }
