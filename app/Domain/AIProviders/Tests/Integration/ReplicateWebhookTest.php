@@ -8,6 +8,7 @@ use App\Domain\Auth\Models\User;
 use App\Domain\Videos\Jobs\DownloadPredictionOutputsJob;
 use App\Domain\Videos\Models\Input;
 use App\Domain\Videos\Models\Prediction;
+use App\Domain\Videos\Models\PredictionOutput;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Queue;
@@ -206,7 +207,7 @@ class ReplicateWebhookTest extends TestCase
         $this->assertCount(1, $prediction->outputs);
 
         $output = $prediction->outputs()->first();
-        $this->assertNotNull($output);
+        $this->assertInstanceOf(PredictionOutput::class, $output);
 
         $this->assertSame($videoUrl, $output->provider_url ?? $output->path);
 

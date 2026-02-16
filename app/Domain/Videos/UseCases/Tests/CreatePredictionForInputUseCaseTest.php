@@ -18,7 +18,6 @@ use App\Domain\Videos\UseCases\CreatePredictionForInputUseCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
-use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
 class CreatePredictionForInputUseCaseTest extends TestCase
@@ -132,7 +131,7 @@ class CreatePredictionForInputUseCaseTest extends TestCase
                 {
                     return new ProviderCreateResultDTO(
                         '2wbzrawha9rmw0cv9h5ajeyyn4',
-                        Response::HTTP_CREATED,
+                        'starting',
                         [
                             'id' => '2wbzrawha9rmw0cv9h5ajeyyn4',
                             'model' => 'kwaivgi/kling-v2.5-turbo-pro',
@@ -163,7 +162,14 @@ class CreatePredictionForInputUseCaseTest extends TestCase
                 {
                     throw new \LogicException('not needed');
                 }
+
+                public function cancel(string $externalId): ProviderGetResultDTO
+                {
+                    throw new \LogicException('not needed');
+                }
             };
+
+            return $replicate;
         });
 
         $this->app->singleton(AdaptersModelAdapterRegistryInterface::class, function () {
@@ -200,8 +206,23 @@ class CreatePredictionForInputUseCaseTest extends TestCase
         ]);
 
         // Assert payloads (debug)
-        $this->assertSame('Go until to the start of the universe. Go to the Big Bang.', $prediction->request_payload['input']['prompt']);
-        $this->assertSame('2wbzrawha9rmw0cv9h5ajeyyn4', $prediction->response_payload['id']);
+        $requestPayloadRaw = $prediction->getAttribute('request_payload');
+        $responsePayloadRaw = $prediction->getAttribute('response_payload');
+
+        $requestPayload = is_array($requestPayloadRaw)
+            ? $requestPayloadRaw
+            : (is_string($requestPayloadRaw) ? json_decode($requestPayloadRaw, true) : null);
+        $responsePayload = is_array($responsePayloadRaw)
+            ? $responsePayloadRaw
+            : (is_string($responsePayloadRaw) ? json_decode($responsePayloadRaw, true) : null);
+
+        $this->assertIsArray($requestPayload);
+        $this->assertIsArray($responsePayload);
+        $this->assertArrayHasKey('input', $requestPayload);
+        $this->assertIsArray($requestPayload['input']);
+        $this->assertArrayHasKey('id', $responsePayload);
+        $this->assertSame('Go until to the start of the universe. Go to the Big Bang.', $requestPayload['input']['prompt']);
+        $this->assertSame('2wbzrawha9rmw0cv9h5ajeyyn4', $responsePayload['id']);
 
         // Input virou processing
         $input->refresh();

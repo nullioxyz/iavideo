@@ -2,6 +2,7 @@
 
 namespace App\Domain\Videos\Services;
 
+use App\Domain\Auth\Models\User;
 use App\Domain\Credits\UseCases\RefundCreditUseCase;
 use App\Domain\Videos\Contracts\PredictionWebhookEffectsInterface;
 use App\Domain\Videos\Jobs\DownloadPredictionOutputsJob;
@@ -30,6 +31,10 @@ class PredictionWebhookEffects implements PredictionWebhookEffectsInterface
                 ->first();
 
             if (! $input || ! $input->credit_debited) {
+                return;
+            }
+
+            if (! $input->user instanceof User) {
                 return;
             }
 

@@ -26,7 +26,7 @@ class AspectRatio implements ValidationRule
         }
 
         $size = @getimagesize($path);
-        if (! $size || ! isset($size[0], $size[1])) {
+        if (! $size) {
             return;
         }
 

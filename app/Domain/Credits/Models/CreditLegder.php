@@ -42,11 +42,6 @@ class CreditLegder extends EloquentModel
         ];
     }
 
-    public function isActive(): bool
-    {
-        return $this->active;
-    }
-
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');

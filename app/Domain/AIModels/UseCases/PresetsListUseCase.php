@@ -4,7 +4,7 @@ namespace App\Domain\AIModels\UseCases;
 
 use App\Domain\AIModels\Contracts\Repositories\PresetRepositoryInterface;
 use App\Domain\AIModels\Requests\PresetsRequest;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 final class PresetsListUseCase
 {

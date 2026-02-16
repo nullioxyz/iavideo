@@ -134,7 +134,7 @@ class GetPredictionUseCaseTest extends TestCase
                 {
                     return new ProviderCreateResultDTO(
                         '2wbzrawha9rmw0cv9h5ajeyyn4',
-                        Response::HTTP_CREATED,
+                        'starting',
                         [
                             'id' => '2wbzrawha9rmw0cv9h5ajeyyn4',
                             'model' => 'kwaivgi/kling-v2.5-turbo-pro',
@@ -192,7 +192,14 @@ class GetPredictionUseCaseTest extends TestCase
                         ]
                     );
                 }
+
+                public function cancel(string $externalId): ProviderGetResultDTO
+                {
+                    throw new \LogicException('not needed');
+                }
             };
+
+            return $replicate;
         });
 
         $this->app->singleton(AdaptersModelAdapterRegistryInterface::class, function () {

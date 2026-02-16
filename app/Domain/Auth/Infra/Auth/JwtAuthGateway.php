@@ -4,6 +4,8 @@ namespace App\Domain\Auth\Infra\Auth;
 
 use App\Domain\Auth\Contracts\Infra\JwtAuthGatewayInterface;
 use App\Domain\Auth\Models\User;
+use RuntimeException;
+use Tymon\JWTAuth\JWTGuard;
 
 class JwtAuthGateway implements JwtAuthGatewayInterface
 {
@@ -13,12 +15,22 @@ class JwtAuthGateway implements JwtAuthGatewayInterface
 
     public function attempt(string $email, string $password): ?string
     {
-        $token = auth($this->guard)->attempt([
+        $guard = auth($this->guard);
+        if (! $guard instanceof JWTGuard) {
+            throw new RuntimeException('Configured auth guard is not a JWT guard.');
+        }
+
+        /** @var mixed $token */
+        $token = $guard->attempt([
             'email' => $email,
             'password' => $password,
         ]);
 
-        return $token ?: null;
+        if (! is_string($token) || $token === '') {
+            return null;
+        }
+
+        return $token;
     }
 
     public function user(): ?User
@@ -36,6 +48,11 @@ class JwtAuthGateway implements JwtAuthGatewayInterface
 
     public function tokenTtlSeconds(): int
     {
-        return auth($this->guard)->factory()->getTTL() * 60;
+        $guard = auth($this->guard);
+        if (! $guard instanceof JWTGuard) {
+            throw new RuntimeException('Configured auth guard is not a JWT guard.');
+        }
+
+        return $guard->factory()->getTTL() * 60;
     }
 }

@@ -22,7 +22,7 @@ final class ValidateInviteUseCase
             return false;
         }
 
-        if ($invite->expires_at !== null && $invite->expires_at->isPast()) {
+        if ($invite->expires_at !== null && now()->greaterThan($invite->expires_at)) {
             return false;
         }
 

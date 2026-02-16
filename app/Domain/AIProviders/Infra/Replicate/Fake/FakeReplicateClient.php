@@ -18,7 +18,7 @@ final class FakeReplicateClient implements ProviderClientInterface
     {
         return new ProviderCreateResultDTO(
             '2wbzrawha9rmw0cv9h5ajeyyn4',
-            Response::HTTP_CREATED,
+            'starting',
             [
                 'id' => '2wbzrawha9rmw0cv9h5ajeyyn4',
                 'model' => 'kwaivgi/kling-v2.5-turbo-pro',
@@ -42,6 +42,17 @@ final class FakeReplicateClient implements ProviderClientInterface
                 ],
             ]
 
+        );
+    }
+
+    public function cancel(string $externalId): ProviderGetResultDTO
+    {
+        return new ProviderGetResultDTO(
+            statusCode: Response::HTTP_OK,
+            payload: [
+                'id' => $externalId,
+                'status' => 'cancelled',
+            ]
         );
     }
 

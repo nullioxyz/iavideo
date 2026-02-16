@@ -136,7 +136,7 @@ class CancelPredictionUseCaseTest extends TestCase
                 {
                     return new ProviderCreateResultDTO(
                         '2wbzrawha9rmw0cv9h5ajeyyn4',
-                        Response::HTTP_CREATED,
+                        'starting',
                         []
                     );
                 }
@@ -181,6 +181,8 @@ class CancelPredictionUseCaseTest extends TestCase
                     );
                 }
             };
+
+            return $replicate;
         });
 
         $this->app->singleton(AdaptersModelAdapterRegistryInterface::class, function () {

@@ -2,8 +2,10 @@
 
 namespace App\Domain\Invites\Resources;
 
+use App\Domain\Invites\Models\Invite;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/** @mixin Invite */
 class InviteResource extends JsonResource
 {
     public function toArray($request): array

@@ -2,8 +2,10 @@
 
 namespace App\Domain\AIModels\Resources;
 
+use App\Domain\AIModels\Models\Preset;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/** @mixin Preset */
 class PresetsResource extends JsonResource
 {
     public function toArray($request): array

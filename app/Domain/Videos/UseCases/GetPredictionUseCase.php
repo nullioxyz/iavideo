@@ -2,7 +2,9 @@
 
 namespace App\Domain\Videos\UseCases;
 
+use App\Domain\AIModels\Models\Model as AIModel;
 use App\Domain\AIProviders\Infra\ProviderRegistry;
+use App\Domain\Platforms\Models\Platform;
 use App\Domain\Videos\Models\Prediction;
 use RuntimeException;
 
@@ -21,6 +23,10 @@ final class GetPredictionUseCase
             ->firstOrFail();
 
         $model = $prediction->model;
+        if (! $model instanceof AIModel || ! $model->platform instanceof Platform) {
+            throw new RuntimeException('Model/platform not configured for prediction.');
+        }
+
         $providerSlug = (string) $model->platform->slug;
 
         $client = $this->providerClients->get($providerSlug);

@@ -58,11 +58,6 @@ class Input extends EloquentModel implements HasMedia
         ];
     }
 
-    public function isActive(): bool
-    {
-        return $this->active;
-    }
-
     public function preset(): BelongsTo
     {
         return $this->belongsTo(Preset::class, 'preset_id');

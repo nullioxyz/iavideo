@@ -19,12 +19,12 @@ class LoginUseCaseTest extends TestCase
     {
         $gateway = new class implements JwtAuthGatewayInterface
         {
-            public function attempt(string $email, string $password): ?string
+            public function attempt(string $email, string $password): string
             {
                 return 'token123';
             }
 
-            public function user(): ?User
+            public function user(): User
             {
                 $u = new User;
                 $u->active = true;

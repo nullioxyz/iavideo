@@ -7,8 +7,10 @@ use App\Domain\Videos\Models\PredictionOutput;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
+/** @extends Factory<PredictionOutput> */
 class PredictionOutputFactory extends Factory
 {
+    /** @var class-string<PredictionOutput> */
     protected $model = PredictionOutput::class;
 
     public function definition(): array

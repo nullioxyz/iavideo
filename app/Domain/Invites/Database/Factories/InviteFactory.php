@@ -7,8 +7,10 @@ use App\Domain\Invites\Models\Invite;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
+/** @extends Factory<Invite> */
 class InviteFactory extends Factory
 {
+    /** @var class-string<Invite> */
     protected $model = Invite::class;
 
     public function definition(): array

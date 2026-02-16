@@ -2,6 +2,7 @@
 
 namespace App\Domain\Auth\Resources;
 
+use App\Domain\Auth\DTO\TokenDTO;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class TokenResource extends JsonResource

@@ -2,8 +2,10 @@
 
 namespace App\Domain\Videos\Resources;
 
+use App\Domain\Videos\Models\Input;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/** @mixin Input */
 class InputResource extends JsonResource
 {
     public function toArray($request): array

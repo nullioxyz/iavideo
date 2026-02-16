@@ -7,11 +7,10 @@ use App\Domain\Platforms\Models\Platform;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
- */
+/** @extends Factory<Model> */
 class ModelFactory extends Factory
 {
+    /** @var class-string<Model> */
     protected $model = Model::class;
 
     /**
@@ -22,7 +21,7 @@ class ModelFactory extends Factory
     public function definition(): array
     {
         return [
-            'platform_id' => Platform::factory()->create(),
+            'platform_id' => Platform::factory(),
             'name' => fake()->word(),
             'slug' => fake()->slug(),
             'created_at' => Carbon::now(),

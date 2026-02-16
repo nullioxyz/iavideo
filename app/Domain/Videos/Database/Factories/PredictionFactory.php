@@ -8,8 +8,10 @@ use App\Domain\Videos\Models\Prediction;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
+/** @extends Factory<Prediction> */
 class PredictionFactory extends Factory
 {
+    /** @var class-string<Prediction> */
     protected $model = Prediction::class;
 
     public function definition(): array

@@ -3,8 +3,11 @@
 namespace App\Domain\Videos\UseCases;
 
 use App\Domain\AIModels\Contracts\Adapters\ModelAdapterRegistryInterface;
+use App\Domain\AIModels\Models\Model as AIModel;
+use App\Domain\AIModels\Models\Preset;
 use App\Domain\AIProviders\DTO\CreateVideoFromImageRequestDTO;
 use App\Domain\AIProviders\Infra\ProviderRegistry;
+use App\Domain\Platforms\Models\Platform;
 use App\Domain\Videos\Models\Input;
 use App\Domain\Videos\Models\Prediction;
 use Illuminate\Support\Carbon;
@@ -25,12 +28,12 @@ final class CreatePredictionForInputUseCase
             ->findOrFail($inputId);
 
         $preset = $input->preset;
-        if (! $preset) {
+        if (! $preset instanceof Preset) {
             throw new RuntimeException("Preset not found for input {$inputId}");
         }
 
         $model = $preset->model;
-        if (! $model || ! $model->platform) {
+        if (! $model instanceof AIModel || ! $model->platform instanceof Platform) {
             throw new RuntimeException("Model/platform not configured for preset {$preset->id}");
         }
 

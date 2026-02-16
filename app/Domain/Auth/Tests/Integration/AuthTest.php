@@ -77,7 +77,7 @@ class AuthTest extends TestCase
             'password' => 'password',
         ]);
 
-        $response->assertForbidden(403);
+        $response->assertForbidden();
         $response->assertJson([
             'message' => __('validation.inactive_user'),
         ]);

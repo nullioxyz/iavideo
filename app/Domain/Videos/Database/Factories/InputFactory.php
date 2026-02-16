@@ -8,8 +8,10 @@ use App\Domain\Videos\Models\Input;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/** @extends Factory<Input> */
 class InputFactory extends Factory
 {
+    /** @var class-string<Input> */
     protected $model = Input::class;
 
     /**
@@ -20,8 +22,8 @@ class InputFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => User::factory()->create(),
-            'preset_id' => Preset::factory()->create(),
+            'user_id' => User::factory(),
+            'preset_id' => Preset::factory(),
             'start_image_path' => fake()->url(),
             'original_filename' => 'fakefilename.jpg',
             'mime_type' => 'image/jpeg',

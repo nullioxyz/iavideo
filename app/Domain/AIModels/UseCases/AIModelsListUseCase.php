@@ -3,7 +3,7 @@
 namespace App\Domain\AIModels\UseCases;
 
 use App\Domain\AIModels\Contracts\Repositories\AIModelsRepositoryInterface;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 final class AIModelsListUseCase
 {

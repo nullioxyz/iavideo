@@ -7,8 +7,10 @@ use App\Domain\AIModels\Models\Preset;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/** @extends Factory<Preset> */
 class PresetFactory extends Factory
 {
+    /** @var class-string<Preset> */
     protected $model = Preset::class;
 
     /**
@@ -19,7 +21,7 @@ class PresetFactory extends Factory
     public function definition(): array
     {
         return [
-            'default_model_id' => Model::factory()->create(),
+            'default_model_id' => Model::factory(),
             'name' => fake()->word(),
             'prompt' => fake()->text(),
             'negative_prompt' => fake()->text(),
@@ -27,7 +29,6 @@ class PresetFactory extends Factory
             'duration_seconds' => 5,
             'cost_estimate_usd' => 0.7,
             'preview_video_url' => null,
-            'active' => true,
             'created_at' => Carbon::now(),
             'active' => true,
         ];

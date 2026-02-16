@@ -20,11 +20,12 @@ class JwtAuthMiddlewareTest extends TestCase
         $request = Request::create('/anything', 'GET'); // sem Authorization
 
         $response = $middleware->handle($request, fn () => response('ok', 200));
+        $data = json_decode((string) $response->getContent(), true);
 
         $this->assertSame(401, $response->getStatusCode());
         $this->assertSame(
             ['message' => 'Unauthorized', 'error' => 'missing_bearer_token'],
-            $response->getData(true)
+            $data
         );
     }
 
@@ -41,11 +42,12 @@ class JwtAuthMiddlewareTest extends TestCase
             ->andThrow(new TokenInvalidException('Token invalid'));
 
         $response = $middleware->handle($request, fn () => response('ok', 200));
+        $data = json_decode((string) $response->getContent(), true);
 
         $this->assertSame(401, $response->getStatusCode());
         $this->assertSame(
             ['message' => 'Unauthorized', 'error' => 'token_invalid'],
-            $response->getData(true)
+            $data
         );
     }
 
@@ -63,8 +65,9 @@ class JwtAuthMiddlewareTest extends TestCase
             ->andReturn((object) ['id' => 1]);
 
         $response = $middleware->handle($request, fn () => response()->json(['ok' => true], 200));
+        $data = json_decode((string) $response->getContent(), true);
 
         $this->assertSame(200, $response->getStatusCode());
-        $this->assertSame(['ok' => true], $response->getData(true));
+        $this->assertSame(['ok' => true], $data);
     }
 }

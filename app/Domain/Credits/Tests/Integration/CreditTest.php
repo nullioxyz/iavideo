@@ -86,7 +86,6 @@ class CreditTest extends TestCase
 
         Event::assertDispatched(InputCreated::class, function (InputCreated $event) use ($inputId) {
             return $event->inputId === $inputId
-                && is_string($event->tempPath)
                 && str_contains($event->tempPath, 'tmp/inputs');
         });
     }
