@@ -25,6 +25,9 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
+      - name: Fix code style (Pint)
+        run: ./vendor/bin/pint
+
       - name: Check code style (Pint)
         run: ./vendor/bin/pint --test
 

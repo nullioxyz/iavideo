@@ -2,8 +2,8 @@
 
 namespace App\Domain\Videos\UseCases;
 
-use App\Domain\Credits\UseCases\RefundCreditUseCase;
 use App\Domain\AIProviders\Infra\ProviderRegistry;
+use App\Domain\Credits\UseCases\RefundCreditUseCase;
 use App\Domain\Videos\Models\Input;
 use App\Domain\Videos\Models\Prediction;
 use RuntimeException;

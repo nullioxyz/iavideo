@@ -15,4 +15,3 @@ return [
         rtrim((string) env('APP_URL', 'http://localhost'), '/').'/invite/{token}'
     ),
 ];
-

@@ -49,8 +49,7 @@ final class ReceivePredictionWebhookUseCase
         PredictionWebhookDTO $dto,
         PredictionStatus $status,
         array $payload
-    ): array
-    {
+    ): array {
         $now = Carbon::now();
         $update = $dto->prepareToSave(
             $prediction->input_id,

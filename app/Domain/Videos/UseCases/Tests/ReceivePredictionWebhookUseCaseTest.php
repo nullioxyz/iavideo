@@ -25,9 +25,7 @@ class ReceivePredictionWebhookUseCaseTest extends TestCase
         {
             public int $updateCalls = 0;
 
-            public function __construct(private ?Prediction $prediction)
-            {
-            }
+            public function __construct(private ?Prediction $prediction) {}
 
             public function findByExternalId(string $externalId): ?Prediction
             {
@@ -41,18 +39,15 @@ class ReceivePredictionWebhookUseCaseTest extends TestCase
                 return $prediction;
             }
 
-            public function createOutput(Prediction $prediction, string $path, string $kind = 'video'): void
-            {
-            }
+            public function createOutput(Prediction $prediction, string $path, string $kind = 'video'): void {}
 
-            public function updateInputStatus(Prediction $prediction, string $status): void
-            {
-            }
+            public function updateInputStatus(Prediction $prediction, string $status): void {}
         };
 
         $effects = new class implements PredictionWebhookEffectsInterface
         {
             public int $dispatchCalls = 0;
+
             public int $refundCalls = 0;
 
             public function dispatchDownloadOutputs(Prediction $prediction): void
@@ -96,9 +91,7 @@ class ReceivePredictionWebhookUseCaseTest extends TestCase
         {
             public array $lastUpdate = [];
 
-            public function __construct(private ?Prediction $prediction)
-            {
-            }
+            public function __construct(private ?Prediction $prediction) {}
 
             public function findByExternalId(string $externalId): ?Prediction
             {
@@ -115,24 +108,16 @@ class ReceivePredictionWebhookUseCaseTest extends TestCase
                 return $prediction;
             }
 
-            public function createOutput(Prediction $prediction, string $path, string $kind = 'video'): void
-            {
-            }
+            public function createOutput(Prediction $prediction, string $path, string $kind = 'video'): void {}
 
-            public function updateInputStatus(Prediction $prediction, string $status): void
-            {
-            }
+            public function updateInputStatus(Prediction $prediction, string $status): void {}
         };
 
         $effects = new class implements PredictionWebhookEffectsInterface
         {
-            public function dispatchDownloadOutputs(Prediction $prediction): void
-            {
-            }
+            public function dispatchDownloadOutputs(Prediction $prediction): void {}
 
-            public function refundFailedGenerationIfDebited(Prediction $prediction): void
-            {
-            }
+            public function refundFailedGenerationIfDebited(Prediction $prediction): void {}
         };
 
         $useCase = new ReceivePredictionWebhookUseCase($repository, $effects);
@@ -162,11 +147,10 @@ class ReceivePredictionWebhookUseCaseTest extends TestCase
         $repository = new class($prediction) implements PredictionWebhookRepositoryInterface
         {
             public array $outputs = [];
+
             public array $inputStatuses = [];
 
-            public function __construct(private ?Prediction $prediction)
-            {
-            }
+            public function __construct(private ?Prediction $prediction) {}
 
             public function findByExternalId(string $externalId): ?Prediction
             {
@@ -202,9 +186,7 @@ class ReceivePredictionWebhookUseCaseTest extends TestCase
                 $this->dispatchCalls++;
             }
 
-            public function refundFailedGenerationIfDebited(Prediction $prediction): void
-            {
-            }
+            public function refundFailedGenerationIfDebited(Prediction $prediction): void {}
         };
 
         $useCase = new ReceivePredictionWebhookUseCase($repository, $effects);
@@ -237,11 +219,10 @@ class ReceivePredictionWebhookUseCaseTest extends TestCase
         $repository = new class($prediction) implements PredictionWebhookRepositoryInterface
         {
             public array $inputStatuses = [];
+
             public array $lastUpdate = [];
 
-            public function __construct(private ?Prediction $prediction)
-            {
-            }
+            public function __construct(private ?Prediction $prediction) {}
 
             public function findByExternalId(string $externalId): ?Prediction
             {
@@ -258,9 +239,7 @@ class ReceivePredictionWebhookUseCaseTest extends TestCase
                 return $prediction;
             }
 
-            public function createOutput(Prediction $prediction, string $path, string $kind = 'video'): void
-            {
-            }
+            public function createOutput(Prediction $prediction, string $path, string $kind = 'video'): void {}
 
             public function updateInputStatus(Prediction $prediction, string $status): void
             {
@@ -272,9 +251,7 @@ class ReceivePredictionWebhookUseCaseTest extends TestCase
         {
             public int $refundCalls = 0;
 
-            public function dispatchDownloadOutputs(Prediction $prediction): void
-            {
-            }
+            public function dispatchDownloadOutputs(Prediction $prediction): void {}
 
             public function refundFailedGenerationIfDebited(Prediction $prediction): void
             {
@@ -312,24 +289,16 @@ class ReceivePredictionWebhookUseCaseTest extends TestCase
                 return $prediction;
             }
 
-            public function createOutput(Prediction $prediction, string $path, string $kind = 'video'): void
-            {
-            }
+            public function createOutput(Prediction $prediction, string $path, string $kind = 'video'): void {}
 
-            public function updateInputStatus(Prediction $prediction, string $status): void
-            {
-            }
+            public function updateInputStatus(Prediction $prediction, string $status): void {}
         };
 
         $effects = new class implements PredictionWebhookEffectsInterface
         {
-            public function dispatchDownloadOutputs(Prediction $prediction): void
-            {
-            }
+            public function dispatchDownloadOutputs(Prediction $prediction): void {}
 
-            public function refundFailedGenerationIfDebited(Prediction $prediction): void
-            {
-            }
+            public function refundFailedGenerationIfDebited(Prediction $prediction): void {}
         };
 
         $useCase = new ReceivePredictionWebhookUseCase($repository, $effects);
