@@ -8,13 +8,10 @@ use App\Domain\Auth\DTO\TokenDTO;
 use App\Domain\Auth\Exceptions\InvalidCredentialsException;
 use App\Domain\Auth\Models\User;
 use App\Domain\Auth\UseCases\LoginUseCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class LoginUseCaseTest extends TestCase
 {
-    use RefreshDatabase;
-
     public function test_returns_token_dto_when_credentials_are_valid_and_user_is_active(): void
     {
         $gateway = new class implements JwtAuthGatewayInterface

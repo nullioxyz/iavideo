@@ -11,6 +11,7 @@ use App\Domain\Platforms\Models\Platform;
 use App\Domain\Videos\Models\Input;
 use App\Domain\Videos\Models\Prediction;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use RuntimeException;
 
 final class CreatePredictionForInputUseCase
@@ -41,7 +42,13 @@ final class CreatePredictionForInputUseCase
         $modelSlug = (string) $model->slug;
         $modelVersion = $model->version;
 
-        $imageUrl = app()->environment('local', 'testing') ? 'https://solztt.com/lang/images?uuid=e5a4c343-b7cb-4d02-bf7a-9b23c09e44a8&size=lg&format=avif' : $input->getFirstMediaUrl();
+        $imageUrl = app()->environment('testing')
+            ? 'https://solztt.com/lang/images?uuid=e5a4c343-b7cb-4d02-bf7a-9b23c09e44a8&size=lg&format=avif'
+            : (string) optional($input->getFirstMedia('start_image'))->getFullUrl();
+
+        if ($imageUrl === '') {
+            throw new RuntimeException("Input {$inputId} has no start image media URL.");
+        }
 
         $normalized = new CreateVideoFromImageRequestDTO(
             modelSlug: $modelSlug,
@@ -63,7 +70,25 @@ final class CreatePredictionForInputUseCase
         $result = $client->create($modelSlug, $command->payload, $command->headers);
 
         if ($result->externalId === '') {
-            throw new RuntimeException('Provider did not return external prediction id.');
+            $providerMessage = (string) data_get($result->responsePayload, 'detail', data_get($result->responsePayload, 'error', ''));
+            $providerMessage = trim($providerMessage);
+
+            $rawBody = trim((string) data_get($result->responsePayload, '_raw_body', ''));
+            $statusCode = (int) data_get($result->responsePayload, '_status_code', 0);
+
+            $context = [];
+            if ($statusCode > 0) {
+                $context[] = "status={$statusCode}";
+            }
+            if ($providerMessage !== '') {
+                $context[] = "detail=".Str::limit($providerMessage, 250);
+            } elseif ($rawBody !== '') {
+                $context[] = "raw=".Str::limit($rawBody, 350);
+            }
+
+            $suffix = $context !== [] ? ' ('.implode(', ', $context).')' : '';
+
+            throw new RuntimeException('Provider did not return external prediction id'.$suffix.'.');
         }
 
         /** @var Prediction $prediction */

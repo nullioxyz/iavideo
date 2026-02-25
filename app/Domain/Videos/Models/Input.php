@@ -26,6 +26,7 @@ class Input extends EloquentModel implements HasMedia
         'preset_id',
         'start_image_path',
         'original_filename',
+        'title',
         'mime_type',
         'size_bytes',
         'credit_debited',
@@ -70,7 +71,7 @@ class Input extends EloquentModel implements HasMedia
 
     public function prediction(): HasOne
     {
-        return $this->hasOne(Prediction::class, 'input_id');
+        return $this->hasOne(Prediction::class, 'input_id')->latestOfMany();
     }
 
     /**
@@ -85,6 +86,7 @@ class Input extends EloquentModel implements HasMedia
     {
         $this
             ->addMediaCollection('start_image')
+            ->useDisk('public')
             ->singleFile();
     }
 }

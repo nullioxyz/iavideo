@@ -57,6 +57,7 @@ class PredictionOutput extends EloquentModel implements HasMedia
     {
         $this
             ->addMediaCollection('file')
+            ->useDisk('public')
             ->singleFile();
     }
 

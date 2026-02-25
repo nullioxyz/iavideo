@@ -16,7 +16,9 @@ final class PresetsListUseCase
     {
         return $this->presetRepository->paginate(
             (int) $request->route('model'),
-            $perPage, $page
+            $perPage,
+            $page,
+            $request->filters(),
         );
     }
 }

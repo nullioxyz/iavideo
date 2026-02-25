@@ -5,6 +5,7 @@ namespace App\Domain\Auth\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use App\Domain\Invites\Models\Invite;
+use App\Domain\Auth\Support\RoleNames;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasName;
 use Filament\Panel;
@@ -30,6 +31,7 @@ class Admin extends Authenticatable implements FilamentUser, HasName
         'name',
         'email',
         'password',
+        'must_reset_password',
         'email_verified_at',
         'username',
         'phone_number',
@@ -68,13 +70,25 @@ class Admin extends Authenticatable implements FilamentUser, HasName
             'email_verified_at' => 'datetime',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
+            'last_login_at' => 'datetime',
+            'suspended_at' => 'datetime',
+            'last_activity_at' => 'datetime',
+            'must_reset_password' => 'boolean',
             'password' => 'hashed',
         ];
     }
 
     public function canAccessFilament(): bool
     {
-        return true;
+        $user = User::query()->find($this->getKey());
+
+        if (! $user) {
+            return false;
+        }
+
+        return (bool) $user->active
+            && $user->suspended_at === null
+            && $user->hasAnyRole(RoleNames::adminPanelRoles());
     }
 
     public function getFilamentName(): string
@@ -84,7 +98,7 @@ class Admin extends Authenticatable implements FilamentUser, HasName
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return true;
+        return $this->canAccessFilament();
     }
 
     public function invitedBy(): BelongsTo

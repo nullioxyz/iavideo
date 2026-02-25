@@ -6,6 +6,7 @@ final class InputCreateDTO
 {
     public function __construct(
         public readonly int $presetId,
+        public readonly ?string $title = null,
         public readonly ?string $originalFilename = null,
         public readonly ?string $mimeType = null,
         public readonly ?int $sizeBytes = null,
@@ -17,6 +18,7 @@ final class InputCreateDTO
         return new self(
             presetId: (int) $data['preset_id'],
             startImagePath: (string) $data['start_image_path'],
+            title: $data['title'] ?? null,
             originalFilename: $data['original_filename'] ?? null,
             mimeType: $data['mime_type'] ?? null,
             sizeBytes: isset($data['size_bytes']) ? (int) $data['size_bytes'] : null,
@@ -29,6 +31,7 @@ final class InputCreateDTO
             'user_id' => $userId,
             'preset_id' => $this->presetId,
             'start_image_path' => $this->startImagePath,
+            'title' => $this->title ?? $this->originalFilename,
             'original_filename' => $this->originalFilename,
             'mime_type' => $this->mimeType,
             'size_bytes' => $this->sizeBytes,

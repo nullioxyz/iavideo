@@ -20,6 +20,7 @@ Route::prefix('api')
         'api',
         \App\Http\Middleware\SetLocale::class,
         \App\Domain\Auth\Middleware\JwtAuth::class,
+        'throttle:auth-user-main',
     ])
     ->group(function () {
         Route::prefix('invites')->name('invites.')->group(function () {

@@ -31,6 +31,16 @@ class UsersTable
                 TextColumn::make('phone_number_verified_at')
                     ->dateTime()
                     ->sortable(),
+                TextColumn::make('roles')
+                    ->label('Roles')
+                    ->state(function ($record): string {
+                        $user = \App\Domain\Auth\Models\User::query()->find($record->getKey());
+
+                        return $user?->getRoleNames()->implode(', ') ?? '-';
+                    }),
+                IconColumn::make('must_reset_password')
+                    ->label('Must reset password')
+                    ->boolean(),
                 IconColumn::make('active')
                     ->boolean(),
                 TextColumn::make('credit_balance')

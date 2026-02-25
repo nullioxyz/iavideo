@@ -15,6 +15,7 @@ class InputResource extends JsonResource
             'preset_id' => $this->preset_id,
             'user_id' => $this->user_id,
             'status' => $this->status,
+            'title' => $this->title,
             'original_filename' => $this->original_filename,
             'mime_type' => $this->mime_type,
             'size_bytes' => $this->size_bytes,

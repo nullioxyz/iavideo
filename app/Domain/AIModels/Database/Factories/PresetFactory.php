@@ -25,7 +25,7 @@ class PresetFactory extends Factory
             'name' => fake()->word(),
             'prompt' => fake()->text(),
             'negative_prompt' => fake()->text(),
-            'aspect_ratio' => '16:9',
+            'aspect_ratio' => fake()->randomElement(['16:9', '9:16', '1:1']),
             'duration_seconds' => 5,
             'cost_estimate_usd' => 0.7,
             'preview_video_url' => null,

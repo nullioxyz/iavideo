@@ -24,8 +24,8 @@ class PredictionFactory extends Factory
 
             'external_id' => (string) Str::uuid(),
 
-            'status' => $this->faker->randomElement(['queued', 'running', 'succeeded', 'failed']),
-            'source' => $this->faker->randomElement(['api', 'web', 'worker', 'cron']),
+            'status' => $this->faker->randomElement(['queued', 'starting', 'submitting', 'processing', 'succeeded', 'failed', 'cancelled', 'refunded']),
+            'source' => $this->faker->randomElement(['api', 'web', 'admin']),
             'attempt' => 1,
 
             'retry_of_prediction_id' => null,
@@ -78,7 +78,7 @@ class PredictionFactory extends Factory
             $startedAt = (clone $queuedAt)->addSeconds($this->faker->numberBetween(1, 30));
 
             return [
-                'status' => 'running',
+                'status' => 'processing',
                 'queued_at' => $queuedAt,
                 'started_at' => $startedAt,
                 'finished_at' => null,

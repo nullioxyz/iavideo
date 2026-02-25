@@ -26,6 +26,7 @@ class InputFactory extends Factory
             'preset_id' => Preset::factory(),
             'start_image_path' => fake()->url(),
             'original_filename' => 'fakefilename.jpg',
+            'title' => 'fakefilename.jpg',
             'mime_type' => 'image/jpeg',
             'size_bytes' => 10, // 2KB
             'credit_debited' => 1,

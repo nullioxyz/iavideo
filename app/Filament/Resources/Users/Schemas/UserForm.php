@@ -2,10 +2,13 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
+use App\Domain\Auth\Models\Admin;
+use App\Domain\Auth\Models\User;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Spatie\Permission\Models\Role;
 use Filament\Schemas\Schema;
 
 class UserForm
@@ -30,7 +33,32 @@ class UserForm
                     ->required(),
                 TextInput::make('password')
                     ->password()
-                    ->required(),
+                    ->revealable()
+                    ->minLength(8)
+                    ->maxLength(72)
+                    ->required(fn (string $operation): bool => $operation === 'create')
+                    ->dehydrated(fn (?string $state): bool => filled($state)),
+                Select::make('role_names')
+                    ->label('Roles')
+                    ->multiple()
+                    ->options(fn (): array => Role::query()
+                        ->where('guard_name', 'api')
+                        ->orderBy('name')
+                        ->pluck('name', 'name')
+                        ->all())
+                    ->afterStateHydrated(function (Select $component, ?Admin $record): void {
+                        if (! $record) {
+                            return;
+                        }
+
+                        $user = User::query()->find($record->getKey());
+
+                        $component->state(
+                            $user?->getRoleNames()->values()->all() ?? []
+                        );
+                    }),
+                Toggle::make('must_reset_password')
+                    ->label('Force password reset on next login'),
                 Toggle::make('active')
                     ->required(),
                 TextInput::make('credit_balance')

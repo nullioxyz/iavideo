@@ -23,10 +23,45 @@ class InputRepository implements InputRepositoryInterface
             ->paginate(perPage: $perPage, page: $page);
     }
 
+    public function paginateWithRelations(int $userId, int $perPage = 15, int $page = 1): LengthAwarePaginator
+    {
+        $perPage = max(1, min($perPage, 100));
+        $page = max(1, $page);
+
+        return $this->model->newQuery()
+            ->where('user_id', $userId)
+            ->with([
+                'preset.model.platform',
+                'prediction.outputs',
+            ])
+            ->orderByDesc('id')
+            ->paginate(perPage: $perPage, page: $page);
+    }
+
     public function findById(int $id): ?Input
     {
         return $this->model->newQuery()
             ->whereKey($id)
+            ->first();
+    }
+
+    public function findOwnedById(int $userId, int $id): ?Input
+    {
+        return $this->model->newQuery()
+            ->where('user_id', $userId)
+            ->whereKey($id)
+            ->first();
+    }
+
+    public function findOwnedByIdWithRelations(int $userId, int $id): ?Input
+    {
+        return $this->model->newQuery()
+            ->where('user_id', $userId)
+            ->whereKey($id)
+            ->with([
+                'preset.model.platform',
+                'prediction.outputs',
+            ])
             ->first();
     }
 

@@ -3,7 +3,7 @@
 namespace App\Domain\Auth\Middleware\Tests;
 
 use App\Domain\Auth\Middleware\JwtAuth;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Domain\Auth\Models\User;
 use Illuminate\Http\Request;
 use Tests\TestCase;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
@@ -11,8 +11,6 @@ use Tymon\JWTAuth\Facades\JWTAuth as IJWTAuth;
 
 class JwtAuthMiddlewareTest extends TestCase
 {
-    use RefreshDatabase;
-
     public function test_returns_401_when_missing_bearer_token(): void
     {
         $middleware = new JwtAuth;
@@ -59,10 +57,12 @@ class JwtAuthMiddlewareTest extends TestCase
             'HTTP_AUTHORIZATION' => 'Bearer valid-token',
         ]);
 
-        // Não precisa criar User real: basta retornar um objeto truthy
+        $user = new User;
+        $user->id = 1;
+
         IJWTAuth::shouldReceive('parseToken->authenticate')
             ->once()
-            ->andReturn((object) ['id' => 1]);
+            ->andReturn($user);
 
         $response = $middleware->handle($request, fn () => response()->json(['ok' => true], 200));
         $data = json_decode((string) $response->getContent(), true);

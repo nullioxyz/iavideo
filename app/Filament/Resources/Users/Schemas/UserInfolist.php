@@ -22,6 +22,16 @@ class UserInfolist
                 TextEntry::make('phone_number'),
                 TextEntry::make('phone_number_verified_at')
                     ->dateTime(),
+                TextEntry::make('roles')
+                    ->label('Roles')
+                    ->state(function ($record): string {
+                        $user = \App\Domain\Auth\Models\User::query()->find($record->getKey());
+
+                        return $user?->getRoleNames()->implode(', ') ?? '-';
+                    }),
+                IconEntry::make('must_reset_password')
+                    ->label('Must reset password')
+                    ->boolean(),
                 IconEntry::make('active')
                     ->boolean(),
                 TextEntry::make('credit_balance')

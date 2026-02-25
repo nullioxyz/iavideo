@@ -40,4 +40,13 @@ return [
         'webhook_secret' => env('REPLICATE_WEBHOOK_SECRET', null),
     ],
 
+    'payments' => [
+        'default_provider' => env('PAYMENTS_DEFAULT_PROVIDER', 'fakepay'),
+        'currency' => env('PAYMENTS_CURRENCY', 'USD'),
+        'webhook_secret' => env('PAYMENTS_WEBHOOK_SECRET', null),
+        'fake' => [
+            'default_checkout_status' => env('PAYMENTS_FAKE_CHECKOUT_STATUS', 'pending'),
+        ],
+    ],
+
 ];

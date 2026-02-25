@@ -29,6 +29,7 @@ class UserFactory extends Factory
                 : null,
 
             'password' => bcrypt('password'),
+            'must_reset_password' => false,
 
             'active' => $this->faker->boolean(95),
 
@@ -51,6 +52,14 @@ class UserFactory extends Factory
         return $this->state(fn () => [
             'active' => false,
             'suspended_at' => now(),
+        ]);
+    }
+
+    public function mustResetPassword(): static
+    {
+        return $this->state(fn () => [
+            'must_reset_password' => true,
+            'last_login_at' => null,
         ]);
     }
 

@@ -17,8 +17,10 @@ class PresetsResource extends JsonResource
             'prompt' => $this->prompt,
             'negative_prompt' => $this->negative_prompt,
             'duration_seconds' => $this->duration_seconds,
-            'preview_video_url' => $this->preview_video_url,
+            'preview_image_url' => $this->previewImageUrl(),
+            'preview_video_url' => $this->previewVideoUrl(),
             'aspect_ratio' => $this->aspect_ratio,
+            'tags' => PresetTagResource::collection($this->whenLoaded('tags')),
             'created_at' => optional($this->created_at)?->toISOString(),
             'updated_at' => optional($this->updated_at)?->toISOString(),
         ];

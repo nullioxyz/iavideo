@@ -2,6 +2,7 @@
 
 namespace App\Domain\Auth\Middleware;
 
+use App\Domain\Auth\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -25,6 +26,25 @@ final class JwtAuth
             if (! $user) {
                 return $this->unauthorized('user_not_found');
             }
+
+            if (! $user instanceof User) {
+                $identifier = method_exists($user, 'getAuthIdentifier')
+                    ? $user->getAuthIdentifier()
+                    : null;
+
+                $user = $identifier !== null
+                    ? User::query()->whereKey($identifier)->first()
+                    : null;
+
+                if (! $user instanceof User) {
+                    return $this->unauthorized('user_not_found');
+                }
+            }
+
+            auth('api')->setUser($user);
+            $request->setUserResolver(
+                static fn () => auth('api')->user()
+            );
         } catch (TokenExpiredException) {
             return $this->unauthorized('token_expired');
         } catch (TokenInvalidException) {

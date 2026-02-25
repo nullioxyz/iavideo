@@ -9,7 +9,13 @@ interface InputRepositoryInterface
 {
     public function paginate(int $userId, int $perPage = 15, int $page = 1): LengthAwarePaginator;
 
+    public function paginateWithRelations(int $userId, int $perPage = 15, int $page = 1): LengthAwarePaginator;
+
     public function findById(int $id): ?Input;
+
+    public function findOwnedById(int $userId, int $id): ?Input;
+
+    public function findOwnedByIdWithRelations(int $userId, int $id): ?Input;
 
     public function create(array $data): Input;
 

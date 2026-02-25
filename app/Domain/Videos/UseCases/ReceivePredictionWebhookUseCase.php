@@ -2,6 +2,7 @@
 
 namespace App\Domain\Videos\UseCases;
 
+use App\Domain\Broadcasting\Events\UserJobUpdatedBroadcast;
 use App\Domain\Videos\Contracts\PredictionWebhookEffectsInterface;
 use App\Domain\Videos\Contracts\Repositories\PredictionWebhookRepositoryInterface;
 use App\Domain\Videos\DTO\PredictionWebhookDTO;
@@ -35,6 +36,7 @@ final class ReceivePredictionWebhookUseCase
         $prediction = $this->repository->updatePrediction($prediction, $update);
 
         $this->handleSideEffects($prediction, $status, $dto);
+        $this->broadcastJobUpdated($prediction);
 
         return $prediction;
     }
@@ -82,9 +84,11 @@ final class ReceivePredictionWebhookUseCase
 
     private function handleSucceeded(Prediction $prediction, PredictionWebhookDTO $dto): void
     {
+        $outputUrl = $this->extractOutputUrl($dto);
+
         $this->repository->createOutput(
             $prediction,
-            (string) ($dto->getOutput() ?? 'empty-path')
+            $outputUrl
         );
         $this->repository->updateInputStatus($prediction, Input::DONE);
         $this->effects->dispatchDownloadOutputs($prediction);
@@ -94,5 +98,38 @@ final class ReceivePredictionWebhookUseCase
     {
         $this->repository->updateInputStatus($prediction, Input::FAILED);
         $this->effects->refundFailedGenerationIfDebited($prediction);
+    }
+
+    private function broadcastJobUpdated(Prediction $prediction): void
+    {
+        try {
+            $input = $prediction->input()->first();
+            if (! $input instanceof Input) {
+                return;
+            }
+
+            event(UserJobUpdatedBroadcast::fromInput($input->refresh()));
+        } catch (\Throwable) {
+            // Broadcasting is a non-critical side-effect.
+        }
+    }
+
+    private function extractOutputUrl(PredictionWebhookDTO $dto): string
+    {
+        $output = $dto->getOutput();
+
+        if (is_string($output) && $output !== '') {
+            return $output;
+        }
+
+        if (is_array($output)) {
+            foreach ($output as $item) {
+                if (is_string($item) && $item !== '') {
+                    return $item;
+                }
+            }
+        }
+
+        return 'empty-path';
     }
 }

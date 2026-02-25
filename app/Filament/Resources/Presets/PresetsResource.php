@@ -11,6 +11,7 @@ use App\Filament\Resources\Presets\Schemas\PresetsForm;
 use App\Filament\Resources\Presets\Schemas\PresetsInfolist;
 use App\Filament\Resources\Presets\Tables\PresetsTable;
 use BackedEnum;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -52,5 +53,10 @@ class PresetsResource extends Resource
             'view' => ViewPresets::route('/{record}'),
             'edit' => EditPresets::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with(['tags', 'media']);
     }
 }

@@ -6,6 +6,7 @@ use App\Domain\AIProviders\Contracts\ProviderClientInterface;
 use App\Domain\AIProviders\DTO\ProviderCreateResultDTO;
 use App\Domain\AIProviders\DTO\ProviderGetResultDTO;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 final class ReplicateClient implements ProviderClientInterface
 {
@@ -25,11 +26,29 @@ final class ReplicateClient implements ProviderClientInterface
             ], $headers))
             ->post($url, $payload);
 
-        $json = $res->json() ?? [];
+        $json = $res->json();
+        if (! is_array($json)) {
+            $json = [];
+        }
+
+        $json['_status_code'] = $res->status();
+        $json['_ok'] = $res->successful();
+        $json['_raw_body'] = (string) $res->body();
+
+        $externalId = $this->extractExternalId($json);
+        $status = (string) ($json['status'] ?? ($json['prediction']['status'] ?? ($res->successful() ? 'submitting' : 'failed')));
+
+        if ($externalId === '') {
+            Log::warning('replicate.create.missing_external_id', [
+                'model_slug' => $modelSlug,
+                'status_code' => $res->status(),
+                'response' => $json,
+            ]);
+        }
 
         return new ProviderCreateResultDTO(
-            externalId: (string) ($json['id'] ?? ''),
-            status: (string) ($json['status'] ?? ($res->successful() ? 'submitting' : 'failed')),
+            externalId: $externalId,
+            status: $status,
             responsePayload: $json
         );
     }
@@ -60,5 +79,23 @@ final class ReplicateClient implements ProviderClientInterface
             statusCode: $res->status(),
             payload: $res->json() ?? []
         );
+    }
+
+    private function extractExternalId(array $json): string
+    {
+        $candidate = (string) ($json['id'] ?? ($json['prediction']['id'] ?? ''));
+        if ($candidate !== '') {
+            return $candidate;
+        }
+
+        $getUrl = (string) ($json['urls']['get'] ?? '');
+        if ($getUrl !== '') {
+            $parts = explode('/', trim($getUrl, '/'));
+            $last = end($parts);
+
+            return is_string($last) ? $last : '';
+        }
+
+        return '';
     }
 }

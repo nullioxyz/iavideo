@@ -17,6 +17,9 @@ class PredictionsTable
             ->columns([
                 TextColumn::make('input.id')
                     ->searchable(),
+                TextColumn::make('input.title')
+                    ->label('Input Name')
+                    ->searchable(),
                 TextColumn::make('model.name')
                     ->searchable(),
                 TextColumn::make('external_id')

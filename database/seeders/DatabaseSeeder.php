@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Domain\AIModels\Models\Model;
 use App\Domain\AIModels\Models\Preset;
 use App\Domain\Auth\Models\User;
+use App\Domain\Auth\Support\RoleNames;
 use App\Domain\Platforms\Models\Platform;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -18,7 +19,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()->create(
+        $this->call(RolesSeeder::class);
+
+        $platformUser = User::factory()->create(
             [
                 'name' => 'Test User',
                 'email' => 'test@example.com',
@@ -29,7 +32,7 @@ class DatabaseSeeder extends Seeder
             ],
         );
 
-        User::factory()->create(
+        $adminUser = User::factory()->create(
             [
                 'name' => 'admin',
                 'email' => 'admin@ai.com',
@@ -39,6 +42,21 @@ class DatabaseSeeder extends Seeder
                 'credit_balance' => 3,
             ],
         );
+
+        $devUser = User::factory()->create(
+            [
+                'name' => 'dev',
+                'email' => 'dev@ai.com',
+                'password' => bcrypt('password'),
+                'username' => 'dev',
+                'active' => true,
+                'credit_balance' => 3,
+            ],
+        );
+
+        $platformUser->assignRole(RoleNames::PLATFORM_USER);
+        $adminUser->assignRole(RoleNames::ADMIN);
+        $devUser->assignRole(RoleNames::DEV);
 
         // platform
         $platform = Platform::factory()->create([

@@ -102,7 +102,7 @@ class DownloadPredictionOutputsJob implements ShouldQueue, ShouldBeUnique
             ->withCustomProperties([
                 'mime_type' => $res->header('Content-Type'),
             ])
-            ->toMediaCollection('file');
+            ->toMediaCollection('file', 'public');
 
         $media->update([
             'mime_type' => $res->header('Content-Type'),

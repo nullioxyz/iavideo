@@ -2,7 +2,6 @@
 
 namespace App\Domain\Videos\Requests;
 
-use App\Domain\Videos\Rules\AspectRatio;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -16,6 +15,12 @@ class InputCreateRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'title' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
             'preset_id' => [
                 'required',
                 'integer',
@@ -29,8 +34,6 @@ class InputCreateRequest extends FormRequest
                 'mimes:jpg,jpeg,png,webp',
                 'max:8192',
                 'dimensions:min_width=256,min_height=256,max_width=4096,max_height=4096',
-
-                new AspectRatio(9, 16, tolerancePercent: 3.0),
             ],
         ];
     }
@@ -40,6 +43,13 @@ class InputCreateRequest extends FormRequest
         if ($this->has('preset_id')) {
             $this->merge([
                 'preset_id' => (int) $this->input('preset_id'),
+            ]);
+        }
+
+        if ($this->has('title')) {
+            $title = trim((string) $this->input('title', ''));
+            $this->merge([
+                'title' => $title === '' ? null : $title,
             ]);
         }
     }

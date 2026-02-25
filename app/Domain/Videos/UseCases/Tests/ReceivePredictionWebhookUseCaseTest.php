@@ -7,7 +7,7 @@ use App\Domain\Videos\Contracts\Repositories\PredictionWebhookRepositoryInterfac
 use App\Domain\Videos\DTO\PredictionWebhookDTO;
 use App\Domain\Videos\Models\Prediction;
 use App\Domain\Videos\UseCases\ReceivePredictionWebhookUseCase;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 class ReceivePredictionWebhookUseCaseTest extends TestCase
 {

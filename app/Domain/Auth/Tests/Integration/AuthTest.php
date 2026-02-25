@@ -3,12 +3,29 @@
 namespace App\Domain\Auth\Tests\Integration;
 
 use App\Domain\Auth\Models\User;
+use App\Domain\Auth\Support\RoleNames;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+        foreach ([RoleNames::ADMIN, RoleNames::DEV, RoleNames::PLATFORM_USER] as $roleName) {
+            Role::query()->firstOrCreate([
+                'name' => $roleName,
+                'guard_name' => 'api',
+            ]);
+        }
+    }
 
     public function test_login_returns_token_payload(): void
     {
@@ -41,6 +58,23 @@ class AuthTest extends TestCase
 
         $this->assertIsInt($json['expires_in']);
         $this->assertGreaterThan(0, $json['expires_in']);
+    }
+
+    public function test_login_allows_admin_role_user_on_platform_api(): void
+    {
+        $user = User::factory()->create([
+            'active' => true,
+            'password' => bcrypt('password'),
+        ]);
+        $user->assignRole(RoleNames::ADMIN);
+
+        $response = $this->postJson('/api/auth/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $response->assertOk();
+        $response->assertJsonPath('data.token_type', 'bearer');
     }
 
     public function test_login_fails_with_invalid_password(): void
@@ -95,6 +129,64 @@ class AuthTest extends TestCase
                 'password',
             ],
         ]);
+    }
+
+    public function test_login_fails_when_user_is_suspended(): void
+    {
+        $user = User::factory()->create([
+            'active' => true,
+            'suspended_at' => now(),
+            'password' => bcrypt('password'),
+        ]);
+
+        $response = $this->postJson('/api/auth/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $response->assertForbidden();
+        $response->assertJson([
+            'message' => __('validation.suspended_user'),
+        ]);
+    }
+
+    public function test_login_persists_audit_metadata_and_updates_user_audit_fields(): void
+    {
+        $user = User::factory()->create([
+            'active' => true,
+            'password' => bcrypt('password'),
+            'last_login_at' => null,
+            'last_activity_at' => null,
+            'user_agent' => null,
+        ]);
+
+        $userAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36';
+
+        $response = $this
+            ->withHeader('User-Agent', $userAgent)
+            ->withHeader('CF-IPCountry', 'BR')
+            ->withHeader('X-Forwarded-For', '177.11.22.33')
+            ->postJson('/api/auth/login', [
+                'email' => $user->email,
+                'password' => 'password',
+            ]);
+
+        $response->assertOk();
+
+        $this->assertDatabaseHas('login_audits', [
+            'user_id' => $user->getKey(),
+            'email' => $user->email,
+            'success' => true,
+            'country_code' => 'BR',
+            'forwarded_for' => '177.11.22.33',
+            'browser' => 'Chrome',
+            'platform' => 'Linux',
+        ]);
+
+        $user->refresh();
+        $this->assertNotNull($user->last_login_at);
+        $this->assertNotNull($user->last_activity_at);
+        $this->assertSame($userAgent, $user->user_agent);
     }
 
     public function test_login_inactive_user_message_in_portuguese_when_accept_language_pt_br(): void

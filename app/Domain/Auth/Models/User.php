@@ -11,12 +11,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use App\Domain\Auth\Support\RoleNames;
 
 class User extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles;
+
+    protected string $guard_name = 'api';
 
     /**
      * The attributes that are mass assignable.
@@ -27,6 +31,7 @@ class User extends Authenticatable implements JWTSubject
         'name',
         'email',
         'password',
+        'must_reset_password',
         'email_verified_at',
         'username',
         'phone_number',
@@ -65,6 +70,10 @@ class User extends Authenticatable implements JWTSubject
             'email_verified_at' => 'datetime',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
+            'last_login_at' => 'datetime',
+            'suspended_at' => 'datetime',
+            'last_activity_at' => 'datetime',
+            'must_reset_password' => 'boolean',
             'password' => 'hashed',
         ];
     }
@@ -99,6 +108,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(Invite::class, 'invited_by_user_id');
     }
 
+    public function loginAudits(): HasMany
+    {
+        return $this->hasMany(LoginAudit::class, 'user_id');
+    }
+
     /**
      * @return \App\Domain\Auth\Database\Factories\UserFactory
      */
@@ -110,5 +124,10 @@ class User extends Authenticatable implements JWTSubject
     public function isActive(): bool
     {
         return $this->active;
+    }
+
+    public function canAccessAdminPanel(): bool
+    {
+        return $this->hasAnyRole(RoleNames::adminPanelRoles());
     }
 }

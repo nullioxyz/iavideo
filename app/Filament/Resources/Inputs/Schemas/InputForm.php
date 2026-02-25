@@ -35,6 +35,10 @@ class InputForm
                     ->label('Original Filename')
                     ->required(),
 
+                TextInput::make('title')
+                    ->label('Input Name')
+                    ->nullable(),
+
                 TextInput::make('mime_type')
                     ->label('MIME Type')
                     ->required(),

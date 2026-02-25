@@ -29,6 +29,9 @@
         <testsuite name="Invites">
             <directory>app/Domain/Invites</directory>
         </testsuite>
+        <testsuite name="Payments">
+            <directory>app/Domain/Payments</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>

@@ -66,6 +66,7 @@ class Prediction extends EloquentModel
         return [
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
+            'queued_at' => 'datetime',
             'started_at' => 'datetime',
             'finished_at' => 'datetime',
             'canceled_at' => 'datetime',

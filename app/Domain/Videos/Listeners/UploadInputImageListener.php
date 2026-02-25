@@ -34,7 +34,7 @@ class UploadInputImageListener implements ShouldQueue
             ->addMedia($absolutePath)
             ->usingName('start_image')
             ->usingFileName(basename($absolutePath))
-            ->toMediaCollection('start_image');
+            ->toMediaCollection('start_image', 'public');
 
         $input->update([
             'start_image_path' => $media->getPath(),
