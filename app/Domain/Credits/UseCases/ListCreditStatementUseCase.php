@@ -2,7 +2,7 @@
 
 namespace App\Domain\Credits\UseCases;
 
-use App\Domain\Credits\Models\CreditLegder;
+use App\Domain\Credits\Models\CreditLedger;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 final class ListCreditStatementUseCase
@@ -12,7 +12,7 @@ final class ListCreditStatementUseCase
         $perPage = max(1, min($perPage, 100));
         $page = max(1, $page);
 
-        return CreditLegder::query()
+        return CreditLedger::query()
             ->where('user_id', $userId)
             ->orderByDesc('id')
             ->paginate(perPage: $perPage, page: $page);

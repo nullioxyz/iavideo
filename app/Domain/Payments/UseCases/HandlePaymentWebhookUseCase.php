@@ -7,6 +7,7 @@ use App\Domain\Payments\DTO\WebhookPayloadDTO;
 use App\Domain\Payments\Enums\CreditPurchaseStatus;
 use App\Domain\Payments\Models\CreditPurchaseOrder;
 use App\Domain\Payments\Models\PaymentGatewayEvent;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -19,32 +20,32 @@ class HandlePaymentWebhookUseCase
     public function execute(WebhookPayloadDTO $dto): void
     {
         DB::transaction(function () use ($dto): void {
-            $alreadyProcessed = PaymentGatewayEvent::query()
-                ->where('provider', $dto->provider)
-                ->where('event_id', $dto->eventId)
-                ->exists();
-
-            if ($alreadyProcessed) {
-                Log::info('payments.webhook.idempotent_hit', [
+            try {
+                PaymentGatewayEvent::query()->create([
                     'provider' => $dto->provider,
                     'event_id' => $dto->eventId,
+                    'external_id' => $dto->externalId,
+                    'payload' => $dto->raw,
+                    'processed_at' => now(),
                 ]);
+            } catch (QueryException $exception) {
+                if ($this->isDuplicateKey($exception)) {
+                    Log::info('payments.webhook.idempotent_hit', [
+                        'provider' => $dto->provider,
+                        'event_id' => $dto->eventId,
+                    ]);
 
-                return;
+                    return;
+                }
+
+                throw $exception;
             }
-
-            PaymentGatewayEvent::query()->create([
-                'provider' => $dto->provider,
-                'event_id' => $dto->eventId,
-                'external_id' => $dto->externalId,
-                'payload' => $dto->raw,
-                'processed_at' => now(),
-            ]);
 
             $order = CreditPurchaseOrder::query()
                 ->with('user')
                 ->where('provider', $dto->provider)
                 ->where('external_id', $dto->externalId)
+                ->lockForUpdate()
                 ->first();
 
             if (! $order instanceof CreditPurchaseOrder) {
@@ -105,5 +106,10 @@ class HandlePaymentWebhookUseCase
                 'status' => CreditPurchaseStatus::PENDING,
             ]);
         });
+    }
+
+    private function isDuplicateKey(QueryException $exception): bool
+    {
+        return ((string) $exception->getCode()) === '23000';
     }
 }

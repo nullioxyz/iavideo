@@ -53,5 +53,11 @@ class AppServiceProvider extends ServiceProvider
                 Limit::perMinute(120)->by($identifier),
             ];
         });
+
+        RateLimiter::for('replicate-webhook', function (Request $request) {
+            return [
+                Limit::perMinute(180)->by((string) $request->ip()),
+            ];
+        });
     }
 }

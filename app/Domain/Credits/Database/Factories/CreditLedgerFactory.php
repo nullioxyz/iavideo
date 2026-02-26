@@ -3,16 +3,16 @@
 namespace App\Domain\Credits\Database\Factories;
 
 use App\Domain\Auth\Models\User;
-use App\Domain\Credits\Models\CreditLegder;
+use App\Domain\Credits\Models\CreditLedger;
 use App\Domain\Videos\Models\Input;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/** @extends Factory<CreditLegder> */
+/** @extends Factory<CreditLedger> */
 class CreditLedgerFactory extends Factory
 {
-    /** @var class-string<CreditLegder> */
-    protected $model = CreditLegder::class;
+    /** @var class-string<CreditLedger> */
+    protected $model = CreditLedger::class;
 
     /**
      * Define the model's default state.

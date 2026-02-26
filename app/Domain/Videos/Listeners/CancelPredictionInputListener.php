@@ -15,6 +15,6 @@ class CancelPredictionInputListener implements ShouldQueue
     {
         /** @var CancelInputPredictionUseCase $useCase */
         $useCase = app()->make(CancelInputPredictionUseCase::class);
-        $useCase->execute($event->inputId);
+        $useCase->execute($event->userId, $event->inputId);
     }
 }

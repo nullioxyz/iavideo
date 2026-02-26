@@ -2,10 +2,10 @@
 
 namespace App\Domain\Credits\Resources;
 
-use App\Domain\Credits\Models\CreditLegder;
+use App\Domain\Credits\Models\CreditLedger;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/** @mixin CreditLegder */
+/** @mixin CreditLedger */
 class CreditStatementEntryResource extends JsonResource
 {
     public function toArray($request): array

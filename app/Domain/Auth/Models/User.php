@@ -4,7 +4,7 @@ namespace App\Domain\Auth\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-use App\Domain\Credits\Models\CreditLegder;
+use App\Domain\Credits\Models\CreditLedger;
 use App\Domain\Invites\Models\Invite;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -90,7 +90,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function creditLedger(): HasMany
     {
-        return $this->hasMany(CreditLegder::class, 'user_id');
+        return $this->hasMany(CreditLedger::class, 'user_id');
     }
 
     public function invitedBy(): BelongsTo

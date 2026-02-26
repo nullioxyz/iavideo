@@ -204,7 +204,7 @@ class CancelPredictionUseCaseTest extends TestCase
         /** @var CancelInputPredictionUseCase $useCase */
         $useCase = $this->app->make(CancelInputPredictionUseCase::class);
 
-        $prediction = $useCase->execute($input->getKey());
+        $prediction = $useCase->execute((int) $user->getKey(), (int) $input->getKey());
 
         $this->assertInstanceOf(Prediction::class, $prediction);
         $this->assertSame('2wbzrawha9rmw0cv9h5ajeyyn4', $prediction->external_id);

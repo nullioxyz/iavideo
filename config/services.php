@@ -38,6 +38,7 @@ return [
     'replicate' => [
         'token' => env('REPLICATE_API_TOKEN', null),
         'webhook_secret' => env('REPLICATE_WEBHOOK_SECRET', null),
+        'output_allowed_hosts' => env('REPLICATE_OUTPUT_ALLOWED_HOSTS', 'cdn.replicate.com,replicate.delivery'),
     ],
 
     'payments' => [

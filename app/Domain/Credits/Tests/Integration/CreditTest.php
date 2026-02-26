@@ -7,7 +7,7 @@ use App\Domain\AIModels\Models\Model as AIModel;
 use App\Domain\AIModels\Models\Preset;
 use App\Domain\Auth\Models\User;
 use App\Domain\Auth\Tests\Traits\AuthenticatesWithJwt;
-use App\Domain\Credits\Models\CreditLegder;
+use App\Domain\Credits\Models\CreditLedger;
 use App\Domain\Videos\Events\InputCreated;
 use App\Domain\Videos\Models\Input;
 use App\Domain\Videos\Models\Prediction;
@@ -119,7 +119,7 @@ class CreditTest extends TestCase
             'source' => 'web',
         ]);
 
-        $creditLedger = CreditLegder::factory()->create([
+        $creditLedger = CreditLedger::factory()->create([
             'user_id' => $user->getKey(),
             'delta' => -1,
             'balance_after' => 2,

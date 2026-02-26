@@ -15,14 +15,18 @@ class CancelInputPredictionRequest extends FormRequest
 
     public function rules(): array
     {
+        $userId = auth('api')->id();
+
         return [
             'input_id' => [
                 'required',
                 'integer',
-                Rule::exists('inputs', 'id')->whereIn('status', [
-                    Input::CREATED,
-                    Input::PROCESSING,
-                ]),
+                Rule::exists('inputs', 'id')
+                    ->where('user_id', (int) $userId)
+                    ->whereIn('status', [
+                        Input::CREATED,
+                        Input::PROCESSING,
+                    ]),
             ],
         ];
     }

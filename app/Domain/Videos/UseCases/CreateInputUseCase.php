@@ -12,6 +12,7 @@ use App\Domain\Videos\Events\InputCreated;
 use App\Domain\Videos\Models\Input;
 use App\Infra\Contracts\InputImageIngestionInterface;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 final class CreateInputUseCase
@@ -25,25 +26,36 @@ final class CreateInputUseCase
 
     public function execute(User $user, InputCreateDTO $dto, UploadedFile $file): Input
     {
-        $this->assertDailyInputsLimit($user);
+        /** @var Input $input */
+        $input = DB::transaction(function () use ($user, $dto): Input {
+            /** @var User|null $lockedUser */
+            $lockedUser = User::query()
+                ->whereKey($user->getKey())
+                ->lockForUpdate()
+                ->first();
 
-        if ($this->reserveCreditUseCase->canCharge($user) === false) {
-            throw new \Exception('Insufficient balance');
-        }
+            if (! $lockedUser instanceof User) {
+                throw new \RuntimeException('User not found.');
+            }
 
-        $input = $this->inputRepository->create(
-            $dto->toArray($user->getKey())
-        );
+            $this->assertDailyInputsLimit($lockedUser);
 
-        $this->reserveCreditUseCase->execute($user, [
-            'reason' => 'Charge for input creation',
-            'reference_type' => 'input_creation',
-            'reference_id' => $input->getKey(),
-        ]);
+            $input = $this->inputRepository->create(
+                $dto->toArray($lockedUser->getKey())
+            );
 
-        $input->update([
-            'credit_debited' => true,
-        ]);
+            $this->reserveCreditUseCase->execute($lockedUser, [
+                'reason' => 'Charge for input creation',
+                'reference_type' => 'input_creation',
+                'reference_id' => $input->getKey(),
+            ]);
+
+            $input->update([
+                'credit_debited' => true,
+            ]);
+
+            return $input->refresh();
+        });
 
         $tempPath = $this->ingestion->ingest($input->getKey(), $file);
         InputCreated::dispatch($input->getKey(), $tempPath);

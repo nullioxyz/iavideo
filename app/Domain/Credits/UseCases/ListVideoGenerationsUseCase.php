@@ -2,7 +2,7 @@
 
 namespace App\Domain\Credits\UseCases;
 
-use App\Domain\Credits\Models\CreditLegder;
+use App\Domain\Credits\Models\CreditLedger;
 use App\Domain\Videos\Models\Input;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
@@ -32,7 +32,7 @@ final class ListVideoGenerationsUseCase
         $ledgersByInput = [];
 
         if ($inputIds !== []) {
-            $entries = CreditLegder::query()
+            $entries = CreditLedger::query()
                 ->where('user_id', $userId)
                 ->whereIn('reference_id', $inputIds)
                 ->whereIn('reference_type', [

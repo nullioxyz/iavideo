@@ -10,6 +10,8 @@ use App\Domain\Credits\UseCases\RefundCreditUseCase;
 use App\Domain\Platforms\Models\Platform;
 use App\Domain\Videos\Models\Input;
 use App\Domain\Videos\Models\Prediction;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 final class CancelInputPredictionUseCase
@@ -19,12 +21,18 @@ final class CancelInputPredictionUseCase
         private readonly RefundCreditUseCase $refundCreditUseCase,
     ) {}
 
-    public function execute(int $inputId): Prediction
+    public function execute(int $userId, int $inputId): Prediction
     {
         /** @var Input $input */
         $input = Input::query()
             ->with(['preset', 'preset.model', 'preset.model.platform', 'prediction'])
-            ->findOrFail($inputId);
+            ->whereKey($inputId)
+            ->where('user_id', $userId)
+            ->first();
+
+        if (! $input instanceof Input) {
+            throw (new ModelNotFoundException())->setModel(Input::class, [$inputId]);
+        }
 
         $prediction = $input->prediction;
         if (! $prediction instanceof Prediction || ! $prediction->external_id) {
@@ -50,24 +58,44 @@ final class CancelInputPredictionUseCase
             throw new RuntimeException('Failed to cancel prediction.');
         }
 
-        $input->update(['status' => Input::CANCELLED]);
-        $input->prediction()->update(['status' => Prediction::CANCELLED]);
+        DB::transaction(function () use ($inputId, $userId): void {
+            /** @var Input|null $lockedInput */
+            $lockedInput = Input::query()
+                ->whereKey($inputId)
+                ->where('user_id', $userId)
+                ->lockForUpdate()
+                ->with(['prediction', 'user'])
+                ->first();
 
-        if ($input->credit_debited) {
-            if (! $input->user instanceof User) {
+            if (! $lockedInput instanceof Input) {
+                throw (new ModelNotFoundException())->setModel(Input::class, [$inputId]);
+            }
+
+            if ($lockedInput->status === Input::CANCELLED) {
+                return;
+            }
+
+            $lockedInput->update(['status' => Input::CANCELLED]);
+            $lockedInput->prediction()->update(['status' => Prediction::CANCELLED]);
+
+            if (! $lockedInput->credit_debited) {
+                return;
+            }
+
+            if (! $lockedInput->user instanceof User) {
                 throw new RuntimeException("User not found for input {$inputId}");
             }
 
-            $this->refundCreditUseCase->execute($input->user, [
+            $this->refundCreditUseCase->execute($lockedInput->user, [
                 'reference_type' => 'input_video_generation_canceled',
                 'reason' => 'Canceled video generation',
-                'reference_id' => $input->id,
+                'reference_id' => $lockedInput->id,
             ]);
 
-            $input->update([
+            $lockedInput->update([
                 'credit_debited' => false,
             ]);
-        }
+        });
 
         $updatedPrediction = $input->prediction()->first();
         if (! $updatedPrediction instanceof Prediction) {

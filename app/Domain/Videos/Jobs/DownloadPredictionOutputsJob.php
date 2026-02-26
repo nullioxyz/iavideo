@@ -77,13 +77,9 @@ class DownloadPredictionOutputsJob implements ShouldQueue, ShouldBeUnique
             'url' => $url,
         ]);
 
-        $res = Http::timeout(120)->retry(3, 1000)->get($url);
+        $this->assertAllowedOutputUrl($url);
 
-        if ($res->failed()) {
-            throw new \RuntimeException("Failed to download prediction output from {$url} (status {$res->status()})");
-        }
-
-        $bytes = $res->body();
+        $head = Http::timeout(20)->retry(2, 500)->head($url);
 
         $path = (string) parse_url($url, PHP_URL_PATH);
         $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
@@ -100,25 +96,25 @@ class DownloadPredictionOutputsJob implements ShouldQueue, ShouldBeUnique
             ->usingName('prediction_output')
             ->usingFileName($filename)
             ->withCustomProperties([
-                'mime_type' => $res->header('Content-Type'),
+                'mime_type' => (string) $head->header('Content-Type'),
             ])
             ->toMediaCollection('file', 'public');
 
         $media->update([
-            'mime_type' => $res->header('Content-Type'),
+            'mime_type' => (string) ($head->header('Content-Type') ?: $media->mime_type),
         ]);
 
         $output->update([
-            'mime_type' => $res->header('Content-Type'),
-            'size_bytes' => strlen($bytes),
+            'mime_type' => (string) ($head->header('Content-Type') ?: $media->mime_type),
+            'size_bytes' => (int) ($head->header('Content-Length') ?: $media->size ?: 0),
         ]);
 
         Log::info('prediction.output.download.completed', [
             'prediction_id' => $prediction->id,
             'prediction_output_id' => $output->id,
             'external_id' => $prediction->external_id,
-            'mime_type' => $res->header('Content-Type'),
-            'size_bytes' => strlen($bytes),
+            'mime_type' => (string) ($head->header('Content-Type') ?: $media->mime_type),
+            'size_bytes' => (int) ($head->header('Content-Length') ?: $media->size ?: 0),
         ]);
     }
 
@@ -129,5 +125,24 @@ class DownloadPredictionOutputsJob implements ShouldQueue, ShouldBeUnique
             'exception' => $exception::class,
             'message' => $exception->getMessage(),
         ]);
+    }
+
+    private function assertAllowedOutputUrl(string $url): void
+    {
+        $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+
+        if (! in_array($scheme, ['https'], true)) {
+            throw new \RuntimeException('Prediction output URL must use HTTPS.');
+        }
+
+        $allowedHosts = array_filter(array_map(
+            static fn (string $value): string => strtolower(trim($value)),
+            explode(',', (string) config('services.replicate.output_allowed_hosts', 'cdn.replicate.com'))
+        ));
+
+        if ($host === '' || ! in_array($host, $allowedHosts, true)) {
+            throw new \RuntimeException("Prediction output URL host [{$host}] is not allowed.");
+        }
     }
 }

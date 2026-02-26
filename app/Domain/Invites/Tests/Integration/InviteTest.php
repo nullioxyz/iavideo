@@ -4,7 +4,7 @@ namespace App\Domain\Invites\Tests\Integration;
 
 use App\Domain\Auth\Models\User;
 use App\Domain\Auth\Tests\Traits\AuthenticatesWithJwt;
-use App\Domain\Credits\Models\CreditLegder;
+use App\Domain\Credits\Models\CreditLedger;
 use App\Domain\Invites\Models\Invite;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -110,7 +110,7 @@ class InviteTest extends TestCase
         $this->assertSame(5, (int) $invitedUser->credit_balance);
         $this->assertSame($inviter->getKey(), (int) $invitedUser->invited_by_user_id);
 
-        $ledger = CreditLegder::query()
+        $ledger = CreditLedger::query()
             ->where('user_id', $invitedUser->getKey())
             ->where('reference_type', 'invite_redemption')
             ->where('reference_id', $invite->getKey())

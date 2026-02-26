@@ -13,6 +13,7 @@ class CancelPredictionInput
      * Create a new event instance.
      */
     public function __construct(
+        public readonly int $userId,
         public readonly int $inputId,
     ) {}
 

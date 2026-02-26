@@ -91,8 +91,74 @@ class CancelPredictionTest extends TestCase
 
         $response->assertNoContent();
 
-        Event::assertDispatched(CancelPredictionInput::class, function (CancelPredictionInput $event) use ($input) {
-            return $event->inputId === $input->getKey();
+        Event::assertDispatched(CancelPredictionInput::class, function (CancelPredictionInput $event) use ($input, $user) {
+            return $event->inputId === $input->getKey()
+                && $event->userId === $user->getKey();
         });
+    }
+
+    public function test_user_cannot_cancel_input_of_another_user(): void
+    {
+        Event::fake([CancelPredictionInput::class]);
+
+        $owner = User::factory()->create(['active' => true]);
+        $attacker = User::factory()->create(['active' => true]);
+
+        $token = $this->loginAndGetToken($attacker);
+
+        $platform = Platform::query()->create([
+            'name' => 'Replicate',
+            'slug' => 'replicate',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $model = AIModel::query()->create([
+            'platform_id' => $platform->id,
+            'name' => 'Kling v2.5 Turbo Pro',
+            'slug' => 'kwaivgi/kling-v2.5-turbo-pro',
+            'version' => null,
+            'active' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $preset = Preset::query()->create([
+            'name' => 'Preset 9:16',
+            'prompt' => 'Go until to the start of the universe. Go to the Big Bang.',
+            'negative_prompt' => null,
+            'aspect_ratio' => '9:16',
+            'duration_seconds' => 5,
+            'default_model_id' => $model->id,
+            'cost_estimate_usd' => 0.3500,
+            'active' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $input = Input::query()->create([
+            'user_id' => $owner->getKey(),
+            'preset_id' => $preset->id,
+            'status' => 'created',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        Prediction::factory()->create([
+            'input_id' => $input->getKey(),
+            'model_id' => $model->getKey(),
+            'external_id' => 'ext-owner',
+            'status' => 'starting',
+            'source' => 'web',
+            'attempt' => 1,
+            'queued_at' => Carbon::now(),
+        ]);
+
+        $response = $this->withJwt($token)->postJson('/api/prediction/cancel', [
+            'input_id' => $input->getKey(),
+        ]);
+
+        $response->assertUnprocessable();
+        Event::assertNotDispatched(CancelPredictionInput::class);
     }
 }
