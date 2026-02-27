@@ -9,11 +9,13 @@ use App\Domain\Auth\DTO\TokenDTO;
 use App\Domain\Auth\Exceptions\InvalidCredentialsException;
 use App\Domain\Auth\Models\LoginAudit;
 use App\Domain\Auth\Models\User;
+use App\Domain\Observability\Support\StructuredActivityLogger;
 
 final class LoginUseCase
 {
     public function __construct(
-        private readonly JwtAuthGatewayInterface $auth
+        private readonly JwtAuthGatewayInterface $auth,
+        private readonly StructuredActivityLogger $activityLogger,
     ) {}
 
     public function execute(CredentialsDTO $credentials, ?LoginContextDTO $context = null): TokenDTO
@@ -21,6 +23,10 @@ final class LoginUseCase
         $token = $this->auth->attempt($credentials->email, $credentials->password);
 
         if (! $token) {
+            $this->activityLogger->log('login_failed', null, [
+                'email' => $credentials->email,
+                'reason' => 'invalid_credentials',
+            ]);
             $this->recordAudit(
                 user: null,
                 email: $credentials->email,
@@ -38,6 +44,10 @@ final class LoginUseCase
 
         if (! $user || ! $user->isActive()) {
             $this->auth->logout();
+            $this->activityLogger->log('login_blocked', $user, [
+                'email' => $credentials->email,
+                'reason' => 'inactive_user',
+            ]);
             $this->recordAudit(
                 user: $user,
                 email: $credentials->email,
@@ -50,6 +60,10 @@ final class LoginUseCase
 
         if ($user->suspended_at !== null) {
             $this->auth->logout();
+            $this->activityLogger->log('login_blocked', $user, [
+                'email' => $credentials->email,
+                'reason' => 'suspended_user',
+            ]);
             $this->recordAudit(
                 user: $user,
                 email: $credentials->email,
@@ -80,6 +94,9 @@ final class LoginUseCase
             success: true,
             failureReason: null,
         );
+        $this->activityLogger->log('login_success', $user, [
+            'email' => $credentials->email,
+        ]);
 
         return new TokenDTO(
             accessToken: $token,

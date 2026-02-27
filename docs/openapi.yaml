@@ -1,0 +1,136 @@
+openapi: 3.0.3
+info:
+  title: inkai.video Backend API
+  version: 0.1.0-beta
+  description: Minimal OpenAPI contract for closed beta frontend integration.
+servers:
+  - url: https://api.example.com
+paths:
+  /api/auth/login:
+    post:
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        '200': { description: Auth token payload }
+  /api/auth/me:
+    get:
+      summary: Current authenticated user
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: User profile }
+  /api/auth/preferences:
+    patch:
+      summary: Update user preferences (language/theme)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                language_id: { type: integer, nullable: true }
+                theme_preference:
+                  type: string
+                  enum: [light, dark, system]
+      responses:
+        '200': { description: Updated user profile }
+  /api/input/create:
+    post:
+      summary: Create input job
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [preset_id, image]
+              properties:
+                preset_id: { type: integer }
+                image: { type: string, format: binary }
+                title: { type: string, nullable: true }
+      responses:
+        '201': { description: Input created }
+  /api/jobs:
+    get:
+      summary: List user jobs
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Jobs list }
+  /api/jobs/quota:
+    get:
+      summary: Daily generation quota
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Quota payload }
+  /api/jobs/{job}/download:
+    get:
+      summary: Download generated video
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: job
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: Binary file response }
+  /api/analytics/mvp-kpis:
+    get:
+      summary: MVP KPIs (admin/dev)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: KPI payload }
+  /api/analytics/ops-metrics:
+    get:
+      summary: Operational metrics (admin/dev)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Ops metrics payload }
+  /api/institutional:
+    get:
+      summary: List institutional content
+      responses:
+        '200': { description: Institutional list }
+  /api/seo/{slug}:
+    get:
+      summary: Get SEO data by slug
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: SEO payload }
+  /api/contacts:
+    post:
+      summary: Create contact message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, message]
+              properties:
+                name: { type: string }
+                email: { type: string, format: email }
+                phone: { type: string, nullable: true }
+                message: { type: string }
+      responses:
+        '201': { description: Contact created }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

@@ -40,6 +40,9 @@ class ProtectedRoutesSecurityTest extends TestCase
             'auth.impersonation_exchange' => ['POST', '/api/auth/impersonation/exchange', [
                 'hash' => str_repeat('a', 64),
             ]],
+            'auth.preferences_update' => ['PATCH', '/api/auth/preferences', [
+                'theme_preference' => 'dark',
+            ]],
 
             // Credits
             'credits.balance' => ['GET', '/api/credits/balance'],
@@ -54,11 +57,16 @@ class ProtectedRoutesSecurityTest extends TestCase
                 'input_id' => 1,
             ]],
             'jobs.list' => ['GET', '/api/jobs'],
+            'jobs.quota' => ['GET', '/api/jobs/quota'],
             'jobs.detail' => ['GET', '/api/jobs/1'],
             'jobs.download' => ['GET', '/api/jobs/1/download'],
             'jobs.rename' => ['PATCH', '/api/jobs/1/title', [
                 'title' => 'Novo título',
             ]],
+
+            // Analytics
+            'analytics.mvp_kpis' => ['GET', '/api/analytics/mvp-kpis'],
+            'analytics.ops_metrics' => ['GET', '/api/analytics/ops-metrics'],
 
             // AI Models / Presets
             'models.list' => ['GET', '/api/models'],
@@ -77,4 +85,3 @@ class ProtectedRoutesSecurityTest extends TestCase
         ];
     }
 }
-

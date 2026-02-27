@@ -17,6 +17,7 @@ class MeResource extends JsonResource
             'username' => $this->username,
             'phone_number' => $this->phone_number,
             'country_code' => $this->country_code,
+            'theme_preference' => $this->theme_preference ?? 'system',
             'language' => [
                 'id' => $this->language?->id,
                 'title' => $this->language?->title,

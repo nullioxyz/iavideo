@@ -23,4 +23,5 @@ return [
     App\Domain\Seo\Providers\SeoRouteServiceProvider::class,
     App\Domain\SocialNetworks\Providers\SocialNetworksRouteServiceProvider::class,
     App\Domain\Contacts\Providers\ContactsRouteServiceProvider::class,
+    App\Domain\Analytics\Providers\AnalyticsRouteServiceProvider::class,
 ];

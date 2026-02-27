@@ -39,6 +39,7 @@ final class ListVideoGenerationsUseCase
                     'input_creation',
                     'input_video_generation_failed',
                     'input_prediction_creation_failed',
+                    'input_prediction_creation_canceled',
                     'input_video_generation_canceled',
                 ])
                 ->orderBy('id')
@@ -62,6 +63,7 @@ final class ListVideoGenerationsUseCase
                 ->whereIn('reference_type', [
                     'input_video_generation_failed',
                     'input_prediction_creation_failed',
+                    'input_prediction_creation_canceled',
                     'input_video_generation_canceled',
                 ])
                 ->sum(fn ($entry) => max(0, (int) $entry->delta));
@@ -72,6 +74,7 @@ final class ListVideoGenerationsUseCase
                 ->whereIn('reference_type', [
                     'input_video_generation_failed',
                     'input_prediction_creation_failed',
+                    'input_prediction_creation_canceled',
                     'input_video_generation_canceled',
                 ])
                 ->filter(fn ($entry) => (int) $entry->delta > 0)
@@ -110,7 +113,10 @@ final class ListVideoGenerationsUseCase
             $isRefunded = $creditsRefunded > 0;
 
             $cancelEntry = $refundEntries
-                ->first(fn ($entry) => (string) $entry->reference_type === 'input_video_generation_canceled');
+                ->first(fn ($entry) => in_array((string) $entry->reference_type, [
+                    'input_video_generation_canceled',
+                    'input_prediction_creation_canceled',
+                ], true));
 
             $failureEntry = $refundEntries
                 ->first(fn ($entry) => in_array((string) $entry->reference_type, [

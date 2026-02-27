@@ -17,9 +17,19 @@ class CreatePredictionForInputListener implements ShouldQueue
 {
     use InteractsWithQueue;
 
+    public int $tries = 3;
+
     public function __construct(
         private readonly RefundCreditUseCase $refundCreditUseCase,
     ) {}
+
+    /**
+     * @return array<int, int>
+     */
+    public function backoff(): array
+    {
+        return [120, 300];
+    }
 
     public function handle(CreatePredictionForInput $event): void
     {
@@ -29,22 +39,30 @@ class CreatePredictionForInputListener implements ShouldQueue
         try {
             $useCase->execute($event->inputId);
         } catch (\Throwable $exception) {
-            $this->handleFailure($event->inputId, $exception);
+            Log::warning('videos.prediction_creation.retryable_failure', [
+                'input_id' => $event->inputId,
+                'attempt' => $this->attempts(),
+                'max_attempts' => $this->tries,
+                'exception' => $exception::class,
+                'message' => $exception->getMessage(),
+            ]);
             throw $exception;
         }
     }
 
-    private function handleFailure(int $inputId, \Throwable $exception): void
+    public function failed(CreatePredictionForInput $event, \Throwable $exception): void
     {
         Log::error('videos.prediction_creation.failed', [
-            'input_id' => $inputId,
+            'input_id' => $event->inputId,
+            'attempt' => $this->attempts(),
+            'max_attempts' => $this->tries,
             'exception' => $exception::class,
             'message' => $exception->getMessage(),
         ]);
 
-        DB::transaction(function () use ($inputId): void {
+        DB::transaction(function () use ($event): void {
             $input = Input::query()
-                ->whereKey($inputId)
+                ->whereKey($event->inputId)
                 ->lockForUpdate()
                 ->with('user')
                 ->first();
@@ -54,13 +72,13 @@ class CreatePredictionForInputListener implements ShouldQueue
             }
 
             $input->update([
-                'status' => Input::FAILED,
+                'status' => Input::CANCELLED,
             ]);
 
             if ($input->credit_debited && $input->user instanceof User) {
                 $this->refundCreditUseCase->execute($input->user, [
-                    'reference_type' => 'input_prediction_creation_failed',
-                    'reason' => 'Prediction creation failed',
+                    'reference_type' => 'input_prediction_creation_canceled',
+                    'reason' => 'Prediction creation canceled after retries',
                     'reference_id' => $input->getKey(),
                 ]);
 

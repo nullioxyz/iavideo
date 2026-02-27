@@ -6,6 +6,7 @@ use App\Domain\Auth\Controllers\AuthController;
 use App\Domain\Auth\Controllers\FirstLoginResetPasswordController;
 use App\Domain\Auth\Controllers\ExchangeImpersonationHashController;
 use App\Domain\Auth\Controllers\MeController;
+use App\Domain\Auth\Controllers\UpdateUserPreferencesController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('api')
@@ -28,6 +29,7 @@ Route::prefix('api')
     ->group(function () {
         Route::prefix('auth')->name('auth.')->group(function () {
             Route::get('/me', MeController::class)->name('me');
+            Route::patch('/preferences', UpdateUserPreferencesController::class)->name('preferences.update');
             Route::post('/first-login/reset-password', FirstLoginResetPasswordController::class)->name('first-login.reset-password');
             Route::post('/impersonation/exchange', ExchangeImpersonationHashController::class)->name('impersonation.exchange');
         });

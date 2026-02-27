@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Users\Pages;
 
 use App\Domain\Auth\Models\Admin;
 use App\Domain\Auth\Models\User;
+use App\Domain\Auth\Support\RoleNames;
 use App\Domain\Auth\UseCases\CreateImpersonationLinkUseCase;
 use App\Filament\Resources\Users\UserResource;
 use Filament\Actions\Action;
@@ -30,14 +31,9 @@ class EditUser extends EditRecord
         /** @var Admin $record */
         $record = $this->record;
 
-        $roleNames = collect($this->data['role_names'] ?? [])
-            ->filter(fn ($role) => is_string($role) && $role !== '')
-            ->values()
-            ->all();
-
         $user = User::query()->find($record->getKey());
         if ($user) {
-            $user->syncRoles($roleNames);
+            $user->syncRoles([RoleNames::PLATFORM_USER]);
         }
     }
 

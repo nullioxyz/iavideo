@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\Users;
 
 use App\Domain\Auth\Models\Admin;
+use App\Domain\Auth\Models\User;
+use App\Domain\Auth\Support\RoleNames;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
@@ -11,6 +13,7 @@ use App\Filament\Resources\Users\Schemas\UserForm;
 use App\Filament\Resources\Users\Schemas\UserInfolist;
 use App\Filament\Resources\Users\Tables\UsersTable;
 use BackedEnum;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -22,11 +25,17 @@ class UserResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    protected static ?string $navigationLabel = 'Users';
+
     protected static ?string $recordTitleAttribute = 'User';
 
     public static function form(Schema $schema): Schema
     {
-        return UserForm::configure($schema);
+        return UserForm::configure(
+            schema: $schema,
+            allowedRoles: [RoleNames::PLATFORM_USER],
+            showRolesField: false,
+        );
     }
 
     public static function infolist(Schema $schema): Schema
@@ -54,5 +63,18 @@ class UserResource extends Resource
             'view' => ViewUser::route('/{record}'),
             'edit' => EditUser::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $platformUserIds = User::query()
+            ->whereHas('roles', function (Builder $query): void {
+                $query->where('name', RoleNames::PLATFORM_USER)
+                    ->where('guard_name', 'api');
+            })
+            ->select('id');
+
+        return parent::getEloquentQuery()
+            ->whereIn('id', $platformUserIds);
     }
 }

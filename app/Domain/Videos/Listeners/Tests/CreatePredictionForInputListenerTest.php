@@ -1,0 +1,63 @@
+<?php
+
+namespace App\Domain\Videos\Listeners\Tests;
+
+use App\Domain\Auth\Models\User;
+use App\Domain\Broadcasting\Events\UserJobUpdatedBroadcast;
+use App\Domain\Credits\Models\CreditLedger;
+use App\Domain\Videos\Events\CreatePredictionForInput;
+use App\Domain\Videos\Listeners\CreatePredictionForInputListener;
+use App\Domain\Videos\Models\Input;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
+use Tests\TestCase;
+
+class CreatePredictionForInputListenerTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_listener_has_expected_retry_configuration(): void
+    {
+        $listener = app(CreatePredictionForInputListener::class);
+
+        $this->assertSame(3, $listener->tries);
+        $this->assertSame([120, 300], $listener->backoff());
+    }
+
+    public function test_listener_final_failure_cancels_input_and_refunds_credit(): void
+    {
+        Event::fake([UserJobUpdatedBroadcast::class]);
+
+        $user = User::factory()->create([
+            'active' => true,
+            'credit_balance' => 0,
+        ]);
+
+        $input = Input::factory()->create([
+            'user_id' => $user->getKey(),
+            'credit_debited' => true,
+            'status' => Input::PROCESSING,
+        ]);
+
+        $listener = app(CreatePredictionForInputListener::class);
+        $listener->failed(
+            new CreatePredictionForInput((int) $input->getKey()),
+            new \RuntimeException('provider unavailable')
+        );
+
+        $this->assertSame(Input::CANCELLED, (string) $input->fresh()->status);
+        $this->assertFalse((bool) $input->fresh()->credit_debited);
+
+        $ledger = CreditLedger::query()
+            ->where('user_id', $user->getKey())
+            ->where('reference_type', 'input_prediction_creation_canceled')
+            ->where('reference_id', $input->getKey())
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($ledger);
+        $this->assertSame(1, (int) $user->fresh()->credit_balance);
+
+        Event::assertDispatched(UserJobUpdatedBroadcast::class);
+    }
+}

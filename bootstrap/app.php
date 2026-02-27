@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use App\Http\Middleware\AttachRequestContext;
 use App\Http\Middleware\NoIndexSensitivePaths;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -12,6 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->append(AttachRequestContext::class);
         $middleware->append(NoIndexSensitivePaths::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
