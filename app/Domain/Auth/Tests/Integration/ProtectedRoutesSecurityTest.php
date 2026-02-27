@@ -60,6 +60,7 @@ class ProtectedRoutesSecurityTest extends TestCase
             'jobs.quota' => ['GET', '/api/jobs/quota'],
             'jobs.detail' => ['GET', '/api/jobs/1'],
             'jobs.download' => ['GET', '/api/jobs/1/download'],
+            'jobs.cancel' => ['POST', '/api/jobs/1/cancel'],
             'jobs.rename' => ['PATCH', '/api/jobs/1/title', [
                 'title' => 'Novo título',
             ]],

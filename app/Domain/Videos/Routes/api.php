@@ -1,6 +1,7 @@
 <?php
 
 use App\Domain\Videos\Controllers\CancelInputPredictionController;
+use App\Domain\Videos\Controllers\CancelJobController;
 use App\Domain\Videos\Controllers\DownloadJobVideoController;
 use App\Domain\Videos\Controllers\InputCreateController;
 use App\Domain\Videos\Controllers\JobDetailController;
@@ -31,5 +32,6 @@ Route::prefix('api')
             Route::get('/{job}', JobDetailController::class)->whereNumber('job')->name('detail');
             Route::get('/{job}/download', DownloadJobVideoController::class)->whereNumber('job')->name('download');
             Route::patch('/{job}/title', RenameInputTitleController::class)->whereNumber('job')->name('rename-title');
+            Route::post('/{job}/cancel', CancelJobController::class)->whereNumber('job')->name('cancel');
         });
     });
