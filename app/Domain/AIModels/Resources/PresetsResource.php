@@ -23,8 +23,9 @@ class PresetsResource extends JsonResource
             'prompt' => $this->localizedPrompt($preferredLanguageId, $defaultLanguageId),
             'negative_prompt' => $this->localizedNegativePrompt($preferredLanguageId, $defaultLanguageId),
             'duration_seconds' => $this->duration_seconds,
-            'preview_image_url' => FrontendAssetUrl::resolve($this->previewImageUrl()),
-            'preview_video_url' => FrontendAssetUrl::resolve($this->previewVideoUrl()),
+            'preview_image_url' => FrontendAssetUrl::image($this->getFirstMedia('preview_image')),
+            'preview_video_url' => FrontendAssetUrl::video($this->getFirstMedia('preview_video'))
+                ?? FrontendAssetUrl::resolveExternal($this->previewVideoUrl()),
             'aspect_ratio' => $this->aspect_ratio,
             'tags' => PresetTagResource::collection($this->whenLoaded('tags')),
             'language_slug' => $context['preferred_language_slug'] ?? $context['default_language_slug'],

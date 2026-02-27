@@ -11,7 +11,7 @@ class InputJobResource extends JsonResource
 {
     public function toArray($request): array
     {
-        $startImageUrl = $this->resolveStartImageUrl($request);
+        $startImageUrl = $this->resolveStartImageUrl();
 
         return [
             'id' => $this->id,
@@ -32,10 +32,8 @@ class InputJobResource extends JsonResource
         ];
     }
 
-    private function resolveStartImageUrl($request): ?string
+    private function resolveStartImageUrl(): ?string
     {
-        $url = (string) $this->getFirstMediaUrl('start_image');
-
-        return FrontendAssetUrl::resolve($url);
+        return FrontendAssetUrl::image($this->getFirstMedia('start_image'));
     }
 }

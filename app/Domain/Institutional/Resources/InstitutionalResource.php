@@ -28,7 +28,7 @@ class InstitutionalResource extends JsonResource
             'active' => (bool) $this->active,
             'images' => $this->getMedia('images')->map(fn ($media) => [
                 'id' => $media->id,
-                'url' => FrontendAssetUrl::resolve((string) $media->getUrl()),
+                'url' => FrontendAssetUrl::image($media),
                 'name' => $media->name,
             ])->values()->all(),
             'created_at' => $this->created_at?->toISOString(),

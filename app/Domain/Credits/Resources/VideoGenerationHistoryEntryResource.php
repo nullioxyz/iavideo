@@ -67,7 +67,7 @@ class VideoGenerationHistoryEntryResource extends JsonResource
 
         $media = $videoOutput->getMediaFile();
         if ($media) {
-            return FrontendAssetUrl::resolve((string) $media->getFullUrl());
+            return FrontendAssetUrl::video($media);
         }
 
         $path = (string) $videoOutput->path;

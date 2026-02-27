@@ -31,7 +31,7 @@ class SeoResource extends JsonResource
             'twitter_description' => $localized['twitter_description'],
             'images' => $this->getMedia('images')->map(fn ($media) => [
                 'id' => $media->id,
-                'url' => FrontendAssetUrl::resolve((string) $media->getUrl()),
+                'url' => FrontendAssetUrl::image($media),
                 'name' => $media->name,
             ])->values()->all(),
             'active' => (bool) $this->active,

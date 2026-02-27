@@ -32,7 +32,7 @@ class PredictionOutputResource extends JsonResource
         $media = $this->getMediaFile();
 
         if ($media) {
-            return FrontendAssetUrl::resolve((string) $media->getUrl());
+            return FrontendAssetUrl::video($media);
         }
 
         $path = (string) $this->path;
@@ -41,7 +41,7 @@ class PredictionOutputResource extends JsonResource
         }
 
         if ($path !== '' && str_starts_with($path, '/')) {
-            return FrontendAssetUrl::resolve($path);
+            return FrontendAssetUrl::resolveExternal($path);
         }
 
         return null;
