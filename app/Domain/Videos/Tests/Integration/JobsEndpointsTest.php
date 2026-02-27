@@ -4,8 +4,10 @@ namespace App\Domain\Videos\Tests\Integration;
 
 use App\Domain\AIModels\Models\Model as AIModel;
 use App\Domain\AIModels\Models\Preset;
+use App\Domain\AIModels\Models\PresetLang;
 use App\Domain\Auth\Models\User;
 use App\Domain\Auth\Tests\Traits\AuthenticatesWithJwt;
+use App\Domain\Languages\Models\Language;
 use App\Domain\Platforms\Models\Platform;
 use App\Domain\Videos\Models\Input;
 use App\Domain\Videos\Models\Prediction;
@@ -138,16 +140,72 @@ class JobsEndpointsTest extends TestCase
 
     public function test_job_detail_returns_title_for_authenticated_user_job(): void
     {
+        Language::query()->create([
+            'title' => 'English',
+            'slug' => 'en',
+            'is_default' => true,
+            'active' => true,
+        ]);
+
+        $languagePt = Language::query()->create([
+            'title' => 'Portugues (Brasil)',
+            'slug' => 'pt-BR',
+            'is_default' => false,
+            'active' => true,
+        ]);
+
         $user = User::factory()->create([
             'active' => true,
             'password' => bcrypt('password'),
             'credit_balance' => 5,
+            'language_id' => $languagePt->getKey(),
         ]);
 
         $token = $this->loginAndGetToken($user);
 
+        $platform = Platform::query()->create([
+            'name' => 'Replicate',
+            'slug' => 'replicate',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $model = AIModel::query()->create([
+            'platform_id' => $platform->id,
+            'name' => 'Model',
+            'slug' => 'model',
+            'active' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $preset = Preset::query()->create([
+            'name' => 'Default preset name',
+            'prompt' => 'Prompt',
+            'negative_prompt' => null,
+            'aspect_ratio' => '9:16',
+            'duration_seconds' => 5,
+            'default_model_id' => $model->id,
+            'cost_estimate_usd' => 0.3500,
+            'active' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        PresetLang::query()->create([
+            'preset_id' => $preset->getKey(),
+            'language_id' => $languagePt->getKey(),
+            'name' => 'Nome do preset PT-BR',
+            'prompt' => 'Prompt PT',
+            'negative_prompt' => null,
+            'slug' => 'preset-pt',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
         $input = Input::factory()->create([
             'user_id' => $user->getKey(),
+            'preset_id' => $preset->getKey(),
             'title' => 'Titulo detalhe',
         ]);
 
@@ -156,6 +214,8 @@ class JobsEndpointsTest extends TestCase
         $response->assertOk();
         $response->assertJsonPath('data.id', $input->getKey());
         $response->assertJsonPath('data.title', 'Titulo detalhe');
+        $response->assertJsonPath('data.preset.id', $preset->getKey());
+        $response->assertJsonPath('data.preset.name', 'Nome do preset PT-BR');
     }
 
     public function test_rename_job_title_updates_authenticated_user_input(): void

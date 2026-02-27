@@ -2,6 +2,7 @@
 
 namespace App\Domain\Videos\Resources;
 
+use App\Domain\Languages\Support\UserLanguageContextResolver;
 use App\Domain\Videos\Models\Input;
 use App\Support\FrontendAssetUrl;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -12,10 +13,17 @@ class InputJobResource extends JsonResource
     public function toArray($request): array
     {
         $startImageUrl = $this->resolveStartImageUrl();
+        $context = app(UserLanguageContextResolver::class)->fromRequest($request);
+        $preferredLanguageId = $context['preferred_language_id'] ?? null;
+        $defaultLanguageId = $context['default_language_id'] ?? null;
 
         return [
             'id' => $this->id,
             'preset_id' => $this->preset_id,
+            'preset' => $this->preset ? [
+                'id' => $this->preset->getKey(),
+                'name' => $this->preset->localizedName($preferredLanguageId, $defaultLanguageId),
+            ] : null,
             'user_id' => $this->user_id,
             'status' => $this->status,
             'title' => $this->title,
