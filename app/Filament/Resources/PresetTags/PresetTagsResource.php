@@ -7,6 +7,7 @@ use App\Filament\Resources\PresetTags\Pages\CreatePresetTags;
 use App\Filament\Resources\PresetTags\Pages\EditPresetTags;
 use App\Filament\Resources\PresetTags\Pages\ListPresetTags;
 use App\Filament\Resources\PresetTags\Pages\ViewPresetTags;
+use App\Filament\Resources\PresetTags\RelationManagers\PresetsRelationManager;
 use App\Filament\Resources\PresetTags\Schemas\PresetTagsForm;
 use App\Filament\Resources\PresetTags\Schemas\PresetTagsInfolist;
 use App\Filament\Resources\PresetTags\Tables\PresetTagsTable;
@@ -43,7 +44,7 @@ class PresetTagsResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            PresetsRelationManager::class,
         ];
     }
 

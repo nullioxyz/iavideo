@@ -7,6 +7,7 @@ use App\Filament\Resources\Presets\Pages\CreatePresets;
 use App\Filament\Resources\Presets\Pages\EditPresets;
 use App\Filament\Resources\Presets\Pages\ListPresets;
 use App\Filament\Resources\Presets\Pages\ViewPresets;
+use App\Filament\Resources\Presets\RelationManagers\InputsRelationManager;
 use App\Filament\Resources\Presets\Schemas\PresetsForm;
 use App\Filament\Resources\Presets\Schemas\PresetsInfolist;
 use App\Filament\Resources\Presets\Tables\PresetsTable;
@@ -41,7 +42,7 @@ class PresetsResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            InputsRelationManager::class,
         ];
     }
 

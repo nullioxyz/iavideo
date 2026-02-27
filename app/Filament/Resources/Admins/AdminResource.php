@@ -45,7 +45,11 @@ class AdminResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return UsersTable::configure($table);
+        return UsersTable::configure(
+            table: $table,
+            enableRoleFilter: true,
+            allowedRoles: RoleNames::adminPanelRoles(),
+        );
     }
 
     public static function getPages(): array

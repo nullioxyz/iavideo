@@ -2,12 +2,18 @@
 
 namespace App\Filament\Resources\Predictions\Tables;
 
+use App\Domain\Videos\Models\Prediction;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\TextInput;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class PredictionsTable
 {
@@ -73,7 +79,27 @@ class PredictionsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('status')
+                    ->label('Status')
+                    ->options([
+                        Prediction::QUEUED => Prediction::QUEUED,
+                        Prediction::STARTING => Prediction::STARTING,
+                        Prediction::SUBMITTING => Prediction::SUBMITTING,
+                        Prediction::PROCESSING => Prediction::PROCESSING,
+                        Prediction::SUCCEEDED => Prediction::SUCCEEDED,
+                        Prediction::FAILED => Prediction::FAILED,
+                        Prediction::CANCELLED => Prediction::CANCELLED,
+                        Prediction::REFUNDED => Prediction::REFUNDED,
+                    ]),
+                Filter::make('name_search')
+                    ->form([
+                        TextInput::make('name')->label('Search Name'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => self::applyNameFilter($query, (string) ($data['name'] ?? ''))),
+                self::dateRangeFilter('created_at', 'Created At'),
+                self::dateRangeFilter('started_at', 'Started At'),
+                self::dateRangeFilter('finished_at', 'Finished At'),
+                self::dateRangeFilter('failed_at', 'Failed At'),
             ])
             ->recordActions([
                 ViewAction::make(),
@@ -84,5 +110,46 @@ class PredictionsTable
                     DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    private static function dateRangeFilter(string $column, string $label): Filter
+    {
+        return Filter::make($column.'_range')
+            ->label($label)
+            ->form([
+                DateTimePicker::make('from')->label('From'),
+                DateTimePicker::make('until')->label('Until'),
+            ])
+            ->query(fn (Builder $query, array $data): Builder => self::applyDateRangeFilter($query, $column, $data));
+    }
+
+    public static function applyNameFilter(Builder $query, string $name): Builder
+    {
+        $name = trim($name);
+
+        if ($name === '') {
+            return $query;
+        }
+
+        return $query->where(function (Builder $inner) use ($name): void {
+            $inner->whereHas('input', fn (Builder $inputQuery) => $inputQuery->where('title', 'like', "%{$name}%"))
+                ->orWhereHas('model', fn (Builder $modelQuery) => $modelQuery->where('name', 'like', "%{$name}%"));
+        });
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public static function applyDateRangeFilter(Builder $query, string $column, array $data): Builder
+    {
+        return $query
+            ->when(
+                filled($data['from'] ?? null),
+                fn (Builder $builder): Builder => $builder->where($column, '>=', (string) $data['from'])
+            )
+            ->when(
+                filled($data['until'] ?? null),
+                fn (Builder $builder): Builder => $builder->where($column, '<=', (string) $data['until'])
+            );
     }
 }

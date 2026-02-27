@@ -7,6 +7,7 @@ namespace App\Domain\Auth\Models;
 use App\Domain\Credits\Models\CreditLedger;
 use App\Domain\Invites\Models\Invite;
 use App\Domain\Languages\Models\Language;
+use App\Domain\Videos\Models\Input;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -110,6 +111,11 @@ class User extends Authenticatable implements JWTSubject
     public function invitedUsers(): HasMany
     {
         return $this->hasMany(self::class, 'invited_by_user_id');
+    }
+
+    public function inputs(): HasMany
+    {
+        return $this->hasMany(Input::class, 'user_id');
     }
 
     public function invitesSent(): HasMany

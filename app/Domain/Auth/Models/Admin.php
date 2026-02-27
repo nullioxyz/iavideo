@@ -5,6 +5,8 @@ namespace App\Domain\Auth\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use App\Domain\Invites\Models\Invite;
+use App\Domain\Languages\Models\Language;
+use App\Domain\Videos\Models\Input;
 use App\Domain\Auth\Support\RoleNames;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasName;
@@ -36,6 +38,9 @@ class Admin extends Authenticatable implements FilamentUser, HasName
         'username',
         'phone_number',
         'phone_number_verified_at',
+        'language_id',
+        'country_code',
+        'theme_preference',
         'password',
         'active',
         'credit_balance',
@@ -111,9 +116,19 @@ class Admin extends Authenticatable implements FilamentUser, HasName
         return $this->hasMany(self::class, 'invited_by_user_id');
     }
 
+    public function language(): BelongsTo
+    {
+        return $this->belongsTo(Language::class, 'language_id');
+    }
+
     public function invitesSent(): HasMany
     {
         return $this->hasMany(Invite::class, 'invited_by_user_id');
+    }
+
+    public function inputs(): HasMany
+    {
+        return $this->hasMany(Input::class, 'user_id');
     }
 
     /**

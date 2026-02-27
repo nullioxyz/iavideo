@@ -3,6 +3,7 @@
 namespace App\Domain\AIModels\Models;
 
 use App\Domain\AIModels\Jobs\AttachPresetMediaJob;
+use App\Domain\Videos\Models\Input;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -74,6 +75,11 @@ class Preset extends EloquentModel implements HasMedia
     public function translations(): HasMany
     {
         return $this->hasMany(PresetLang::class, 'preset_id');
+    }
+
+    public function inputs(): HasMany
+    {
+        return $this->hasMany(Input::class, 'preset_id');
     }
 
     public function registerMediaCollections(): void

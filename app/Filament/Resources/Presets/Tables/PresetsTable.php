@@ -8,6 +8,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
 class PresetsTable
@@ -62,6 +63,19 @@ class PresetsTable
                 SelectFilter::make('tags')
                     ->relationship('tags', 'name')
                     ->multiple(),
+                SelectFilter::make('duration_seconds')
+                    ->label('Duration (seconds)')
+                    ->options(fn (): array => \App\Domain\AIModels\Models\Preset::query()
+                        ->whereNotNull('duration_seconds')
+                        ->orderBy('duration_seconds')
+                        ->pluck('duration_seconds', 'duration_seconds')
+                        ->mapWithKeys(fn ($duration, $key): array => [(string) $key => (string) $duration])
+                        ->all()),
+                TernaryFilter::make('active')
+                    ->label('Active')
+                    ->boolean()
+                    ->trueLabel('Active')
+                    ->falseLabel('Inactive'),
             ])
             ->recordActions([
                 ViewAction::make(),

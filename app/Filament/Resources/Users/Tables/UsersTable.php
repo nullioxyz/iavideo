@@ -2,17 +2,22 @@
 
 namespace App\Filament\Resources\Users\Tables;
 
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class UsersTable
 {
-    public static function configure(Table $table): Table
+    /**
+     * @param  list<string>  $allowedRoles
+     */
+    public static function configure(Table $table, bool $enableRoleFilter = false, array $allowedRoles = []): Table
     {
         return $table
             ->columns([
@@ -74,7 +79,16 @@ class UsersTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('email')
+                    ->label('Email')
+                    ->searchable()
+                    ->options(fn () => self::emailOptions()),
+                ...($enableRoleFilter ? [
+                    SelectFilter::make('role')
+                        ->label('Role')
+                        ->options(collect($allowedRoles)->mapWithKeys(fn (string $role): array => [$role => $role])->all())
+                        ->query(fn (Builder $query, array $data): Builder => self::applyRoleFilter($query, $data['value'] ?? null)),
+                ] : []),
             ])
             ->recordActions([
                 ViewAction::make(),
@@ -85,5 +99,32 @@ class UsersTable
                     DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function emailOptions(): array
+    {
+        return \App\Domain\Auth\Models\Admin::query()
+            ->orderBy('email')
+            ->pluck('email', 'email')
+            ->all();
+    }
+
+    public static function applyRoleFilter(Builder $query, ?string $role): Builder
+    {
+        if (! is_string($role) || $role === '') {
+            return $query;
+        }
+
+        $userIds = \App\Domain\Auth\Models\User::query()
+            ->whereHas('roles', function (Builder $rolesQuery) use ($role): void {
+                $rolesQuery->where('name', $role)
+                    ->where('guard_name', 'api');
+            })
+            ->select('id');
+
+        return $query->whereIn('id', $userIds);
     }
 }

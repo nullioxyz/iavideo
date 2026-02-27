@@ -11,7 +11,9 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class InputsTable
 {
@@ -33,7 +35,8 @@ class InputsTable
                     ->label('Start Image Path'),
 
                 TextColumn::make('original_filename')
-                    ->label('Original Filename'),
+                    ->label('Original Filename')
+                    ->searchable(),
 
                 TextColumn::make('title')
                     ->label('Input Name')
@@ -49,13 +52,19 @@ class InputsTable
                     ->label('Credit/Debited'),
 
                 TextColumn::make('status')
-                    ->label('Status'),
+                    ->label('Status')
+                    ->searchable(),
 
                 TextColumn::make('created_at'),
                 TextColumn::make('updated_at'),
             ])
             ->filters([
-                //
+                SelectFilter::make('preset_id')
+                    ->label('Preset')
+                    ->relationship('preset', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->query(fn (Builder $query, array $data): Builder => self::applyPresetFilter($query, $data['value'] ?? null)),
             ])
             ->recordActions([
                 ViewAction::make(),
@@ -89,5 +98,14 @@ class InputsTable
                     DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public static function applyPresetFilter(Builder $query, mixed $presetId): Builder
+    {
+        if (! is_numeric($presetId)) {
+            return $query;
+        }
+
+        return $query->where('preset_id', (int) $presetId);
     }
 }
