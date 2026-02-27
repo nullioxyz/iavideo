@@ -27,6 +27,8 @@ class UserFactory extends Factory
             'phone_number_verified_at' => $phone
                 ? $this->faker->dateTimeBetween('-1 year', 'now')
                 : null,
+            'language_id' => null,
+            'country_code' => null,
 
             'password' => bcrypt('password'),
             'must_reset_password' => false,

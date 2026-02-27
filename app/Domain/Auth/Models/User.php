@@ -6,6 +6,7 @@ namespace App\Domain\Auth\Models;
 
 use App\Domain\Credits\Models\CreditLedger;
 use App\Domain\Invites\Models\Invite;
+use App\Domain\Languages\Models\Language;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -36,6 +37,8 @@ class User extends Authenticatable implements JWTSubject
         'username',
         'phone_number',
         'phone_number_verified_at',
+        'language_id',
+        'country_code',
         'password',
         'active',
         'credit_balance',
@@ -96,6 +99,11 @@ class User extends Authenticatable implements JWTSubject
     public function invitedBy(): BelongsTo
     {
         return $this->belongsTo(self::class, 'invited_by_user_id');
+    }
+
+    public function language(): BelongsTo
+    {
+        return $this->belongsTo(Language::class, 'language_id');
     }
 
     public function invitedUsers(): HasMany

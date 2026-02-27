@@ -6,6 +6,7 @@ use App\Domain\AIModels\Models\Model;
 use App\Domain\AIModels\Models\Preset;
 use App\Domain\Auth\Models\User;
 use App\Domain\Auth\Support\RoleNames;
+use App\Domain\Languages\Models\Language;
 use App\Domain\Platforms\Models\Platform;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -20,6 +21,12 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(RolesSeeder::class);
+        $this->call(LanguagesSeeder::class);
+        $this->call(InstitutionalsSeeder::class);
+
+        $defaultLanguageId = (int) (Language::query()
+            ->where('slug', 'en')
+            ->value('id') ?? 0);
 
         $platformUser = User::factory()->create(
             [
@@ -29,6 +36,7 @@ class DatabaseSeeder extends Seeder
                 'username' => 'test.user',
                 'active' => true,
                 'credit_balance' => 3,
+                'language_id' => $defaultLanguageId > 0 ? $defaultLanguageId : null,
             ],
         );
 
@@ -40,6 +48,7 @@ class DatabaseSeeder extends Seeder
                 'username' => 'admin',
                 'active' => true,
                 'credit_balance' => 3,
+                'language_id' => $defaultLanguageId > 0 ? $defaultLanguageId : null,
             ],
         );
 
@@ -51,6 +60,7 @@ class DatabaseSeeder extends Seeder
                 'username' => 'dev',
                 'active' => true,
                 'credit_balance' => 3,
+                'language_id' => $defaultLanguageId > 0 ? $defaultLanguageId : null,
             ],
         );
 

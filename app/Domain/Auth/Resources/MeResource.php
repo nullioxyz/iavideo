@@ -16,6 +16,12 @@ class MeResource extends JsonResource
             'email' => $this->email,
             'username' => $this->username,
             'phone_number' => $this->phone_number,
+            'country_code' => $this->country_code,
+            'language' => [
+                'id' => $this->language?->id,
+                'title' => $this->language?->title,
+                'slug' => $this->language?->slug,
+            ],
             'active' => (bool) $this->active,
             'credit_balance' => (int) $this->credit_balance,
             'roles' => $this->getRoleNames()->values()->all(),

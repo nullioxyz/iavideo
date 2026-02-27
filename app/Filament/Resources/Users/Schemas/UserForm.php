@@ -31,6 +31,17 @@ class UserForm
                     ->required(),
                 DateTimePicker::make('phone_number_verified_at')
                     ->required(),
+                Select::make('language_id')
+                    ->label('Language')
+                    ->relationship('language', 'title')
+                    ->searchable()
+                    ->preload(),
+                TextInput::make('country_code')
+                    ->label('Country Code')
+                    ->length(2)
+                    ->maxLength(2)
+                    ->placeholder('BR')
+                    ->nullable(),
                 TextInput::make('password')
                     ->password()
                     ->revealable()

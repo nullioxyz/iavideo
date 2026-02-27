@@ -3,10 +3,13 @@
 namespace App\Domain\AIModels\Tests\Integration;
 
 use App\Domain\AIModels\Models\Model as AIModel;
+use App\Domain\AIModels\Models\PresetLang;
 use App\Domain\AIModels\Models\Preset;
 use App\Domain\AIModels\Models\PresetTag;
+use App\Domain\AIModels\Models\PresetTagLang;
 use App\Domain\Auth\Models\User;
 use App\Domain\Auth\Tests\Traits\AuthenticatesWithJwt;
+use App\Domain\Languages\Models\Language;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -232,5 +235,133 @@ class PresetsTest extends TestCase
         $response->assertJsonPath('data.0.id', $preset->getKey());
         $this->assertNotNull($response->json('data.0.preview_image_url'));
         $this->assertNotNull($response->json('data.0.preview_video_url'));
+    }
+
+    public function test_fetch_presets_returns_translated_fields_according_to_user_language(): void
+    {
+        $languageEn = Language::query()->create([
+            'title' => 'English',
+            'slug' => 'en',
+            'is_default' => true,
+            'active' => true,
+        ]);
+
+        $languagePt = Language::query()->create([
+            'title' => 'Portugues (Brasil)',
+            'slug' => 'pt-BR',
+            'is_default' => false,
+            'active' => true,
+        ]);
+
+        $user = User::factory()->create([
+            'active' => true,
+            'password' => bcrypt('password'),
+            'language_id' => $languagePt->getKey(),
+        ]);
+
+        $activeModel = AIModel::factory()->create(['active' => true]);
+        $preset = Preset::factory()->create([
+            'default_model_id' => $activeModel->getKey(),
+            'name' => 'Original preset name',
+            'prompt' => 'Original prompt',
+            'active' => true,
+        ]);
+
+        PresetLang::query()->create([
+            'preset_id' => $preset->getKey(),
+            'language_id' => $languagePt->getKey(),
+            'name' => 'Preset em Portugues',
+            'prompt' => 'Prompt em Portugues',
+            'negative_prompt' => 'Negativo em Portugues',
+            'slug' => 'preset-pt',
+        ]);
+
+        $tag = PresetTag::factory()->create([
+            'name' => 'Realistic',
+            'slug' => 'realistic',
+            'active' => true,
+        ]);
+        $preset->tags()->attach($tag->getKey());
+
+        PresetTagLang::query()->create([
+            'preset_tag_id' => $tag->getKey(),
+            'language_id' => $languagePt->getKey(),
+            'name' => 'Realista',
+            'slug' => 'realista',
+        ]);
+
+        $token = $this->loginAndGetToken($user);
+
+        $response = $this->withJwt($token)
+            ->getJson("/api/models/{$activeModel->getKey()}/presets");
+
+        $response->assertOk();
+        $response->assertJsonPath('data.0.name', 'Preset em Portugues');
+        $response->assertJsonPath('data.0.prompt', 'Prompt em Portugues');
+        $response->assertJsonPath('data.0.tags.0.name', 'Realista');
+        $response->assertJsonPath('data.0.tags.0.slug', 'realista');
+        $response->assertJsonPath('data.0.language_slug', 'pt-BR');
+    }
+
+    public function test_fetch_presets_can_filter_by_translated_tag_slug(): void
+    {
+        $languageEn = Language::query()->create([
+            'title' => 'English',
+            'slug' => 'en',
+            'is_default' => true,
+            'active' => true,
+        ]);
+
+        $languagePt = Language::query()->create([
+            'title' => 'Portugues (Brasil)',
+            'slug' => 'pt-BR',
+            'is_default' => false,
+            'active' => true,
+        ]);
+
+        $user = User::factory()->create([
+            'active' => true,
+            'password' => bcrypt('password'),
+            'language_id' => $languagePt->getKey(),
+        ]);
+
+        $activeModel = AIModel::factory()->create(['active' => true]);
+        $wantedTag = PresetTag::factory()->create(['name' => 'Anime', 'slug' => 'anime', 'active' => true]);
+        $otherTag = PresetTag::factory()->create(['name' => 'Cinematic', 'slug' => 'cinematic', 'active' => true]);
+
+        PresetTagLang::query()->create([
+            'preset_tag_id' => $wantedTag->getKey(),
+            'language_id' => $languagePt->getKey(),
+            'name' => 'Anime PT',
+            'slug' => 'anime-pt',
+        ]);
+
+        PresetTagLang::query()->create([
+            'preset_tag_id' => $otherTag->getKey(),
+            'language_id' => $languagePt->getKey(),
+            'name' => 'Cinematico',
+            'slug' => 'cinematico-pt',
+        ]);
+
+        $presetWanted = Preset::factory()->create([
+            'default_model_id' => $activeModel->getKey(),
+            'active' => true,
+        ]);
+        $presetWanted->tags()->attach($wantedTag->getKey());
+
+        $presetOther = Preset::factory()->create([
+            'default_model_id' => $activeModel->getKey(),
+            'active' => true,
+        ]);
+        $presetOther->tags()->attach($otherTag->getKey());
+
+        $token = $this->loginAndGetToken($user);
+
+        $response = $this->withJwt($token)
+            ->getJson("/api/models/{$activeModel->getKey()}/presets?tag=anime-pt");
+
+        $response->assertOk();
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonPath('data.0.id', $presetWanted->getKey());
     }
 }

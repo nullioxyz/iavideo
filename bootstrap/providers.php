@@ -19,4 +19,8 @@ return [
     App\Domain\Credits\Providers\CreditServiceProvider::class,
     App\Domain\Payments\Providers\PaymentsRouteServiceProvider::class,
     App\Domain\Payments\Providers\PaymentsServiceProvider::class,
+    App\Domain\Institutional\Providers\InstitutionalRouteServiceProvider::class,
+    App\Domain\Seo\Providers\SeoRouteServiceProvider::class,
+    App\Domain\SocialNetworks\Providers\SocialNetworksRouteServiceProvider::class,
+    App\Domain\Contacts\Providers\ContactsRouteServiceProvider::class,
 ];

@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Illuminate\Notifications\Notifiable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -67,6 +69,11 @@ class Preset extends EloquentModel implements HasMedia
             'preset_id',
             'preset_tag_id'
         );
+    }
+
+    public function translations(): HasMany
+    {
+        return $this->hasMany(PresetLang::class, 'preset_id');
     }
 
     public function registerMediaCollections(): void
@@ -130,5 +137,56 @@ class Preset extends EloquentModel implements HasMedia
     protected static function newFactory()
     {
         return \App\Domain\AIModels\Database\Factories\PresetFactory::new();
+    }
+
+    public function localizedName(?int $preferredLanguageId = null, ?int $defaultLanguageId = null): string
+    {
+        $translation = $this->resolveTranslation($preferredLanguageId, $defaultLanguageId);
+
+        return (string) ($translation?->name ?: $this->name);
+    }
+
+    public function localizedPrompt(?int $preferredLanguageId = null, ?int $defaultLanguageId = null): string
+    {
+        $translation = $this->resolveTranslation($preferredLanguageId, $defaultLanguageId);
+
+        return (string) ($translation?->prompt ?: $this->prompt);
+    }
+
+    public function localizedNegativePrompt(?int $preferredLanguageId = null, ?int $defaultLanguageId = null): ?string
+    {
+        $translation = $this->resolveTranslation($preferredLanguageId, $defaultLanguageId);
+        $value = $translation?->negative_prompt ?: $this->negative_prompt;
+
+        return $value !== null ? (string) $value : null;
+    }
+
+    private function resolveTranslation(?int $preferredLanguageId, ?int $defaultLanguageId): ?PresetLang
+    {
+        $translations = $this->relationLoaded('translations')
+            ? $this->getRelation('translations')
+            : $this->translations()->get();
+
+        if (! $translations instanceof Collection) {
+            return null;
+        }
+
+        if ($preferredLanguageId !== null) {
+            $preferred = $translations->firstWhere('language_id', $preferredLanguageId);
+            if ($preferred instanceof PresetLang) {
+                return $preferred;
+            }
+        }
+
+        if ($defaultLanguageId !== null) {
+            $fallback = $translations->firstWhere('language_id', $defaultLanguageId);
+            if ($fallback instanceof PresetLang) {
+                return $fallback;
+            }
+        }
+
+        $first = $translations->first();
+
+        return $first instanceof PresetLang ? $first : null;
     }
 }
