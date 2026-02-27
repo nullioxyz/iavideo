@@ -3,6 +3,7 @@
 namespace App\Domain\Seo\Resources;
 
 use App\Domain\Seo\Models\Seo;
+use App\Support\FrontendAssetUrl;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /** @mixin Seo */
@@ -30,7 +31,7 @@ class SeoResource extends JsonResource
             'twitter_description' => $localized['twitter_description'],
             'images' => $this->getMedia('images')->map(fn ($media) => [
                 'id' => $media->id,
-                'url' => $media->getUrl(),
+                'url' => FrontendAssetUrl::resolve((string) $media->getUrl()),
                 'name' => $media->name,
             ])->values()->all(),
             'active' => (bool) $this->active,
@@ -39,4 +40,3 @@ class SeoResource extends JsonResource
         ];
     }
 }
-

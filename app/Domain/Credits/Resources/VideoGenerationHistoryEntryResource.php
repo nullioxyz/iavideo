@@ -4,6 +4,7 @@ namespace App\Domain\Credits\Resources;
 
 use App\Domain\Videos\Models\Input;
 use App\Domain\Videos\Models\PredictionOutput;
+use App\Support\FrontendAssetUrl;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /** @mixin Input */
@@ -66,7 +67,7 @@ class VideoGenerationHistoryEntryResource extends JsonResource
 
         $media = $videoOutput->getMediaFile();
         if ($media) {
-            return $media->getFullUrl();
+            return FrontendAssetUrl::resolve((string) $media->getFullUrl());
         }
 
         $path = (string) $videoOutput->path;

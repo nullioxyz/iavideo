@@ -4,6 +4,7 @@ namespace App\Domain\AIModels\Resources;
 
 use App\Domain\AIModels\Models\Preset;
 use App\Domain\Languages\Support\UserLanguageContextResolver;
+use App\Support\FrontendAssetUrl;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /** @mixin Preset */
@@ -22,8 +23,8 @@ class PresetsResource extends JsonResource
             'prompt' => $this->localizedPrompt($preferredLanguageId, $defaultLanguageId),
             'negative_prompt' => $this->localizedNegativePrompt($preferredLanguageId, $defaultLanguageId),
             'duration_seconds' => $this->duration_seconds,
-            'preview_image_url' => $this->previewImageUrl(),
-            'preview_video_url' => $this->previewVideoUrl(),
+            'preview_image_url' => FrontendAssetUrl::resolve($this->previewImageUrl()),
+            'preview_video_url' => FrontendAssetUrl::resolve($this->previewVideoUrl()),
             'aspect_ratio' => $this->aspect_ratio,
             'tags' => PresetTagResource::collection($this->whenLoaded('tags')),
             'language_slug' => $context['preferred_language_slug'] ?? $context['default_language_slug'],

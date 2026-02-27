@@ -3,6 +3,7 @@
 namespace App\Domain\Videos\Resources;
 
 use App\Domain\Videos\Models\Input;
+use App\Support\FrontendAssetUrl;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /** @mixin Input */
@@ -34,16 +35,7 @@ class InputJobResource extends JsonResource
     private function resolveStartImageUrl($request): ?string
     {
         $url = (string) $this->getFirstMediaUrl('start_image');
-        if ($url === '') {
-            return null;
-        }
 
-        if (filter_var($url, FILTER_VALIDATE_URL)) {
-            return $url;
-        }
-
-        $baseUrl = rtrim((string) ($request?->getSchemeAndHttpHost() ?? config('app.url')), '/');
-
-        return $baseUrl.'/'.ltrim($url, '/');
+        return FrontendAssetUrl::resolve($url);
     }
 }

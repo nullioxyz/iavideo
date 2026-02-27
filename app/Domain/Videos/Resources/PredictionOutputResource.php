@@ -3,6 +3,7 @@
 namespace App\Domain\Videos\Resources;
 
 use App\Domain\Videos\Models\PredictionOutput;
+use App\Support\FrontendAssetUrl;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /** @mixin PredictionOutput */
@@ -10,7 +11,7 @@ class PredictionOutputResource extends JsonResource
 {
     public function toArray($request): array
     {
-        $playbackUrl = $this->resolvePlaybackUrl($request);
+        $playbackUrl = $this->resolvePlaybackUrl();
 
         return [
             'id' => $this->id,
@@ -26,12 +27,12 @@ class PredictionOutputResource extends JsonResource
         ];
     }
 
-    private function resolvePlaybackUrl($request): ?string
+    private function resolvePlaybackUrl(): ?string
     {
         $media = $this->getMediaFile();
 
         if ($media) {
-            return $this->toAbsoluteUrl((string) $media->getUrl(), $request);
+            return FrontendAssetUrl::resolve((string) $media->getUrl());
         }
 
         $path = (string) $this->path;
@@ -40,20 +41,9 @@ class PredictionOutputResource extends JsonResource
         }
 
         if ($path !== '' && str_starts_with($path, '/')) {
-            return $this->toAbsoluteUrl($path, $request);
+            return FrontendAssetUrl::resolve($path);
         }
 
         return null;
-    }
-
-    private function toAbsoluteUrl(string $url, $request): string
-    {
-        if ($url !== '' && filter_var($url, FILTER_VALIDATE_URL)) {
-            return $url;
-        }
-
-        $baseUrl = rtrim((string) ($request?->getSchemeAndHttpHost() ?? config('app.url')), '/');
-
-        return $baseUrl.'/'.ltrim($url, '/');
     }
 }

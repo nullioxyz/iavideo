@@ -3,6 +3,7 @@
 namespace App\Domain\Institutional\Resources;
 
 use App\Domain\Institutional\Models\Institutional;
+use App\Support\FrontendAssetUrl;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /** @mixin Institutional */
@@ -27,7 +28,7 @@ class InstitutionalResource extends JsonResource
             'active' => (bool) $this->active,
             'images' => $this->getMedia('images')->map(fn ($media) => [
                 'id' => $media->id,
-                'url' => $media->getUrl(),
+                'url' => FrontendAssetUrl::resolve((string) $media->getUrl()),
                 'name' => $media->name,
             ])->values()->all(),
             'created_at' => $this->created_at?->toISOString(),
@@ -35,4 +36,3 @@ class InstitutionalResource extends JsonResource
         ];
     }
 }
-
