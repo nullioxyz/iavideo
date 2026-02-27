@@ -2,6 +2,7 @@
 
 namespace App\Domain\Institutional\Models;
 
+use App\Infra\Storage\UploadStorageResolver;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
@@ -43,7 +44,7 @@ class Institutional extends EloquentModel implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('images')->useDisk('public');
+        $this->addMediaCollection('images')->useDisk(UploadStorageResolver::mediaDisk());
     }
 
     /**
@@ -91,4 +92,3 @@ class Institutional extends EloquentModel implements HasMedia
         return $first instanceof InstitutionalLang ? $first : null;
     }
 }
-

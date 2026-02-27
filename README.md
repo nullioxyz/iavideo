@@ -181,6 +181,30 @@ Operationally relevant decisions:
 - Redis-backed realtime distribution
 - Domain modularity to keep future extraction and scaling options open
 
+## 📦 Upload Storage
+
+The upload flow is abstracted through providers so business logic does not depend on a specific storage backend.
+
+Behavior:
+
+- Local/dev (`UPLOADS_PROVIDER=local`): media is stored on local disk (`public` by default)
+- Production (`UPLOADS_PROVIDER=s3`): media is stored on S3-compatible storage (`spaces` by default)
+- Production prefix is enforced as `inkai` when S3 prefix is not configured
+
+Main envs:
+
+- `UPLOADS_PROVIDER` (`local` or `s3`)
+- `UPLOADS_TEMP_DISK` (temporary ingestion disk, default `local`)
+- `UPLOADS_LOCAL_MEDIA_DISK` / `UPLOADS_LOCAL_MEDIA_PREFIX`
+- `UPLOADS_S3_MEDIA_DISK` / `UPLOADS_S3_MEDIA_PREFIX`
+- `DO_SPACE_KEY`, `DO_SPACE_SECRET`, `DO_SPACE_REGION`, `DO_SPACE_BUCKET`, `DO_SPACE_ENDPOINT`, `DO_SPACE_URL`
+
+How to run upload-related tests:
+
+```bash
+php artisan test app/Infra/Storage/Tests/Unit app/Domain/Videos/Listeners/Tests/UploadInputImageListenerTest.php
+```
+
 ---
 
 ## 🗺️ Evolution Direction

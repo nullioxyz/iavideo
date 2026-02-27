@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Seos\Pages;
 
 use App\Filament\Resources\Seos\SeosResource;
+use App\Filament\Support\FilamentUpload;
 use App\Filament\Support\SyncsLanguageTranslations;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
@@ -52,6 +53,8 @@ class EditSeos extends EditRecord
 
     protected function afterSave(): void
     {
+        $disk = FilamentUpload::disk();
+
         $this->syncTranslations(
             $this->record,
             $this->translationsPayload,
@@ -59,14 +62,13 @@ class EditSeos extends EditRecord
         );
 
         foreach ($this->imageUploadPaths as $path) {
-            if (! is_string($path) || $path === '' || ! Storage::disk('public')->exists($path)) {
+            if (! is_string($path) || $path === '' || ! Storage::disk($disk)->exists($path)) {
                 continue;
             }
 
             $this->record
-                ->addMediaFromDisk($path, 'public')
-                ->toMediaCollection('images', 'public');
+                ->addMediaFromDisk($path, $disk)
+                ->toMediaCollection('images', $disk);
         }
     }
 }
-

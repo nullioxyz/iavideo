@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Infra\Storage\UploadStorageResolver;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -22,6 +24,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Config::set('media-library.prefix', UploadStorageResolver::mediaPrefix());
+
         RateLimiter::for('payments-create', function (Request $request) {
             $identifier = (string) ($request->user('api')?->getAuthIdentifier() ?? $request->ip());
 

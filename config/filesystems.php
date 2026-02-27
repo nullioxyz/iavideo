@@ -66,6 +66,20 @@ return [
             'report' => false,
         ],
 
+        'spaces' => [
+            'driver' => 's3',
+            'key' => env('DO_SPACE_KEY', env('AWS_ACCESS_KEY_ID')),
+            'secret' => env('DO_SPACE_SECRET', env('AWS_SECRET_ACCESS_KEY')),
+            'region' => env('DO_SPACE_REGION', env('AWS_DEFAULT_REGION', 'nyc3')),
+            'bucket' => env('DO_SPACE_BUCKET', env('AWS_BUCKET')),
+            'url' => env('DO_SPACE_URL'),
+            'endpoint' => env('DO_SPACE_ENDPOINT'),
+            'use_path_style_endpoint' => env('DO_SPACE_USE_PATH_STYLE_ENDPOINT', false),
+            'throw' => false,
+            'report' => false,
+            'visibility' => 'public',
+        ],
+
     ],
 
     /*

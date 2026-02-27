@@ -2,6 +2,7 @@
 
 namespace App\Domain\Seo\Models;
 
+use App\Infra\Storage\UploadStorageResolver;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
@@ -47,7 +48,7 @@ class Seo extends EloquentModel implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('images')->useDisk('public');
+        $this->addMediaCollection('images')->useDisk(UploadStorageResolver::mediaDisk());
     }
 
     /**
@@ -99,4 +100,3 @@ class Seo extends EloquentModel implements HasMedia
         return $first instanceof SeoLang ? $first : null;
     }
 }
-

@@ -3,6 +3,7 @@
 namespace App\Domain\AIModels\Jobs;
 
 use App\Domain\AIModels\Models\Preset;
+use App\Infra\Storage\UploadStorageResolver;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -23,7 +24,7 @@ class AttachPresetMediaJob implements ShouldQueue
         public readonly int $presetId,
         public readonly string $kind,
         public readonly string $path,
-        public readonly string $disk = 'public',
+        public readonly ?string $disk = null,
     ) {}
 
     /**
@@ -36,6 +37,9 @@ class AttachPresetMediaJob implements ShouldQueue
 
     public function handle(): void
     {
+        $sourceDisk = $this->disk ?: UploadStorageResolver::mediaDisk();
+        $targetDisk = UploadStorageResolver::mediaDisk();
+
         $preset = Preset::query()->find($this->presetId);
 
         if (! $preset instanceof Preset) {
@@ -51,24 +55,23 @@ class AttachPresetMediaJob implements ShouldQueue
             return;
         }
 
-        if (! Storage::disk($this->disk)->exists($this->path)) {
+        if (! Storage::disk($sourceDisk)->exists($this->path)) {
             Log::warning('ai_models.presets.media.attach.skipped_missing_file', [
                 'preset_id' => $this->presetId,
                 'kind' => $this->kind,
                 'path' => $this->path,
-                'disk' => $this->disk,
+                'disk' => $sourceDisk,
             ]);
 
             return;
         }
 
-        $absolutePath = Storage::disk($this->disk)->path($this->path);
         $collection = $this->kind === 'image' ? 'preview_image' : 'preview_video';
 
         $preset
-            ->addMedia($absolutePath)
+            ->addMediaFromDisk($this->path, $sourceDisk)
             ->usingName("preset_{$this->kind}_preview")
-            ->toMediaCollection($collection, 'public');
+            ->toMediaCollection($collection, $targetDisk);
 
         if ($this->kind === 'video') {
             $preset->forceFill([
@@ -85,6 +88,6 @@ class AttachPresetMediaJob implements ShouldQueue
                 $column => null,
             ]);
 
-        Storage::disk($this->disk)->delete($this->path);
+        Storage::disk($sourceDisk)->delete($this->path);
     }
 }

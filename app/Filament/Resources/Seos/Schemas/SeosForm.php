@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Seos\Schemas;
 
 use App\Domain\Languages\Models\Language;
+use App\Filament\Support\FilamentUpload;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -26,8 +27,8 @@ class SeosForm
             TextInput::make('twitter_description'),
             FileUpload::make('images_upload_paths')
                 ->label('SEO Images Upload')
-                ->disk('public')
-                ->directory('seo/uploads')
+                ->disk(FilamentUpload::disk())
+                ->directory(FilamentUpload::directory('seo/uploads'))
                 ->multiple()
                 ->image()
                 ->nullable(),
@@ -72,4 +73,3 @@ class SeosForm
         ];
     }
 }
-

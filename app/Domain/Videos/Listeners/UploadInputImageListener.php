@@ -5,9 +5,9 @@ namespace App\Domain\Videos\Listeners;
 use App\Domain\Videos\Events\CreatePredictionForInput;
 use App\Domain\Videos\Events\InputCreated;
 use App\Domain\Videos\Models\Input;
+use App\Infra\Storage\InputImageStorageService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Support\Facades\Storage;
 
 class UploadInputImageListener implements ShouldQueue
 {
@@ -15,32 +15,23 @@ class UploadInputImageListener implements ShouldQueue
 
     public $queue = 'uploads';
 
-    public function handle(InputCreated $event): void
+    public function handle(InputCreated $event, InputImageStorageService $imageStorage): void
     {
         /** @var Input $input */
         $input = Input::query()->findOrFail($event->inputId);
 
-        $absolutePath = Storage::disk('local')->path($event->tempPath);
-
-        if (! file_exists($absolutePath)) {
+        if (! $imageStorage->tempFileExists($event->tempPath)) {
             $input->update(['status' => 'failed']);
 
             return;
         }
 
         $input->update(['status' => 'processing']);
-
-        $media = $input
-            ->addMedia($absolutePath)
-            ->usingName('start_image')
-            ->usingFileName(basename($absolutePath))
-            ->toMediaCollection('start_image', 'public');
+        $media = $imageStorage->attachFromTemp($input, $event->tempPath);
 
         $input->update([
-            'start_image_path' => $media->getPath(),
+            'start_image_path' => $media->getPathRelativeToRoot(),
         ]);
-
-        Storage::disk('local')->delete($event->tempPath);
 
         CreatePredictionForInput::dispatch($input->getKey());
     }

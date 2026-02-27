@@ -11,6 +11,8 @@ use App\Domain\Videos\Repositories\InputRepository;
 use App\Domain\Videos\Repositories\PredictionWebhookRepository;
 use App\Domain\Videos\Services\PredictionWebhookEffects;
 use App\Infra\Contracts\InputImageIngestionInterface;
+use App\Infra\Storage\Contracts\StorageProviderInterface;
+use App\Infra\Storage\StorageProviderFactory;
 use App\Infra\Uploads\InputImageIngestionService;
 use Illuminate\Support\ServiceProvider;
 
@@ -24,6 +26,7 @@ class VideosServiceProvider extends ServiceProvider
         $this->app->bind(InputRepositoryInterface::class, InputRepository::class);
         $this->app->bind(PredictionWebhookRepositoryInterface::class, PredictionWebhookRepository::class);
         $this->app->bind(PredictionWebhookEffectsInterface::class, PredictionWebhookEffects::class);
+        $this->app->bind(StorageProviderInterface::class, fn ($app) => $app->make(StorageProviderFactory::class)->make());
         $this->app->bind(InputImageIngestionInterface::class, InputImageIngestionService::class);
 
         $this->app->bind(ProviderRegistry::class, function ($app) {

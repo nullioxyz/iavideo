@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Institutionals\Pages;
 
 use App\Filament\Resources\Institutionals\InstitutionalsResource;
+use App\Filament\Support\FilamentUpload;
 use App\Filament\Support\SyncsLanguageTranslations;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
@@ -52,6 +53,8 @@ class EditInstitutionals extends EditRecord
 
     protected function afterSave(): void
     {
+        $disk = FilamentUpload::disk();
+
         $this->syncTranslations(
             $this->record,
             $this->translationsPayload,
@@ -59,14 +62,13 @@ class EditInstitutionals extends EditRecord
         );
 
         foreach ($this->imageUploadPaths as $path) {
-            if (! is_string($path) || $path === '' || ! Storage::disk('public')->exists($path)) {
+            if (! is_string($path) || $path === '' || ! Storage::disk($disk)->exists($path)) {
                 continue;
             }
 
             $this->record
-                ->addMediaFromDisk($path, 'public')
-                ->toMediaCollection('images', 'public');
+                ->addMediaFromDisk($path, $disk)
+                ->toMediaCollection('images', $disk);
         }
     }
 }
-

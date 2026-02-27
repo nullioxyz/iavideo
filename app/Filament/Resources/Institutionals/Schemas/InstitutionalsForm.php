@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Institutionals\Schemas;
 
 use App\Domain\Languages\Models\Language;
+use App\Filament\Support\FilamentUpload;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -23,8 +24,8 @@ class InstitutionalsForm
             Textarea::make('description')->rows(6),
             FileUpload::make('images_upload_paths')
                 ->label('Images Upload')
-                ->disk('public')
-                ->directory('institutionals/uploads')
+                ->disk(FilamentUpload::disk())
+                ->directory(FilamentUpload::directory('institutionals/uploads'))
                 ->multiple()
                 ->image()
                 ->nullable(),
@@ -66,4 +67,3 @@ class InstitutionalsForm
         ];
     }
 }
-

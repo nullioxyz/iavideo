@@ -2,6 +2,7 @@
 
 namespace App\Domain\Videos\Models;
 
+use App\Infra\Storage\UploadStorageResolver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -57,7 +58,7 @@ class PredictionOutput extends EloquentModel implements HasMedia
     {
         $this
             ->addMediaCollection('file')
-            ->useDisk('public')
+            ->useDisk(UploadStorageResolver::mediaDisk())
             ->singleFile();
     }
 

@@ -41,7 +41,12 @@ return [
     |
     */
 
-    'default_filesystem_disk' => env('FILESYSTEM_DISK', 'local'),
+    'default_filesystem_disk' => env(
+        'FILAMENT_FILESYSTEM_DISK',
+        env('UPLOADS_PROVIDER', env('APP_ENV') === 'production' ? 's3' : 'local') === 's3'
+            ? env('UPLOADS_S3_MEDIA_DISK', 'spaces')
+            : env('UPLOADS_LOCAL_MEDIA_DISK', 'public')
+    ),
 
     /*
     |--------------------------------------------------------------------------

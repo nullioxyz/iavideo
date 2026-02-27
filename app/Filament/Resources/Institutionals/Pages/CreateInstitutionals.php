@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Institutionals\Pages;
 
 use App\Filament\Resources\Institutionals\InstitutionalsResource;
+use App\Filament\Support\FilamentUpload;
 use App\Filament\Support\SyncsLanguageTranslations;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Storage;
@@ -34,6 +35,8 @@ class CreateInstitutionals extends CreateRecord
 
     protected function afterCreate(): void
     {
+        $disk = FilamentUpload::disk();
+
         $this->syncTranslations(
             $this->record,
             $this->translationsPayload,
@@ -41,14 +44,13 @@ class CreateInstitutionals extends CreateRecord
         );
 
         foreach ($this->imageUploadPaths as $path) {
-            if (! is_string($path) || $path === '' || ! Storage::disk('public')->exists($path)) {
+            if (! is_string($path) || $path === '' || ! Storage::disk($disk)->exists($path)) {
                 continue;
             }
 
             $this->record
-                ->addMediaFromDisk($path, 'public')
-                ->toMediaCollection('images', 'public');
+                ->addMediaFromDisk($path, $disk)
+                ->toMediaCollection('images', $disk);
         }
     }
 }
-

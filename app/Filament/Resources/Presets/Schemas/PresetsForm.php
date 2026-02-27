@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Presets\Schemas;
 
 use App\Domain\Languages\Models\Language;
+use App\Filament\Support\FilamentUpload;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
@@ -72,8 +73,8 @@ class PresetsForm
 
                 FileUpload::make('preview_image_upload_path')
                     ->label('Preview Image Upload')
-                    ->disk('public')
-                    ->directory('presets/uploads/images')
+                    ->disk(FilamentUpload::disk())
+                    ->directory(FilamentUpload::directory('presets/uploads/images'))
                     ->image()
                     ->nullable(),
 
@@ -90,8 +91,8 @@ class PresetsForm
 
                 FileUpload::make('preview_video_upload_path')
                     ->label('Preview Video Upload')
-                    ->disk('public')
-                    ->directory('presets/uploads/videos')
+                    ->disk(FilamentUpload::disk())
+                    ->directory(FilamentUpload::directory('presets/uploads/videos'))
                     ->acceptedFileTypes([
                         'video/mp4',
                         'video/quicktime',

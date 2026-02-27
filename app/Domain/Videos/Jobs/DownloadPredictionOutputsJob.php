@@ -4,6 +4,7 @@ namespace App\Domain\Videos\Jobs;
 
 use App\Domain\Videos\Models\Prediction;
 use App\Domain\Videos\Models\PredictionOutput;
+use App\Infra\Storage\UploadStorageResolver;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -98,7 +99,7 @@ class DownloadPredictionOutputsJob implements ShouldQueue, ShouldBeUnique
             ->withCustomProperties([
                 'mime_type' => (string) $head->header('Content-Type'),
             ])
-            ->toMediaCollection('file', 'public');
+            ->toMediaCollection('file', UploadStorageResolver::mediaDisk());
 
         $media->update([
             'mime_type' => (string) ($head->header('Content-Type') ?: $media->mime_type),

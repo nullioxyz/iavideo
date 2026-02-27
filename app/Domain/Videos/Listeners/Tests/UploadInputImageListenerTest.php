@@ -6,6 +6,7 @@ use App\Domain\Videos\Events\CreatePredictionForInput;
 use App\Domain\Videos\Events\InputCreated;
 use App\Domain\Videos\Listeners\UploadInputImageListener;
 use App\Domain\Videos\Models\Input;
+use App\Infra\Storage\InputImageStorageService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
@@ -47,7 +48,7 @@ class UploadInputImageListenerTest extends TestCase
         $event = new InputCreated($input->id, $tempPath);
         $listener = new UploadInputImageListener;
 
-        $listener->handle($event);
+        $listener->handle($event, app(InputImageStorageService::class));
 
         $input->refresh();
 
@@ -72,11 +73,48 @@ class UploadInputImageListenerTest extends TestCase
         $event = new InputCreated($input->id, $missingPath);
         $listener = new UploadInputImageListener;
 
-        $listener->handle($event);
+        $listener->handle($event, app(InputImageStorageService::class));
 
         $input->refresh();
         $this->assertSame('failed', $input->status);
         $this->assertNull($input->start_image_path);
         $this->assertCount(0, $input->getMedia('start_image'));
+    }
+
+    public function test_it_uses_spaces_with_inkai_prefix_in_production_mode(): void
+    {
+        Event::fake([CreatePredictionForInput::class]);
+        Storage::fake('spaces');
+        Storage::disk('local')->deleteDirectory('tmp/inputs');
+
+        config()->set('uploads.provider', 's3');
+        config()->set('uploads.s3.media_disk', 'spaces');
+        config()->set('uploads.s3.media_prefix', '');
+        $this->app['env'] = 'production';
+
+        $input = Input::factory()->create([
+            'status' => 'created',
+            'start_image_path' => null,
+        ]);
+
+        $uploaded = UploadedFile::fake()->image('start.png', 900, 1600);
+        $tempPath = "tmp/inputs/{$input->id}/start.png";
+
+        Storage::disk('local')->putFileAs(
+            dirname($tempPath),
+            $uploaded,
+            basename($tempPath)
+        );
+
+        $listener = new UploadInputImageListener;
+        $listener->handle(new InputCreated($input->id, $tempPath), app(InputImageStorageService::class));
+
+        $input->refresh();
+        $media = $input->getFirstMedia('start_image');
+
+        $this->assertNotNull($media);
+        $this->assertSame('spaces', $media->disk);
+        $this->assertStringStartsWith('inkai/', $media->getPathRelativeToRoot());
+        Storage::disk('spaces')->assertExists($media->getPathRelativeToRoot());
     }
 }

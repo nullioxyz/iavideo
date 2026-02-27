@@ -4,6 +4,7 @@ namespace App\Domain\AIModels\Models;
 
 use App\Domain\AIModels\Jobs\AttachPresetMediaJob;
 use App\Domain\Videos\Models\Input;
+use App\Infra\Storage\UploadStorageResolver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -86,12 +87,12 @@ class Preset extends EloquentModel implements HasMedia
     {
         $this
             ->addMediaCollection('preview_image')
-            ->useDisk('public')
+            ->useDisk(UploadStorageResolver::mediaDisk())
             ->singleFile();
 
         $this
             ->addMediaCollection('preview_video')
-            ->useDisk('public')
+            ->useDisk(UploadStorageResolver::mediaDisk())
             ->singleFile();
     }
 
@@ -123,7 +124,12 @@ class Preset extends EloquentModel implements HasMedia
             ) && is_string($imagePath) && $imagePath !== '';
 
             if ($shouldDispatchImage) {
-                AttachPresetMediaJob::dispatch((int) $preset->getKey(), 'image', $imagePath)->onQueue('media');
+                AttachPresetMediaJob::dispatch(
+                    (int) $preset->getKey(),
+                    'image',
+                    $imagePath,
+                    UploadStorageResolver::mediaDisk(),
+                )->onQueue('media');
             }
 
             $videoPath = $preset->getAttribute('preview_video_upload_path');
@@ -132,7 +138,12 @@ class Preset extends EloquentModel implements HasMedia
             ) && is_string($videoPath) && $videoPath !== '';
 
             if ($shouldDispatchVideo) {
-                AttachPresetMediaJob::dispatch((int) $preset->getKey(), 'video', $videoPath)->onQueue('media');
+                AttachPresetMediaJob::dispatch(
+                    (int) $preset->getKey(),
+                    'video',
+                    $videoPath,
+                    UploadStorageResolver::mediaDisk(),
+                )->onQueue('media');
             }
         });
     }

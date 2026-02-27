@@ -4,6 +4,7 @@ namespace App\Domain\Videos\Models;
 
 use App\Domain\AIModels\Models\Preset;
 use App\Domain\Auth\Models\User;
+use App\Infra\Storage\UploadStorageResolver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -86,7 +87,7 @@ class Input extends EloquentModel implements HasMedia
     {
         $this
             ->addMediaCollection('start_image')
-            ->useDisk('public')
+            ->useDisk(UploadStorageResolver::mediaDisk())
             ->singleFile();
     }
 }
