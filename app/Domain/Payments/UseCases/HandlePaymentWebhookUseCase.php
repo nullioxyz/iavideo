@@ -73,8 +73,13 @@ class HandlePaymentWebhookUseCase
                 if ($order->user) {
                     $this->wallet->refund($order->user, (int) $order->credits, [
                         'reason' => 'Credits purchase approved',
+                        'operation_type' => 'credit_purchase',
                         'reference_type' => 'credit_purchase',
                         'reference_id' => $order->getKey(),
+                        'metadata' => [
+                            'provider' => $dto->provider,
+                            'external_id' => $dto->externalId,
+                        ],
                     ]);
                 }
 

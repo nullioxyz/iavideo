@@ -68,8 +68,8 @@ class PresetsForm
                     ->required(),
 
                 TextInput::make('cost_estimate_usd')
-                    ->label('Cost Estimate (USD)')
-                    ->required(),
+                    ->label('Legacy Cost Estimate (deprecated)')
+                    ->nullable(),
 
                 FileUpload::make('preview_image_upload_path')
                     ->label('Preview Image Upload')

@@ -6,7 +6,6 @@ use App\Domain\Videos\Events\CreatePredictionForInput;
 use App\Domain\Videos\Events\InputCreated;
 use App\Domain\Videos\Listeners\UploadInputImageListener;
 use App\Domain\Videos\Models\Input;
-use App\Infra\Storage\InputImageStorageService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
@@ -48,7 +47,7 @@ class UploadInputImageListenerTest extends TestCase
         $event = new InputCreated($input->id, $tempPath);
         $listener = new UploadInputImageListener;
 
-        $listener->handle($event, app(InputImageStorageService::class));
+        $listener->handle($event);
 
         $input->refresh();
 
@@ -73,7 +72,7 @@ class UploadInputImageListenerTest extends TestCase
         $event = new InputCreated($input->id, $missingPath);
         $listener = new UploadInputImageListener;
 
-        $listener->handle($event, app(InputImageStorageService::class));
+        $listener->handle($event);
 
         $input->refresh();
         $this->assertSame('failed', $input->status);
@@ -107,7 +106,7 @@ class UploadInputImageListenerTest extends TestCase
         );
 
         $listener = new UploadInputImageListener;
-        $listener->handle(new InputCreated($input->id, $tempPath), app(InputImageStorageService::class));
+        $listener->handle(new InputCreated($input->id, $tempPath));
 
         $input->refresh();
         $media = $input->getFirstMedia('start_image');

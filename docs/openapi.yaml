@@ -1,13 +1,21 @@
 openapi: 3.0.3
 info:
   title: inkai.video Backend API
-  version: 0.1.0-beta
-  description: Minimal OpenAPI contract for closed beta frontend integration.
+  version: 0.2.0-beta
+  description: Backend contract for generation pricing, credits, jobs and supporting frontend flows.
 servers:
   - url: https://api.example.com
+tags:
+  - name: Auth
+  - name: Models
+  - name: Generation
+  - name: Jobs
+  - name: Credits
+  - name: Public
 paths:
   /api/auth/login:
     post:
+      tags: [Auth]
       summary: Login
       requestBody:
         required: true
@@ -17,20 +25,38 @@ paths:
               type: object
               required: [email, password]
               properties:
-                email: { type: string, format: email }
-                password: { type: string }
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
       responses:
-        '200': { description: Auth token payload }
+        '200':
+          description: Auth token payload
   /api/auth/me:
     get:
+      tags: [Auth]
       summary: Current authenticated user
-      security: [{ bearerAuth: [] }]
+      security:
+        - bearerAuth: []
       responses:
-        '200': { description: User profile }
+        '200':
+          description: User profile
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout current session
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Logged out
   /api/auth/preferences:
     patch:
-      summary: Update user preferences (language/theme)
-      security: [{ bearerAuth: [] }]
+      tags: [Auth]
+      summary: Update user preferences
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -38,81 +64,401 @@ paths:
             schema:
               type: object
               properties:
-                language_id: { type: integer, nullable: true }
+                language_id:
+                  type: integer
+                  nullable: true
                 theme_preference:
                   type: string
                   enum: [light, dark, system]
       responses:
-        '200': { description: Updated user profile }
+        '200':
+          description: Updated user profile
+  /api/models:
+    get:
+      tags: [Models]
+      summary: List models available for generation
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PerPage'
+        - $ref: '#/components/parameters/Page'
+      responses:
+        '200':
+          description: Paginated model list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAIModels'
+  /api/models/{model}/presets:
+    get:
+      tags: [Models]
+      summary: List active presets for a model
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ModelIdPath'
+        - $ref: '#/components/parameters/PerPage'
+        - $ref: '#/components/parameters/Page'
+        - name: aspect_ratio
+          in: query
+          schema:
+            type: string
+            enum: ['16:9', '9:16', '1:1']
+        - name: tag
+          in: query
+          schema:
+            type: string
+        - name: tags[]
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+      responses:
+        '200':
+          description: Paginated preset list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPresets'
+  /api/models/{model}/presets/filters:
+    get:
+      tags: [Models]
+      summary: List filter values available for presets of a model
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ModelIdPath'
+      responses:
+        '200':
+          description: Preset filter payload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PresetFilters'
+  /api/input/estimate:
+    post:
+      tags: [Generation]
+      summary: Estimate generation cost and required credits
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [model_id, preset_id]
+              properties:
+                model_id:
+                  type: integer
+                preset_id:
+                  type: integer
+                duration_seconds:
+                  type: integer
+                  minimum: 1
+                  maximum: 300
+                  nullable: true
+      responses:
+        '200':
+          description: Backend credit estimate
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/GenerationEstimate'
+        '422':
+          $ref: '#/components/responses/ValidationError'
   /api/input/create:
     post:
-      summary: Create input job
-      security: [{ bearerAuth: [] }]
+      tags: [Generation]
+      summary: Create generation input and charge credits
+      description: The backend recalculates pricing server-side and ignores any client-calculated credit values.
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
           multipart/form-data:
             schema:
               type: object
-              required: [preset_id, image]
+              required: [model_id, preset_id, image]
               properties:
-                preset_id: { type: integer }
-                image: { type: string, format: binary }
-                title: { type: string, nullable: true }
+                model_id:
+                  type: integer
+                preset_id:
+                  type: integer
+                duration_seconds:
+                  type: integer
+                  minimum: 1
+                  maximum: 300
+                  nullable: true
+                title:
+                  type: string
+                  nullable: true
+                image:
+                  type: string
+                  format: binary
       responses:
-        '201': { description: Input created }
+        '201':
+          description: Input created and charged
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/InputResource'
+        '422':
+          $ref: '#/components/responses/ValidationError'
   /api/jobs:
     get:
+      tags: [Jobs]
       summary: List user jobs
-      security: [{ bearerAuth: [] }]
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PerPage'
+        - $ref: '#/components/parameters/Page'
       responses:
-        '200': { description: Jobs list }
+        '200':
+          description: Paginated job list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedJobs'
   /api/jobs/quota:
     get:
+      tags: [Jobs]
       summary: Daily generation quota
-      security: [{ bearerAuth: [] }]
+      security:
+        - bearerAuth: []
       responses:
-        '200': { description: Quota payload }
+        '200':
+          description: Quota payload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      daily_limit:
+                        type: integer
+                      used_today:
+                        type: integer
+                      remaining_today:
+                        type: integer
+                      near_limit:
+                        type: boolean
+                      limit_reached:
+                        type: boolean
+  /api/jobs/{job}:
+    get:
+      tags: [Jobs]
+      summary: Get job detail
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/JobIdPath'
+      responses:
+        '200':
+          description: Job detail
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/JobResource'
+        '404':
+          description: Job not found
+  /api/jobs/{job}/title:
+    patch:
+      tags: [Jobs]
+      summary: Rename job title
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/JobIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title:
+                  type: string
+      responses:
+        '200':
+          description: Updated job detail
+  /api/jobs/{job}/cancel:
+    post:
+      tags: [Jobs]
+      summary: Cancel a job
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/JobIdPath'
+      responses:
+        '204':
+          description: Cancellation accepted
+        '422':
+          $ref: '#/components/responses/ValidationError'
   /api/jobs/{job}/download:
     get:
+      tags: [Jobs]
       summary: Download generated video
-      security: [{ bearerAuth: [] }]
+      security:
+        - bearerAuth: []
       parameters:
-        - in: path
-          name: job
-          required: true
-          schema: { type: integer }
+        - $ref: '#/components/parameters/JobIdPath'
       responses:
-        '200': { description: Binary file response }
+        '200':
+          description: Binary file response
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+  /api/prediction/cancel:
+    post:
+      tags: [Jobs]
+      summary: Cancel a prediction by input id
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [input_id]
+              properties:
+                input_id:
+                  type: integer
+      responses:
+        '204':
+          description: Cancellation accepted
+  /api/credits/balance:
+    get:
+      tags: [Credits]
+      summary: Get current credit balance
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Wallet balance
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CreditBalance'
+  /api/credits/statement:
+    get:
+      tags: [Credits]
+      summary: List credit ledger entries
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PerPage'
+        - $ref: '#/components/parameters/Page'
+      responses:
+        '200':
+          description: Paginated credit statement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCreditStatement'
+  /api/credits/video-generations:
+    get:
+      tags: [Credits]
+      summary: List generation history with credit audit
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PerPage'
+        - $ref: '#/components/parameters/Page'
+      responses:
+        '200':
+          description: Paginated generation history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedVideoGenerations'
   /api/analytics/mvp-kpis:
     get:
-      summary: MVP KPIs (admin/dev)
-      security: [{ bearerAuth: [] }]
+      tags: [Credits]
+      summary: Internal MVP analytics
+      security:
+        - bearerAuth: []
       responses:
-        '200': { description: KPI payload }
+        '200':
+          description: KPI payload
   /api/analytics/ops-metrics:
     get:
-      summary: Operational metrics (admin/dev)
-      security: [{ bearerAuth: [] }]
+      tags: [Credits]
+      summary: Internal operational metrics
+      security:
+        - bearerAuth: []
       responses:
-        '200': { description: Ops metrics payload }
+        '200':
+          description: Ops metrics payload
   /api/institutional:
     get:
+      tags: [Public]
       summary: List institutional content
       responses:
-        '200': { description: Institutional list }
+        '200':
+          description: Institutional list
+  /api/institutional/{slug}:
+    get:
+      tags: [Public]
+      summary: Get institutional content by slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Institutional detail
   /api/seo/{slug}:
     get:
+      tags: [Public]
       summary: Get SEO data by slug
       parameters:
-        - in: path
-          name: slug
+        - name: slug
+          in: path
           required: true
-          schema: { type: string }
+          schema:
+            type: string
       responses:
-        '200': { description: SEO payload }
+        '200':
+          description: SEO payload
+  /api/social-networks:
+    get:
+      tags: [Public]
+      summary: List active social networks
+      responses:
+        '200':
+          description: Social network list
   /api/contacts:
     post:
+      tags: [Public]
       summary: Create contact message
       requestBody:
         required: true
@@ -122,15 +468,589 @@ paths:
               type: object
               required: [name, email, message]
               properties:
-                name: { type: string }
-                email: { type: string, format: email }
-                phone: { type: string, nullable: true }
-                message: { type: string }
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                phone:
+                  type: string
+                  nullable: true
+                message:
+                  type: string
       responses:
-        '201': { description: Contact created }
+        '201':
+          description: Contact created
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+  parameters:
+    PerPage:
+      name: per_page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+      required: false
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+      required: false
+    ModelIdPath:
+      name: model
+      in: path
+      required: true
+      schema:
+        type: integer
+    JobIdPath:
+      name: job
+      in: path
+      required: true
+      schema:
+        type: integer
+  responses:
+    ValidationError:
+      description: Validation or domain error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    PaginationMeta:
+      type: object
+      properties:
+        current_page:
+          type: integer
+        from:
+          type: integer
+          nullable: true
+        to:
+          type: integer
+          nullable: true
+        per_page:
+          type: integer
+        total:
+          type: integer
+        last_page:
+          type: integer
+    PaginationLinks:
+      type: object
+      properties:
+        first:
+          type: string
+          nullable: true
+        last:
+          type: string
+          nullable: true
+        prev:
+          type: string
+          nullable: true
+        next:
+          type: string
+          nullable: true
+    AIModel:
+      type: object
+      properties:
+        id:
+          type: integer
+        platform_id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        provider_model_key:
+          type: string
+        version:
+          type: string
+          nullable: true
+        active:
+          type: boolean
+        public_visible:
+          type: boolean
+        available_for_generation:
+          type: boolean
+        cost_per_second_usd:
+          type: string
+          nullable: true
+        sort_order:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+    PresetTag:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+    Preset:
+      type: object
+      properties:
+        id:
+          type: integer
+        default_model_id:
+          type: integer
+        name:
+          type: string
+        prompt:
+          type: string
+          nullable: true
+        negative_prompt:
+          type: string
+          nullable: true
+        duration_seconds:
+          type: integer
+          nullable: true
+        preview_image_url:
+          type: string
+          nullable: true
+        preview_video_url:
+          type: string
+          nullable: true
+        aspect_ratio:
+          type: string
+          nullable: true
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/PresetTag'
+        language_slug:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+    PresetFilters:
+      type: object
+      properties:
+        aspect_ratios:
+          type: array
+          items:
+            type: string
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/PresetTag'
+    GenerationEstimate:
+      type: object
+      properties:
+        model_id:
+          type: integer
+        preset_id:
+          type: integer
+        duration_seconds:
+          type: integer
+        credits_required:
+          type: integer
+        model_cost_per_second_usd:
+          type: string
+        estimated_generation_cost_usd:
+          type: string
+        credit_unit_value_usd:
+          type: string
+    ModelSummary:
+      type: object
+      nullable: true
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        provider_model_key:
+          type: string
+    PresetSummary:
+      type: object
+      nullable: true
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+    PredictionOutput:
+      type: object
+      properties:
+        id:
+          type: integer
+        kind:
+          type: string
+        path:
+          type: string
+          nullable: true
+    Prediction:
+      type: object
+      nullable: true
+      properties:
+        id:
+          type: integer
+        external_id:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        source:
+          type: string
+          nullable: true
+        attempt:
+          type: integer
+          nullable: true
+        queued_at:
+          type: string
+          format: date-time
+          nullable: true
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+        finished_at:
+          type: string
+          format: date-time
+          nullable: true
+        failed_at:
+          type: string
+          format: date-time
+          nullable: true
+        canceled_at:
+          type: string
+          format: date-time
+          nullable: true
+        duration_seconds:
+          type: integer
+          nullable: true
+        cost_estimate_usd:
+          type: string
+          nullable: true
+        cost_actual_usd:
+          type: string
+          nullable: true
+        error_code:
+          type: string
+          nullable: true
+        error_message:
+          type: string
+          nullable: true
+        outputs:
+          type: array
+          items:
+            $ref: '#/components/schemas/PredictionOutput'
+    InputResource:
+      type: object
+      properties:
+        id:
+          type: integer
+        model_id:
+          type: integer
+        preset_id:
+          type: integer
+        user_id:
+          type: integer
+        status:
+          type: string
+        title:
+          type: string
+          nullable: true
+        original_filename:
+          type: string
+          nullable: true
+        mime_type:
+          type: string
+          nullable: true
+        size_bytes:
+          type: integer
+          nullable: true
+        duration_seconds:
+          type: integer
+          nullable: true
+        estimated_cost_usd:
+          type: string
+          nullable: true
+        credits_charged:
+          type: integer
+        billing_status:
+          type: string
+          nullable: true
+    JobResource:
+      type: object
+      properties:
+        id:
+          type: integer
+        model_id:
+          type: integer
+        model:
+          $ref: '#/components/schemas/ModelSummary'
+        preset_id:
+          type: integer
+        preset:
+          $ref: '#/components/schemas/PresetSummary'
+        user_id:
+          type: integer
+        status:
+          type: string
+        title:
+          type: string
+          nullable: true
+        original_filename:
+          type: string
+          nullable: true
+        mime_type:
+          type: string
+          nullable: true
+        size_bytes:
+          type: integer
+          nullable: true
+        duration_seconds:
+          type: integer
+          nullable: true
+        estimated_cost_usd:
+          type: string
+          nullable: true
+        credits_charged:
+          type: integer
+        billing_status:
+          type: string
+          nullable: true
+        credit_debited:
+          type: boolean
+        start_image_url:
+          type: string
+          nullable: true
+        prediction:
+          $ref: '#/components/schemas/Prediction'
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+    CreditBalance:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        credit_balance:
+          type: integer
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+    CreditStatementEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+        delta:
+          type: integer
+        amount:
+          type: integer
+        balance_before:
+          type: integer
+          nullable: true
+        balance_after:
+          type: integer
+          nullable: true
+        reason:
+          type: string
+        operation_type:
+          type: string
+          nullable: true
+        reference_type:
+          type: string
+          nullable: true
+        reference_id:
+          type: integer
+          nullable: true
+        model:
+          $ref: '#/components/schemas/ModelSummary'
+        preset:
+          $ref: '#/components/schemas/PresetSummary'
+        duration_seconds:
+          type: integer
+          nullable: true
+        generation_cost_usd:
+          type: string
+          nullable: true
+        metadata:
+          type: object
+          nullable: true
+          additionalProperties: true
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+    VideoGenerationHistoryEntry:
+      type: object
+      properties:
+        input_id:
+          type: integer
+        title:
+          type: string
+          nullable: true
+        status:
+          type: string
+        model:
+          $ref: '#/components/schemas/ModelSummary'
+        preset:
+          $ref: '#/components/schemas/PresetSummary'
+        duration_seconds:
+          type: integer
+          nullable: true
+        estimated_cost_usd:
+          type: string
+          nullable: true
+        prediction:
+          type: object
+          nullable: true
+          properties:
+            id:
+              type: integer
+              nullable: true
+            status:
+              type: string
+              nullable: true
+            error_code:
+              type: string
+              nullable: true
+            error_message:
+              type: string
+              nullable: true
+            output_video_url:
+              type: string
+              nullable: true
+        credits_debited:
+          type: integer
+        credits_refunded:
+          type: integer
+        credits_used:
+          type: integer
+        credits_charged:
+          type: integer
+        billing_status:
+          type: string
+          nullable: true
+        is_failed:
+          type: boolean
+        is_canceled:
+          type: boolean
+        is_refunded:
+          type: boolean
+        ledger_entries_count:
+          type: integer
+        failure:
+          type: object
+          properties:
+            code:
+              type: string
+              nullable: true
+            message:
+              type: string
+              nullable: true
+            reason:
+              type: string
+              nullable: true
+        cancellation:
+          type: object
+          properties:
+            reason:
+              type: string
+              nullable: true
+        ledger_entries:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        credit_events:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+    PaginatedAIModels:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AIModel'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+    PaginatedPresets:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Preset'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+    PaginatedJobs:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobResource'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+    PaginatedCreditStatement:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreditStatementEntry'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+    PaginatedVideoGenerations:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/VideoGenerationHistoryEntry'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string

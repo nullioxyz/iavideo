@@ -78,6 +78,7 @@ final class ReceivePredictionWebhookUseCase
         match ($status) {
             PredictionStatus::SUCCEEDED => $this->handleSucceeded($prediction, $dto),
             PredictionStatus::FAILED => $this->handleFailed($prediction),
+            PredictionStatus::CANCELLED => $this->handleCancelled($prediction),
             default => null,
         };
     }
@@ -85,6 +86,19 @@ final class ReceivePredictionWebhookUseCase
     private function handleSucceeded(Prediction $prediction, PredictionWebhookDTO $dto): void
     {
         $outputUrl = $this->extractOutputUrl($dto);
+        if ($outputUrl === null) {
+            $this->repository->updatePrediction($prediction, [
+                'status' => PredictionStatus::FAILED->value,
+                'failed_at' => now(),
+                'error_message' => 'Provider returned success without a usable output.',
+            ]);
+            $this->repository->updateInputStatus($prediction, Input::FAILED);
+            $this->effects->refundUnsuccessfulGenerationIfCharged($prediction, 'Provider returned success without a usable output.', [
+                'refund_reason' => 'missing_output',
+            ]);
+
+            return;
+        }
 
         $this->repository->createOutput(
             $prediction,
@@ -97,7 +111,17 @@ final class ReceivePredictionWebhookUseCase
     private function handleFailed(Prediction $prediction): void
     {
         $this->repository->updateInputStatus($prediction, Input::FAILED);
-        $this->effects->refundFailedGenerationIfDebited($prediction);
+        $this->effects->refundUnsuccessfulGenerationIfCharged($prediction, 'Failed video generation', [
+            'refund_reason' => 'provider_failed',
+        ]);
+    }
+
+    private function handleCancelled(Prediction $prediction): void
+    {
+        $this->repository->updateInputStatus($prediction, Input::CANCELLED);
+        $this->effects->refundUnsuccessfulGenerationIfCharged($prediction, 'Canceled video generation', [
+            'refund_reason' => 'provider_cancelled',
+        ]);
     }
 
     private function broadcastJobUpdated(Prediction $prediction): void
@@ -114,22 +138,22 @@ final class ReceivePredictionWebhookUseCase
         }
     }
 
-    private function extractOutputUrl(PredictionWebhookDTO $dto): string
+    private function extractOutputUrl(PredictionWebhookDTO $dto): ?string
     {
         $output = $dto->getOutput();
 
-        if (is_string($output) && $output !== '') {
+        if (is_string($output) && $output !== '' && filter_var($output, FILTER_VALIDATE_URL)) {
             return $output;
         }
 
         if (is_array($output)) {
             foreach ($output as $item) {
-                if (is_string($item) && $item !== '') {
+                if (is_string($item) && $item !== '' && filter_var($item, FILTER_VALIDATE_URL)) {
                     return $item;
                 }
             }
         }
 
-        return 'empty-path';
+        return null;
     }
 }

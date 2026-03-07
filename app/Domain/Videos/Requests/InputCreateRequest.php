@@ -21,10 +21,23 @@ class InputCreateRequest extends FormRequest
                 'max:255',
             ],
 
+            'model_id' => [
+                'required',
+                'integer',
+                Rule::exists('models', 'id'),
+            ],
+
             'preset_id' => [
                 'required',
                 'integer',
                 Rule::exists('presets', 'id')->where('active', true),
+            ],
+
+            'duration_seconds' => [
+                'nullable',
+                'integer',
+                'min:1',
+                'max:300',
             ],
 
             'image' => [
@@ -40,10 +53,12 @@ class InputCreateRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        if ($this->has('preset_id')) {
-            $this->merge([
-                'preset_id' => (int) $this->input('preset_id'),
-            ]);
+        foreach (['model_id', 'preset_id', 'duration_seconds'] as $field) {
+            if ($this->has($field)) {
+                $this->merge([
+                    $field => (int) $this->input($field),
+                ]);
+            }
         }
 
         if ($this->has('title')) {
@@ -57,6 +72,10 @@ class InputCreateRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'model_id.required' => __('validation.required', ['attribute' => 'model_id']),
+            'model_id.integer' => __('validation.integer', ['attribute' => 'model_id']),
+            'model_id.exists' => __('validation.exists', ['attribute' => 'model_id']),
+
             'preset_id.required' => __('validation.custom.preset_id.required'),
             'preset_id.integer' => __('validation.custom.preset_id.integer'),
             'preset_id.exists' => __('validation.custom.preset_id.exists'),

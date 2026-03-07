@@ -18,6 +18,9 @@ class InputInfolist
                 TextEntry::make('preset.name')
                     ->label('Preset'),
 
+                TextEntry::make('model.name')
+                    ->label('Model'),
+
                 TextEntry::make('user.name')
                     ->label('User'),
 
@@ -43,6 +46,18 @@ class InputInfolist
 
                 TextEntry::make('size_bytes')
                     ->label('Size (bytes)'),
+
+                TextEntry::make('duration_seconds')
+                    ->label('Duration (seconds)'),
+
+                TextEntry::make('estimated_cost_usd')
+                    ->label('Estimated Cost (USD)'),
+
+                TextEntry::make('credits_charged')
+                    ->label('Credits Charged'),
+
+                TextEntry::make('billing_status')
+                    ->label('Billing Status'),
 
                 TextEntry::make('credit_debited')
                     ->label('Credit/Debited'),

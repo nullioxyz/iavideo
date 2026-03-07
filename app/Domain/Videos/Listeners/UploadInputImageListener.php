@@ -15,8 +15,11 @@ class UploadInputImageListener implements ShouldQueue
 
     public $queue = 'uploads';
 
-    public function handle(InputCreated $event, InputImageStorageService $imageStorage): void
+    public function handle(InputCreated $event): void
     {
+        /** @var InputImageStorageService $imageStorage */
+        $imageStorage = app(InputImageStorageService::class);
+
         /** @var Input $input */
         $input = Input::query()->findOrFail($event->inputId);
 

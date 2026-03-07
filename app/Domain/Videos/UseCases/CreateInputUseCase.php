@@ -2,10 +2,13 @@
 
 namespace App\Domain\Videos\UseCases;
 
+use App\Domain\AIModels\Models\Model as AIModel;
+use App\Domain\AIModels\Models\Preset;
 use App\Domain\Auth\Models\User;
 use App\Domain\Broadcasting\Events\UserGenerationLimitAlertBroadcast;
 use App\Domain\Broadcasting\Events\UserJobUpdatedBroadcast;
-use App\Domain\Credits\UseCases\ReserveCreditUseCase;
+use App\Domain\Credits\Services\GenerationBillingService;
+use App\Domain\Credits\Services\GenerationPricingService;
 use App\Domain\Observability\Support\StructuredActivityLogger;
 use App\Domain\Settings\Models\Setting;
 use App\Domain\Videos\Contracts\Repositories\InputRepositoryInterface;
@@ -21,7 +24,8 @@ final class CreateInputUseCase
     public function __construct(
         private readonly InputRepositoryInterface $inputRepository,
         private readonly InputImageIngestionInterface $ingestion,
-        private readonly ReserveCreditUseCase $reserveCreditUseCase,
+        private readonly GenerationPricingService $pricingService,
+        private readonly GenerationBillingService $billingService,
         private readonly StructuredActivityLogger $activityLogger,
     ) {}
 
@@ -29,6 +33,7 @@ final class CreateInputUseCase
     {
         /** @var Input $input */
         $input = DB::transaction(function () use ($user, $dto): Input {
+            // Input creation, pricing and wallet debit happen in one transaction so the request is atomic.
             /** @var User|null $lockedUser */
             $lockedUser = User::query()
                 ->whereKey($user->getKey())
@@ -41,18 +46,23 @@ final class CreateInputUseCase
 
             $this->assertDailyInputsLimit($lockedUser);
 
+            $model = AIModel::query()->findOrFail($dto->modelId);
+            $preset = Preset::query()->findOrFail($dto->presetId);
+            $quote = $this->pricingService->quote($model, $preset, $dto->durationSeconds);
+
             $input = $this->inputRepository->create(
-                $dto->toArray($lockedUser->getKey())
+                array_merge(
+                    $dto->toArray($lockedUser->getKey()),
+                    [
+                        'model_id' => $model->getKey(),
+                        'duration_seconds' => $quote->durationSeconds,
+                        'estimated_cost_usd' => $quote->generationCostUsd,
+                    ]
+                )
             );
 
-            $this->reserveCreditUseCase->execute($lockedUser, [
-                'reason' => 'Charge for input creation',
-                'reference_type' => 'input_creation',
-                'reference_id' => $input->getKey(),
-            ]);
-
-            $input->update([
-                'credit_debited' => true,
+            $this->billingService->chargeInput($lockedUser, $input, $quote, [
+                'requested_duration_seconds' => $dto->durationSeconds,
             ]);
 
             return $input->refresh();
@@ -64,7 +74,10 @@ final class CreateInputUseCase
         $this->broadcastQuotaState($user, true);
         $this->activityLogger->log('input_created', $user, [
             'input_id' => $input->getKey(),
+            'model_id' => $dto->modelId,
             'preset_id' => $dto->presetId,
+            'duration_seconds' => $input->duration_seconds,
+            'credits_charged' => $input->credits_charged,
         ]);
 
         return $input;

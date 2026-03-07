@@ -43,6 +43,7 @@ class CreditTest extends TestCase
         $image = UploadedFile::fake()->image('tattoo.png', 900, 1600)->size(500);
 
         $response = $this->withJwt($token)->postJson('/api/input/create', [
+            'model_id' => $activeModel->getKey(),
             'preset_id' => $preset->getKey(),
             'image' => $image,
         ]);
@@ -52,12 +53,17 @@ class CreditTest extends TestCase
         $response->assertJsonStructure([
             'data' => [
                 'id',
+                'model_id',
                 'preset_id',
                 'user_id',
                 'status',
                 'original_filename',
                 'mime_type',
                 'size_bytes',
+                'duration_seconds',
+                'estimated_cost_usd',
+                'credits_charged',
+                'billing_status',
             ],
         ]);
 
@@ -66,16 +72,20 @@ class CreditTest extends TestCase
         $this->assertDatabaseHas('inputs', [
             'id' => $inputId,
             'user_id' => $user->getKey(),
+            'model_id' => $activeModel->getKey(),
             'preset_id' => $preset->getKey(),
             'status' => 'created',
             'original_filename' => 'tattoo.png',
             'mime_type' => 'image/png',
+            'credits_charged' => 1,
+            'billing_status' => 'charged',
         ]);
 
         $this->assertDatabaseHas('credit_ledger', [
             'user_id' => $user->getKey(),
             'reference_id' => $inputId,
-            'reference_type' => 'input_creation',
+            'reference_type' => 'input_generation',
+            'operation_type' => 'generation_debit',
             'delta' => -1,
             'balance_after' => 2,
         ]);
@@ -107,7 +117,12 @@ class CreditTest extends TestCase
 
         $input = Input::factory()->create([
             'user_id' => $user->getKey(),
+            'model_id' => $activeModel->getKey(),
             'preset_id' => $preset->getKey(),
+            'duration_seconds' => 5,
+            'estimated_cost_usd' => '0.3500',
+            'credits_charged' => 1,
+            'billing_status' => 'charged',
             'status' => 'created',
         ]);
 
@@ -122,9 +137,16 @@ class CreditTest extends TestCase
         $creditLedger = CreditLedger::factory()->create([
             'user_id' => $user->getKey(),
             'delta' => -1,
+            'balance_before' => 3,
             'balance_after' => 2,
-            'reference_type' => 'input_creation',
+            'reason' => 'Video generation charge',
+            'operation_type' => 'generation_debit',
+            'reference_type' => 'input_generation',
             'reference_id' => $input->getKey(),
+            'model_id' => $activeModel->getKey(),
+            'preset_id' => $preset->getKey(),
+            'duration_seconds' => 5,
+            'generation_cost_usd' => '0.3500',
         ]);
 
         $input->credit_debited = true;
@@ -167,7 +189,8 @@ class CreditTest extends TestCase
         $this->assertDatabaseHas('credit_ledger', [
             'user_id' => $user->getKey(),
             'reference_id' => $input->getKey(),
-            'reference_type' => 'input_creation',
+            'reference_type' => 'input_generation',
+            'operation_type' => 'generation_debit',
             'delta' => -1,
             'balance_after' => 2,
         ]);
@@ -175,7 +198,8 @@ class CreditTest extends TestCase
         $this->assertDatabaseHas('credit_ledger', [
             'user_id' => $user->getKey(),
             'reference_id' => $input->getKey(),
-            'reference_type' => 'input_video_generation_failed',
+            'reference_type' => 'input_generation',
+            'operation_type' => 'generation_refund',
             'delta' => 1,
             'balance_after' => 3,
         ]);

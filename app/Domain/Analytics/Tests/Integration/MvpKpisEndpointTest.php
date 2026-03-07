@@ -45,9 +45,11 @@ class MvpKpisEndpointTest extends TestCase
         CreditLedger::query()->create([
             'user_id' => $user->getKey(),
             'delta' => -1,
+            'balance_before' => 3,
             'balance_after' => 2,
-            'reason' => 'Charge for input creation',
-            'reference_type' => 'input_creation',
+            'reason' => 'Video generation charge',
+            'operation_type' => 'generation_debit',
+            'reference_type' => 'input_generation',
             'reference_id' => $input->getKey(),
             'created_at' => now(),
         ]);

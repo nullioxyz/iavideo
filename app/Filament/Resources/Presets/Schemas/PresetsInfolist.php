@@ -26,7 +26,7 @@ class PresetsInfolist
                     ->label('Duration (seconds)'),
 
                 TextEntry::make('cost_estimate_usd')
-                    ->label('Cost Estimate (USD)'),
+                    ->label('Legacy Cost Estimate (deprecated)'),
 
                 TextEntry::make('preview_image_url')
                     ->label('Preview Image URL')

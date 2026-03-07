@@ -17,6 +17,7 @@ final class ListVideoGenerationsUseCase
             ->where('user_id', $userId)
             ->with([
                 'preset:id,name',
+                'model:id,name,provider_model_key',
                 'prediction.outputs.media',
             ])
             ->orderByDesc('id')
@@ -35,12 +36,20 @@ final class ListVideoGenerationsUseCase
             $entries = CreditLedger::query()
                 ->where('user_id', $userId)
                 ->whereIn('reference_id', $inputIds)
-                ->whereIn('reference_type', [
-                    'input_creation',
-                    'input_video_generation_failed',
-                    'input_prediction_creation_failed',
-                    'input_prediction_creation_canceled',
-                    'input_video_generation_canceled',
+                ->where(function ($query): void {
+                    $query
+                        ->where('reference_type', 'input_generation')
+                        ->orWhereIn('reference_type', [
+                            'input_creation',
+                            'input_video_generation_failed',
+                            'input_prediction_creation_failed',
+                            'input_prediction_creation_canceled',
+                            'input_video_generation_canceled',
+                        ]);
+                })
+                ->with([
+                    'model:id,name,provider_model_key',
+                    'preset:id,name',
                 ])
                 ->orderBy('id')
                 ->get();
@@ -55,30 +64,21 @@ final class ListVideoGenerationsUseCase
                 $entries = collect($entries);
             }
 
-            $creditsDebited = (int) abs($entries
-                ->where('reference_type', 'input_creation')
+            $debitEntries = $entries
+                ->filter(fn (CreditLedger $entry) => $this->isGenerationDebit($entry));
+
+            $refundEntries = $entries
+                ->filter(fn (CreditLedger $entry) => $this->isGenerationRefund($entry))
+                ->filter(fn (CreditLedger $entry) => (int) $entry->delta > 0)
+                ->values();
+
+            $creditsDebited = (int) abs($debitEntries
                 ->sum('delta'));
 
-            $creditsRefunded = (int) $entries
-                ->whereIn('reference_type', [
-                    'input_video_generation_failed',
-                    'input_prediction_creation_failed',
-                    'input_prediction_creation_canceled',
-                    'input_video_generation_canceled',
-                ])
+            $creditsRefunded = (int) $refundEntries
                 ->sum(fn ($entry) => max(0, (int) $entry->delta));
 
             $creditsUsed = max(0, $creditsDebited - $creditsRefunded);
-
-            $refundEntries = $entries
-                ->whereIn('reference_type', [
-                    'input_video_generation_failed',
-                    'input_prediction_creation_failed',
-                    'input_prediction_creation_canceled',
-                    'input_video_generation_canceled',
-                ])
-                ->filter(fn ($entry) => (int) $entry->delta > 0)
-                ->values();
 
             $ledgerEntries = $entries
                 ->values()
@@ -89,11 +89,19 @@ final class ListVideoGenerationsUseCase
                         'ledger_id' => (int) $entry->id,
                         'type' => $delta < 0 ? 'debit' : 'refund',
                         'operation' => $delta < 0 ? 'debit' : 'refund',
+                        'operation_type' => (string) ($entry->operation_type ?? ''),
+                        'amount' => abs($delta),
                         'delta' => $delta,
+                        'balance_before' => (int) ($entry->balance_before ?? ($entry->balance_after - $delta)),
                         'balance_after' => (int) $entry->balance_after,
                         'reason' => (string) $entry->reason,
                         'reference_type' => (string) $entry->reference_type,
                         'reference_id' => (int) $entry->reference_id,
+                        'model_id' => $entry->model_id ? (int) $entry->model_id : null,
+                        'preset_id' => $entry->preset_id ? (int) $entry->preset_id : null,
+                        'duration_seconds' => $entry->duration_seconds ? (int) $entry->duration_seconds : null,
+                        'generation_cost_usd' => $entry->generation_cost_usd,
+                        'metadata' => $entry->metadata,
                         'created_at' => $entry->created_at?->toISOString(),
                     ];
                 })
@@ -113,13 +121,20 @@ final class ListVideoGenerationsUseCase
             $isRefunded = $creditsRefunded > 0;
 
             $cancelEntry = $refundEntries
-                ->first(fn ($entry) => in_array((string) $entry->reference_type, [
+                ->first(fn (CreditLedger $entry) => in_array($this->refundReason($entry), [
+                    'cancelled',
+                    'provider_cancelled',
+                ], true) || in_array((string) $entry->reference_type, [
                     'input_video_generation_canceled',
                     'input_prediction_creation_canceled',
                 ], true));
 
             $failureEntry = $refundEntries
-                ->first(fn ($entry) => in_array((string) $entry->reference_type, [
+                ->first(fn (CreditLedger $entry) => in_array($this->refundReason($entry), [
+                    'provider_failed',
+                    'prediction_creation_failed',
+                    'missing_output',
+                ], true) || in_array((string) $entry->reference_type, [
                     'input_video_generation_failed',
                     'input_prediction_creation_failed',
                 ], true));
@@ -140,5 +155,30 @@ final class ListVideoGenerationsUseCase
         }
 
         return $paginator;
+    }
+
+    private function isGenerationDebit(CreditLedger $entry): bool
+    {
+        return $entry->operation_type === 'generation_debit'
+            || ($entry->reference_type === 'input_creation' && (int) $entry->delta < 0);
+    }
+
+    private function isGenerationRefund(CreditLedger $entry): bool
+    {
+        return $entry->operation_type === 'generation_refund'
+            || in_array((string) $entry->reference_type, [
+                'input_video_generation_failed',
+                'input_prediction_creation_failed',
+                'input_prediction_creation_canceled',
+                'input_video_generation_canceled',
+            ], true);
+    }
+
+    private function refundReason(CreditLedger $entry): ?string
+    {
+        $metadata = is_array($entry->metadata) ? $entry->metadata : null;
+        $refundReason = $metadata['refund_reason'] ?? null;
+
+        return is_string($refundReason) && $refundReason !== '' ? $refundReason : null;
     }
 }

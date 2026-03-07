@@ -5,8 +5,7 @@ namespace App\Domain\Videos\UseCases;
 use App\Domain\AIModels\Models\Model as AIModel;
 use App\Domain\AIModels\Models\Preset;
 use App\Domain\AIProviders\Infra\ProviderRegistry;
-use App\Domain\Auth\Models\User;
-use App\Domain\Credits\UseCases\RefundCreditUseCase;
+use App\Domain\Credits\Services\GenerationBillingService;
 use App\Domain\Platforms\Models\Platform;
 use App\Domain\Videos\Models\Input;
 use App\Domain\Videos\Models\Prediction;
@@ -18,14 +17,14 @@ final class CancelInputPredictionUseCase
 {
     public function __construct(
         private readonly ProviderRegistry $providerClients,
-        private readonly RefundCreditUseCase $refundCreditUseCase,
+        private readonly GenerationBillingService $billingService,
     ) {}
 
     public function execute(int $userId, int $inputId): Prediction
     {
         /** @var Input $input */
         $input = Input::query()
-            ->with(['preset', 'preset.model', 'preset.model.platform', 'prediction'])
+            ->with(['preset', 'model.platform', 'prediction', 'user'])
             ->whereKey($inputId)
             ->where('user_id', $userId)
             ->first();
@@ -39,14 +38,9 @@ final class CancelInputPredictionUseCase
             throw new RuntimeException("External ID not found for input {$inputId}");
         }
 
-        $preset = $input->preset;
-        if (! $preset instanceof Preset) {
-            throw new RuntimeException("Preset not found for input {$inputId}");
-        }
-
-        $model = $preset->model;
+        $model = $input->model;
         if (! $model instanceof AIModel || ! $model->platform instanceof Platform) {
-            throw new RuntimeException("Model/platform not configured for preset {$preset->id}");
+            throw new RuntimeException("Model/platform not configured for input {$inputId}");
         }
 
         $providerSlug = (string) $model->platform->slug;
@@ -76,24 +70,14 @@ final class CancelInputPredictionUseCase
             }
 
             $lockedInput->update(['status' => Input::CANCELLED]);
-            $lockedInput->prediction()->update(['status' => Prediction::CANCELLED]);
-
-            if (! $lockedInput->credit_debited) {
-                return;
-            }
-
-            if (! $lockedInput->user instanceof User) {
-                throw new RuntimeException("User not found for input {$inputId}");
-            }
-
-            $this->refundCreditUseCase->execute($lockedInput->user, [
-                'reference_type' => 'input_video_generation_canceled',
-                'reason' => 'Canceled video generation',
-                'reference_id' => $lockedInput->id,
+            $lockedInput->prediction()->update([
+                'status' => Prediction::CANCELLED,
+                'canceled_at' => now(),
             ]);
 
-            $lockedInput->update([
-                'credit_debited' => false,
+            $this->billingService->refundInput($lockedInput, 'Canceled video generation', [
+                'refund_reason' => 'cancelled',
+                'initiated_by' => 'user',
             ]);
         });
 

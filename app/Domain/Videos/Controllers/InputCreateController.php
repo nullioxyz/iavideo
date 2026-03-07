@@ -25,7 +25,11 @@ class InputCreateController extends Controller
 
         $file = $request->file('image');
         $dto = new \App\Domain\Videos\DTO\InputCreateDTO(
+            modelId: (int) $request->input('model_id'),
             presetId: (int) $request->input('preset_id'),
+            durationSeconds: $request->filled('duration_seconds')
+                ? (int) $request->input('duration_seconds')
+                : null,
             title: $request->input('title'),
             originalFilename: $request->file('image')?->getClientOriginalName(),
             mimeType: $request->file('image')?->getMimeType(),

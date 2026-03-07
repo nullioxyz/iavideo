@@ -2,8 +2,7 @@
 
 namespace App\Domain\Videos\Services;
 
-use App\Domain\Auth\Models\User;
-use App\Domain\Credits\UseCases\RefundCreditUseCase;
+use App\Domain\Credits\Services\GenerationBillingService;
 use App\Domain\Videos\Contracts\PredictionWebhookEffectsInterface;
 use App\Domain\Videos\Jobs\DownloadPredictionOutputsJob;
 use App\Domain\Videos\Models\Input;
@@ -13,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 class PredictionWebhookEffects implements PredictionWebhookEffectsInterface
 {
     public function __construct(
-        private readonly RefundCreditUseCase $refundCreditUseCase,
+        private readonly GenerationBillingService $billingService,
     ) {}
 
     public function dispatchDownloadOutputs(Prediction $prediction): void
@@ -21,32 +20,23 @@ class PredictionWebhookEffects implements PredictionWebhookEffectsInterface
         DownloadPredictionOutputsJob::dispatch($prediction->id)->onQueue('downloads');
     }
 
-    public function refundFailedGenerationIfDebited(Prediction $prediction): void
+    public function refundUnsuccessfulGenerationIfCharged(Prediction $prediction, string $reason, array $metadata = []): void
     {
-        DB::transaction(function () use ($prediction): void {
+        DB::transaction(function () use ($prediction, $reason, $metadata): void {
             $input = Input::query()
                 ->whereKey($prediction->input_id)
                 ->lockForUpdate()
                 ->with('user')
                 ->first();
 
-            if (! $input || ! $input->credit_debited) {
+            if (! $input) {
                 return;
             }
 
-            if (! $input->user instanceof User) {
-                return;
-            }
-
-            $input->update([
-                'credit_debited' => false,
-            ]);
-
-            $this->refundCreditUseCase->execute($input->user, [
-                'reference_type' => 'input_video_generation_failed',
-                'reason' => 'Failed video generation',
-                'reference_id' => $input->id,
-            ]);
+            $this->billingService->refundInput($input, $reason, array_merge([
+                'prediction_id' => $prediction->getKey(),
+                'prediction_status' => $prediction->status,
+            ], $metadata));
         });
     }
 }

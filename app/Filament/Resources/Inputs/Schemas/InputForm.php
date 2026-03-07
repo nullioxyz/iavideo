@@ -27,6 +27,13 @@ class InputForm
                     ->preload()
                     ->required(),
 
+                Select::make('model_id')
+                    ->relationship('model', 'name')
+                    ->label('Model')
+                    ->searchable()
+                    ->preload()
+                    ->required(),
+
                 TextInput::make('start_image_path')
                     ->label('Start Image Path')
                     ->required(),
@@ -45,6 +52,25 @@ class InputForm
 
                 TextInput::make('size_bytes')
                     ->label('Size (bytes)')
+                    ->required(),
+
+                TextInput::make('duration_seconds')
+                    ->label('Duration (seconds)')
+                    ->numeric()
+                    ->nullable(),
+
+                TextInput::make('estimated_cost_usd')
+                    ->label('Estimated Cost (USD)')
+                    ->numeric()
+                    ->nullable(),
+
+                TextInput::make('credits_charged')
+                    ->label('Credits Charged')
+                    ->numeric()
+                    ->required(),
+
+                TextInput::make('billing_status')
+                    ->label('Billing Status')
                     ->required(),
 
                 TextInput::make('credit_debited')

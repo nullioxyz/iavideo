@@ -6,6 +6,7 @@ use App\Domain\AIModels\Adapters\ModelAdapterRegistry;
 use App\Domain\AIModels\Contracts\Adapters\ModelAdapterRegistryInterface;
 use App\Domain\AIModels\Contracts\Repositories\AIModelsRepositoryInterface;
 use App\Domain\AIModels\Contracts\Repositories\PresetRepositoryInterface;
+use App\Domain\AIModels\Infra\Replicate\GenericReplicateVideoAdapter;
 use App\Domain\AIModels\Infra\Replicate\KlingV25TurboProAdapter;
 use App\Domain\AIModels\Repositories\AIModelsRepository;
 use App\Domain\AIModels\Repositories\PresetsRepository;
@@ -24,6 +25,7 @@ class IAModelsServiceProvider extends ServiceProvider
         $this->app->bind(ModelAdapterRegistryInterface::class, function ($app) {
             return new ModelAdapterRegistry([
                 'kwaivgi/kling-v2.5-turbo-pro' => $app->make(KlingV25TurboProAdapter::class),
+                'replicate:*' => $app->make(GenericReplicateVideoAdapter::class),
             ]);
         });
 

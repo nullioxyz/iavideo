@@ -3,8 +3,7 @@
 namespace App\Domain\Videos\Listeners;
 
 use App\Domain\Broadcasting\Events\UserJobUpdatedBroadcast;
-use App\Domain\Auth\Models\User;
-use App\Domain\Credits\UseCases\RefundCreditUseCase;
+use App\Domain\Credits\Services\GenerationBillingService;
 use App\Domain\Videos\Events\CreatePredictionForInput;
 use App\Domain\Videos\Models\Input;
 use App\Domain\Videos\UseCases\CreatePredictionForInputUseCase;
@@ -20,7 +19,7 @@ class CreatePredictionForInputListener implements ShouldQueue
     public int $tries = 3;
 
     public function __construct(
-        private readonly RefundCreditUseCase $refundCreditUseCase,
+        private readonly GenerationBillingService $billingService,
     ) {}
 
     /**
@@ -60,7 +59,7 @@ class CreatePredictionForInputListener implements ShouldQueue
             'message' => $exception->getMessage(),
         ]);
 
-        DB::transaction(function () use ($event): void {
+        DB::transaction(function () use ($event, $exception): void {
             $input = Input::query()
                 ->whereKey($event->inputId)
                 ->lockForUpdate()
@@ -72,20 +71,14 @@ class CreatePredictionForInputListener implements ShouldQueue
             }
 
             $input->update([
-                'status' => Input::CANCELLED,
+                'status' => Input::FAILED,
             ]);
 
-            if ($input->credit_debited && $input->user instanceof User) {
-                $this->refundCreditUseCase->execute($input->user, [
-                    'reference_type' => 'input_prediction_creation_canceled',
-                    'reason' => 'Prediction creation canceled after retries',
-                    'reference_id' => $input->getKey(),
-                ]);
-
-                $input->update([
-                    'credit_debited' => false,
-                ]);
-            }
+            $this->billingService->refundInput($input, 'Prediction creation failed after retries', [
+                'refund_reason' => 'prediction_creation_failed',
+                'exception' => $exception::class,
+                'message' => $exception->getMessage(),
+            ]);
 
             event(UserJobUpdatedBroadcast::fromInput($input->refresh()));
         });

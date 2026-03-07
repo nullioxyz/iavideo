@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
         $this->call(RolesSeeder::class);
         $this->call(LanguagesSeeder::class);
         $this->call(SettingsSeeder::class);
+        $this->call(AIModelsSeeder::class);
         $this->call(InstitutionalsSeeder::class);
 
         $defaultLanguageId = (int) (Language::query()
@@ -69,21 +70,27 @@ class DatabaseSeeder extends Seeder
         $adminUser->assignRole(RoleNames::ADMIN);
         $devUser->assignRole(RoleNames::DEV);
 
-        // platform
-        $platform = Platform::factory()->create([
-            'name' => 'Replicate',
-            'slug' => 'replicate',
-        ]);
+        $platform = Platform::query()->firstOrCreate(
+            ['slug' => 'replicate'],
+            ['name' => 'Replicate']
+        );
 
-        $model = Model::factory()->create([
-            'platform_id' => $platform->id,
-            'name' => 'Kling v2.5 Turbo Pro',
-            'slug' => 'kwaivgi/kling-v2.5-turbo-pro',
-            'version' => '2.5',
-            'active' => true,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $model = Model::query()->where('provider_model_key', 'kwaivgi/kling-v2.5-turbo-pro')->first();
+
+        if (! $model instanceof Model) {
+            $model = Model::factory()->create([
+                'platform_id' => $platform->id,
+                'name' => 'Kling v2.5 Turbo Pro',
+                'slug' => 'kwaivgi/kling-v2.5-turbo-pro',
+                'provider_model_key' => 'kwaivgi/kling-v2.5-turbo-pro',
+                'version' => '2.5',
+                'cost_per_second_usd' => '0.0700',
+                'public_visible' => true,
+                'active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
 
         Preset::factory()->create([
             'name' => 'Warm',

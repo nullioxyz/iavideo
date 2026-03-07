@@ -26,6 +26,11 @@ class InputsTable
                     ->sortable()
                     ->searchable(),
 
+                TextColumn::make('model.name')
+                    ->label('Model')
+                    ->sortable()
+                    ->searchable(),
+
                 TextColumn::make('user.name')
                     ->label('User')
                     ->sortable()
@@ -47,6 +52,18 @@ class InputsTable
 
                 TextColumn::make('size_bytes')
                     ->label('Size (bytes)'),
+
+                TextColumn::make('duration_seconds')
+                    ->label('Duration (s)'),
+
+                TextColumn::make('estimated_cost_usd')
+                    ->label('Estimated Cost (USD)'),
+
+                TextColumn::make('credits_charged')
+                    ->label('Credits Charged'),
+
+                TextColumn::make('billing_status')
+                    ->label('Billing'),
 
                 TextColumn::make('credit_debited')
                     ->label('Credit/Debited'),

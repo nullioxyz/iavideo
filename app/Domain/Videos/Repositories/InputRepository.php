@@ -31,6 +31,7 @@ class InputRepository implements InputRepositoryInterface
         return $this->model->newQuery()
             ->where('user_id', $userId)
             ->with([
+                'model.platform',
                 'preset.model.platform',
                 'prediction.outputs',
             ])
@@ -59,6 +60,7 @@ class InputRepository implements InputRepositoryInterface
             ->where('user_id', $userId)
             ->whereKey($id)
             ->with([
+                'model.platform',
                 'preset.model.platform',
                 'prediction.outputs',
             ])

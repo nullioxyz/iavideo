@@ -27,12 +27,27 @@ class ModelsForm
                 TextInput::make('slug')
                     ->label('Slug')
                     ->required(),
+                TextInput::make('provider_model_key')
+                    ->label('Provider / Model Key')
+                    ->required(),
                 TextInput::make('version')
                     ->label('Version')
+                    ->nullable(),
+                TextInput::make('cost_per_second_usd')
+                    ->label('Cost / Second (USD)')
+                    ->numeric()
+                    ->nullable(),
+                TextInput::make('sort_order')
+                    ->label('Sort Order')
+                    ->numeric()
+                    ->default(0)
                     ->required(),
                 ...self::translationsComponents(),
 
                 Toggle::make('active')
+                    ->required(),
+                Toggle::make('public_visible')
+                    ->label('Visible to Users')
                     ->required(),
 
                 DateTimePicker::make('created_at'),

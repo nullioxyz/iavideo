@@ -14,6 +14,10 @@ final class ListCreditStatementUseCase
 
         return CreditLedger::query()
             ->where('user_id', $userId)
+            ->with([
+                'model:id,name,provider_model_key',
+                'preset:id,name',
+            ])
             ->orderByDesc('id')
             ->paginate(perPage: $perPage, page: $page);
     }

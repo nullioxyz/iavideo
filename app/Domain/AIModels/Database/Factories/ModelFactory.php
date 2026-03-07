@@ -20,10 +20,17 @@ class ModelFactory extends Factory
      */
     public function definition(): array
     {
+        $providerModelKey = fake()->unique()->slug();
+
         return [
             'platform_id' => Platform::factory(),
             'name' => fake()->word(),
-            'slug' => fake()->slug(),
+            'slug' => $providerModelKey,
+            'provider_model_key' => $providerModelKey,
+            'version' => null,
+            'cost_per_second_usd' => '0.0700',
+            'public_visible' => true,
+            'sort_order' => 0,
             'created_at' => Carbon::now(),
             'active' => true,
         ];

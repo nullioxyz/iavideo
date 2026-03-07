@@ -18,10 +18,17 @@ class VideoGenerationHistoryEntryResource extends JsonResource
             'input_id' => $this->id,
             'title' => $this->title,
             'status' => $this->status,
+            'model' => $this->model ? [
+                'id' => $this->model->getKey(),
+                'name' => $this->model->name,
+                'provider_model_key' => $this->model->providerModelKey(),
+            ] : null,
             'preset' => [
                 'id' => $this->preset?->id,
                 'name' => $this->preset?->name,
             ],
+            'duration_seconds' => $this->duration_seconds,
+            'estimated_cost_usd' => $this->estimated_cost_usd,
             'prediction' => [
                 'id' => $this->prediction?->id,
                 'status' => $this->prediction?->status,
@@ -32,6 +39,8 @@ class VideoGenerationHistoryEntryResource extends JsonResource
             'credits_debited' => (int) ($this->credits_debited ?? 0),
             'credits_refunded' => (int) ($this->credits_refunded ?? 0),
             'credits_used' => (int) ($this->credits_used ?? 0),
+            'credits_charged' => (int) ($this->credits_charged ?? 0),
+            'billing_status' => $this->billing_status,
             'is_failed' => (bool) ($this->is_failed ?? false),
             'is_canceled' => (bool) ($this->is_canceled ?? false),
             'is_refunded' => (bool) ($this->is_refunded ?? false),

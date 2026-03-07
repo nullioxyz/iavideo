@@ -23,8 +23,12 @@ class Model extends EloquentModel
         'platform_id',
         'name',
         'slug',
+        'provider_model_key',
         'version',
+        'cost_per_second_usd',
         'active',
+        'public_visible',
+        'sort_order',
         'created_at',
         'updated_at',
     ];
@@ -39,17 +43,33 @@ class Model extends EloquentModel
         return [
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
+            'cost_per_second_usd' => 'decimal:4',
+            'active' => 'boolean',
+            'public_visible' => 'boolean',
+            'sort_order' => 'integer',
         ];
     }
 
     public function isActive(): bool
     {
-        return $this->active;
+        return (bool) $this->active;
+    }
+
+    public function isPubliclyVisible(): bool
+    {
+        return (bool) $this->public_visible;
+    }
+
+    public function isAvailableForGeneration(): bool
+    {
+        return $this->isActive()
+            && $this->isPubliclyVisible()
+            && $this->cost_per_second_usd !== null;
     }
 
     public function presets(): HasMany
     {
-        return $this->hasMany(Preset::class, 'defaul_model_id');
+        return $this->hasMany(Preset::class, 'default_model_id');
     }
 
     public function translations(): HasMany
@@ -82,6 +102,11 @@ class Model extends EloquentModel
         $translation = $this->resolveTranslation($preferredLanguageId, $defaultLanguageId);
 
         return (string) ($translation?->slug ?: $this->slug);
+    }
+
+    public function providerModelKey(): string
+    {
+        return (string) ($this->provider_model_key ?: $this->slug);
     }
 
     private function resolveTranslation(?int $preferredLanguageId, ?int $defaultLanguageId): ?ModelLang

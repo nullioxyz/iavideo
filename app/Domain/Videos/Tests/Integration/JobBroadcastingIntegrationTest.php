@@ -40,6 +40,7 @@ class JobBroadcastingIntegrationTest extends TestCase
         $image = UploadedFile::fake()->image('tattoo.png', 900, 1600)->size(500);
 
         $response = $this->withJwt($token)->postJson('/api/input/create', [
+            'model_id' => $activeModel->getKey(),
             'preset_id' => $preset->getKey(),
             'image' => $image,
         ]);

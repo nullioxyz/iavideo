@@ -29,6 +29,11 @@ class AIModelsRepository implements AIModelsRepositoryInterface
 
         return $this->model->newQuery()
             ->where('active', true)
+            ->where('public_visible', true)
+            ->whereNotNull('cost_per_second_usd')
+            ->whereHas('presets', function ($query): void {
+                $query->where('active', true);
+            })
             ->with([
                 'translations' => function ($query) use ($languageIds): void {
                     if ($languageIds !== []) {
@@ -36,6 +41,7 @@ class AIModelsRepository implements AIModelsRepositoryInterface
                     }
                 },
             ])
+            ->orderBy('sort_order')
             ->orderBy('id', 'desc')
             ->paginate(perPage: $perPage, page: $page);
     }

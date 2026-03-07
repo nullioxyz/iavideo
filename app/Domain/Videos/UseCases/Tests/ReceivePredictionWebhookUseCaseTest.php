@@ -55,7 +55,7 @@ class ReceivePredictionWebhookUseCaseTest extends TestCase
                 $this->dispatchCalls++;
             }
 
-            public function refundFailedGenerationIfDebited(Prediction $prediction): void
+            public function refundUnsuccessfulGenerationIfCharged(Prediction $prediction, string $reason, array $metadata = []): void
             {
                 $this->refundCalls++;
             }
@@ -117,7 +117,7 @@ class ReceivePredictionWebhookUseCaseTest extends TestCase
         {
             public function dispatchDownloadOutputs(Prediction $prediction): void {}
 
-            public function refundFailedGenerationIfDebited(Prediction $prediction): void {}
+            public function refundUnsuccessfulGenerationIfCharged(Prediction $prediction, string $reason, array $metadata = []): void {}
         };
 
         $useCase = new ReceivePredictionWebhookUseCase($repository, $effects);
@@ -186,7 +186,7 @@ class ReceivePredictionWebhookUseCaseTest extends TestCase
                 $this->dispatchCalls++;
             }
 
-            public function refundFailedGenerationIfDebited(Prediction $prediction): void {}
+            public function refundUnsuccessfulGenerationIfCharged(Prediction $prediction, string $reason, array $metadata = []): void {}
         };
 
         $useCase = new ReceivePredictionWebhookUseCase($repository, $effects);
@@ -253,7 +253,7 @@ class ReceivePredictionWebhookUseCaseTest extends TestCase
 
             public function dispatchDownloadOutputs(Prediction $prediction): void {}
 
-            public function refundFailedGenerationIfDebited(Prediction $prediction): void
+            public function refundUnsuccessfulGenerationIfCharged(Prediction $prediction, string $reason, array $metadata = []): void
             {
                 $this->refundCalls++;
             }
@@ -298,7 +298,7 @@ class ReceivePredictionWebhookUseCaseTest extends TestCase
         {
             public function dispatchDownloadOutputs(Prediction $prediction): void {}
 
-            public function refundFailedGenerationIfDebited(Prediction $prediction): void {}
+            public function refundUnsuccessfulGenerationIfCharged(Prediction $prediction, string $reason, array $metadata = []): void {}
         };
 
         $useCase = new ReceivePredictionWebhookUseCase($repository, $effects);

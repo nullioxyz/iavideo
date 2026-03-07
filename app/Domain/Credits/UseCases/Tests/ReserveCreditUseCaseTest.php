@@ -45,10 +45,10 @@ class ReserveCreditUseCaseTest extends TestCase
         };
 
         $useCase = new ReserveCreditUseCase($wallet);
-        $useCase->execute($user, ['reference_type' => 'input_creation']);
+        $useCase->execute($user, ['reference_type' => 'input_generation']);
 
         $this->assertTrue($state->called);
         $this->assertSame(1, $state->receivedAmount);
-        $this->assertSame('input_creation', $state->receivedData['reference_type']);
+        $this->assertSame('input_generation', $state->receivedData['reference_type']);
     }
 }

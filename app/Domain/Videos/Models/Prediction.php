@@ -30,6 +30,9 @@ class Prediction extends EloquentModel
         'finished_at',
         'canceled_at',
         'failed_at',
+        'duration_seconds',
+        'processing_ms',
+        'total_ms',
         'cost_estimate_usd',
         'cost_actual_usd',
         'error_code',
@@ -73,6 +76,8 @@ class Prediction extends EloquentModel
             'failed_at' => 'datetime',
             'request_payload' => 'array',
             'response_payload' => 'array',
+            'cost_estimate_usd' => 'decimal:4',
+            'cost_actual_usd' => 'decimal:4',
         ];
     }
 

@@ -82,8 +82,11 @@ class CancelPredictionUseCaseTest extends TestCase
             'platform_id' => $platform->id,
             'name' => 'Kling v2.5 Turbo Pro',
             'slug' => 'kwaivgi/kling-v2.5-turbo-pro',
+            'provider_model_key' => 'kwaivgi/kling-v2.5-turbo-pro',
             'version' => null,
+            'cost_per_second_usd' => '0.0700',
             'active' => true,
+            'public_visible' => true,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -103,11 +106,16 @@ class CancelPredictionUseCaseTest extends TestCase
 
         $input = Input::query()->create([
             'user_id' => $user->getKey(),
+            'model_id' => $model->getKey(),
             'preset_id' => $preset->id,
             'start_image_path' => null,
             'original_filename' => 'tattoo.png',
             'mime_type' => 'image/png',
             'size_bytes' => 12345,
+            'duration_seconds' => 5,
+            'estimated_cost_usd' => '0.3500',
+            'credits_charged' => 1,
+            'billing_status' => 'charged',
             'credit_debited' => true,
             'status' => 'created',
             'created_at' => now(),
@@ -231,7 +239,8 @@ class CancelPredictionUseCaseTest extends TestCase
         $this->assertDatabaseHas('credit_ledger', [
             'user_id' => $user->getKey(),
             'reference_id' => $input->getKey(),
-            'reference_type' => 'input_video_generation_canceled',
+            'reference_type' => 'input_generation',
+            'operation_type' => 'generation_refund',
             'delta' => 1,
             'balance_after' => 3,
         ]);

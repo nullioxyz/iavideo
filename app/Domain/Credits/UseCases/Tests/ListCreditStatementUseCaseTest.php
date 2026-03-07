@@ -18,17 +18,21 @@ class ListCreditStatementUseCaseTest extends TestCase
 
         $user->creditLedger()->create([
             'delta' => -1,
+            'balance_before' => 3,
             'balance_after' => 2,
             'reason' => 'input creation',
-            'reference_type' => 'input_creation',
+            'operation_type' => 'generation_debit',
+            'reference_type' => 'input_generation',
             'reference_id' => 1,
         ]);
 
         $other->creditLedger()->create([
             'delta' => -2,
+            'balance_before' => 3,
             'balance_after' => 1,
             'reason' => 'other user',
-            'reference_type' => 'input_creation',
+            'operation_type' => 'generation_debit',
+            'reference_type' => 'input_generation',
             'reference_id' => 2,
         ]);
 

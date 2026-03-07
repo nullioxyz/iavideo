@@ -87,8 +87,11 @@ class CreatePredictionForInputUseCaseTest extends TestCase
             'platform_id' => $platform->id,
             'name' => 'Kling v2.5 Turbo Pro',
             'slug' => 'kwaivgi/kling-v2.5-turbo-pro',
+            'provider_model_key' => 'kwaivgi/kling-v2.5-turbo-pro',
             'version' => null,
+            'cost_per_second_usd' => '0.0700',
             'active' => true,
+            'public_visible' => true,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -108,12 +111,17 @@ class CreatePredictionForInputUseCaseTest extends TestCase
 
         $input = Input::query()->create([
             'user_id' => $user->getKey(),
+            'model_id' => $model->getKey(),
             'preset_id' => $preset->id,
             'start_image_path' => null,
             'original_filename' => 'tattoo.png',
             'mime_type' => 'image/png',
             'size_bytes' => 12345,
+            'duration_seconds' => 5,
+            'estimated_cost_usd' => '0.3500',
             'credit_debited' => false,
+            'credits_charged' => 0,
+            'billing_status' => 'none',
             'status' => 'created',
             'created_at' => now(),
             'updated_at' => now(),
@@ -198,6 +206,7 @@ class CreatePredictionForInputUseCaseTest extends TestCase
         $this->assertSame('starting', $prediction->status);
         $this->assertSame($input->id, $prediction->input_id);
         $this->assertSame($model->id, $prediction->model_id);
+        $this->assertSame('0.3500', (string) $prediction->cost_estimate_usd);
 
         $this->assertDatabaseHas('predictions', [
             'id' => $prediction->id,

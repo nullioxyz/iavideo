@@ -20,8 +20,13 @@ class AIModelResource extends JsonResource
             'platform_id' => $this->platform_id,
             'name' => $this->localizedName($preferredLanguageId, $defaultLanguageId),
             'slug' => $this->localizedSlug($preferredLanguageId, $defaultLanguageId),
+            'provider_model_key' => $this->providerModelKey(),
             'version' => $this->version,
             'active' => (bool) $this->active,
+            'public_visible' => (bool) $this->public_visible,
+            'available_for_generation' => $this->isAvailableForGeneration(),
+            'cost_per_second_usd' => $this->cost_per_second_usd,
+            'sort_order' => (int) ($this->sort_order ?? 0),
             'created_at' => optional($this->created_at)?->toISOString(),
             'updated_at' => optional($this->updated_at)?->toISOString(),
         ];

@@ -24,7 +24,7 @@ class CreatePredictionForInputListenerTest extends TestCase
         $this->assertSame([120, 300], $listener->backoff());
     }
 
-    public function test_listener_final_failure_cancels_input_and_refunds_credit(): void
+    public function test_listener_final_failure_marks_input_failed_and_refunds_credit(): void
     {
         Event::fake([UserJobUpdatedBroadcast::class]);
 
@@ -35,6 +35,8 @@ class CreatePredictionForInputListenerTest extends TestCase
 
         $input = Input::factory()->create([
             'user_id' => $user->getKey(),
+            'credits_charged' => 1,
+            'billing_status' => 'charged',
             'credit_debited' => true,
             'status' => Input::PROCESSING,
         ]);
@@ -45,12 +47,13 @@ class CreatePredictionForInputListenerTest extends TestCase
             new \RuntimeException('provider unavailable')
         );
 
-        $this->assertSame(Input::CANCELLED, (string) $input->fresh()->status);
+        $this->assertSame(Input::FAILED, (string) $input->fresh()->status);
         $this->assertFalse((bool) $input->fresh()->credit_debited);
 
         $ledger = CreditLedger::query()
             ->where('user_id', $user->getKey())
-            ->where('reference_type', 'input_prediction_creation_canceled')
+            ->where('reference_type', 'input_generation')
+            ->where('operation_type', 'generation_refund')
             ->where('reference_id', $input->getKey())
             ->latest('id')
             ->first();

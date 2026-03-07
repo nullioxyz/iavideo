@@ -10,6 +10,7 @@ class InputCreateDTOTest extends TestCase
     public function test_to_array_uses_explicit_title_when_provided(): void
     {
         $dto = new InputCreateDTO(
+            modelId: 9,
             presetId: 10,
             title: 'Titulo customizado',
             originalFilename: 'arquivo.png',
@@ -20,12 +21,14 @@ class InputCreateDTOTest extends TestCase
 
         $payload = $dto->toArray(5);
 
+        $this->assertSame(9, $payload['model_id']);
         $this->assertSame('Titulo customizado', $payload['title']);
     }
 
     public function test_to_array_fallbacks_title_to_original_filename_when_title_is_null(): void
     {
         $dto = new InputCreateDTO(
+            modelId: 9,
             presetId: 10,
             title: null,
             originalFilename: 'arquivo.png',

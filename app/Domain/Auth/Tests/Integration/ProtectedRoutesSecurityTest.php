@@ -50,7 +50,12 @@ class ProtectedRoutesSecurityTest extends TestCase
             'credits.video_generations' => ['GET', '/api/credits/video-generations'],
 
             // Videos / Jobs
+            'input.estimate' => ['POST', '/api/input/estimate', [
+                'model_id' => 1,
+                'preset_id' => 1,
+            ]],
             'input.create' => ['POST', '/api/input/create', [
+                'model_id' => 1,
                 'preset_id' => 1,
             ]],
             'prediction.cancel' => ['POST', '/api/prediction/cancel', [

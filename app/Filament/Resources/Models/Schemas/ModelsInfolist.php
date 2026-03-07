@@ -15,10 +15,18 @@ class ModelsInfolist
                 TextEntry::make('name'),
                 TextEntry::make('slug')
                     ->label('Slug'),
+                TextEntry::make('provider_model_key')
+                    ->label('Provider / Model Key'),
                 TextEntry::make('version')
                     ->label('Version'),
+                TextEntry::make('cost_per_second_usd')
+                    ->label('Cost / Second (USD)'),
+                TextEntry::make('sort_order')
+                    ->label('Sort Order'),
 
                 IconEntry::make('active')
+                    ->boolean(),
+                IconEntry::make('public_visible')
                     ->boolean(),
 
                 TextEntry::make('created_at'),

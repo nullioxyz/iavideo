@@ -37,7 +37,7 @@ class PresetsTable
                     ->label('Duration (seconds)'),
 
                 TextColumn::make('cost_estimate_usd')
-                    ->label('Cost Estimate (USD)'),
+                    ->label('Legacy Cost Estimate (deprecated)'),
 
                 TextColumn::make('preview_image_url')
                     ->label('Preview Image URL')

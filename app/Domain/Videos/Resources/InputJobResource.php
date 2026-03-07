@@ -19,6 +19,12 @@ class InputJobResource extends JsonResource
 
         return [
             'id' => $this->id,
+            'model_id' => $this->model_id,
+            'model' => $this->model ? [
+                'id' => $this->model->getKey(),
+                'name' => $this->model->localizedName($preferredLanguageId, $defaultLanguageId),
+                'provider_model_key' => $this->model->providerModelKey(),
+            ] : null,
             'preset_id' => $this->preset_id,
             'preset' => $this->preset ? [
                 'id' => $this->preset->getKey(),
@@ -30,6 +36,10 @@ class InputJobResource extends JsonResource
             'original_filename' => $this->original_filename,
             'mime_type' => $this->mime_type,
             'size_bytes' => $this->size_bytes,
+            'duration_seconds' => $this->duration_seconds,
+            'estimated_cost_usd' => $this->estimated_cost_usd,
+            'credits_charged' => (int) ($this->credits_charged ?? 0),
+            'billing_status' => $this->billing_status,
             'credit_debited' => (bool) $this->credit_debited,
             'start_image_url' => $startImageUrl,
             'prediction' => $this->prediction

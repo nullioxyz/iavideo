@@ -46,6 +46,7 @@ class InputCreationStressTest extends TestCase
 
         for ($i = 1; $i <= $attempts; $i++) {
             $response = $this->withJwt($token)->postJson('/api/input/create', [
+                'model_id' => $activeModel->getKey(),
                 'preset_id' => $preset->getKey(),
                 'title' => "stress-{$i}",
                 'image' => UploadedFile::fake()->image("stress-{$i}.png", 1024, 1024)->size(400),
@@ -67,7 +68,7 @@ class InputCreationStressTest extends TestCase
         $this->assertDatabaseCount('inputs', $created);
         $this->assertSame(
             $created,
-            $user->creditLedger()->where('reference_type', 'input_creation')->count()
+            $user->creditLedger()->where('reference_type', 'input_generation')->count()
         );
 
         Event::assertDispatchedTimes(InputCreated::class, $created);
@@ -104,6 +105,7 @@ class InputCreationStressTest extends TestCase
 
         for ($i = 1; $i <= $totalRounds; $i++) {
             $responseA = $this->withJwt($tokenA)->postJson('/api/input/create', [
+                'model_id' => $activeModel->getKey(),
                 'preset_id' => $preset->getKey(),
                 'title' => "A-{$i}",
                 'image' => UploadedFile::fake()->image("a-{$i}.png", 900, 900)->size(300),
@@ -116,6 +118,7 @@ class InputCreationStressTest extends TestCase
             }
 
             $responseB = $this->withJwt($tokenB)->postJson('/api/input/create', [
+                'model_id' => $activeModel->getKey(),
                 'preset_id' => $preset->getKey(),
                 'title' => "B-{$i}",
                 'image' => UploadedFile::fake()->image("b-{$i}.png", 900, 900)->size(300),
@@ -133,7 +136,7 @@ class InputCreationStressTest extends TestCase
         $this->assertSame(0, (int) $userA->fresh()->credit_balance);
         $this->assertSame(0, (int) $userB->fresh()->credit_balance);
 
-        $this->assertSame(10, $userA->creditLedger()->where('reference_type', 'input_creation')->count());
-        $this->assertSame(7, $userB->creditLedger()->where('reference_type', 'input_creation')->count());
+        $this->assertSame(10, $userA->creditLedger()->where('reference_type', 'input_generation')->count());
+        $this->assertSame(7, $userB->creditLedger()->where('reference_type', 'input_generation')->count());
     }
 }

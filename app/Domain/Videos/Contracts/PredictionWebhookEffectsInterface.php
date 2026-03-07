@@ -8,5 +8,8 @@ interface PredictionWebhookEffectsInterface
 {
     public function dispatchDownloadOutputs(Prediction $prediction): void;
 
-    public function refundFailedGenerationIfDebited(Prediction $prediction): void;
+    /**
+     * @param  array<string, mixed>  $metadata
+     */
+    public function refundUnsuccessfulGenerationIfCharged(Prediction $prediction, string $reason, array $metadata = []): void;
 }

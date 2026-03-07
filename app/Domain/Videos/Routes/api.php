@@ -3,6 +3,7 @@
 use App\Domain\Videos\Controllers\CancelInputPredictionController;
 use App\Domain\Videos\Controllers\CancelJobController;
 use App\Domain\Videos\Controllers\DownloadJobVideoController;
+use App\Domain\Videos\Controllers\InputEstimateController;
 use App\Domain\Videos\Controllers\InputCreateController;
 use App\Domain\Videos\Controllers\JobDetailController;
 use App\Domain\Videos\Controllers\JobsListController;
@@ -19,6 +20,7 @@ Route::prefix('api')
     ])
     ->group(function () {
         Route::prefix('input')->name('input.')->group(function () {
+            Route::post('/estimate', InputEstimateController::class)->name('estimate');
             Route::post('/create', InputCreateController::class)->name('create');
         });
 

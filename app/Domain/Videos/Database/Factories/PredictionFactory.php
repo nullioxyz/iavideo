@@ -34,6 +34,9 @@ class PredictionFactory extends Factory
             'started_at' => null,
             'finished_at' => null,
             'failed_at' => null,
+            'duration_seconds' => 5,
+            'processing_ms' => null,
+            'total_ms' => null,
 
             'cost_estimate_usd' => $this->faker->randomFloat(4, 0, 5),
             'cost_actual_usd' => null,

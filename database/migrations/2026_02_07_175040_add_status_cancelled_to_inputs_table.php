@@ -12,6 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
         Schema::table('inputs', function (Blueprint $table) {
             DB::statement("
                 ALTER TABLE inputs 
@@ -31,6 +35,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
         Schema::table('inputs', function (Blueprint $table) {
             DB::statement("
                 ALTER TABLE inputs 

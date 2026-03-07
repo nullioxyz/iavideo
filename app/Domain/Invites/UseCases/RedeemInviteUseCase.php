@@ -47,6 +47,7 @@ final class RedeemInviteUseCase
 
             $this->creditWallet->refund($user, (int) $invite->credits_granted, [
                 'reason' => 'Invite redeemed',
+                'operation_type' => 'invite_redemption',
                 'reference_type' => 'invite_redemption',
                 'reference_id' => $invite->getKey(),
             ]);

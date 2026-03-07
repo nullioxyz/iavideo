@@ -23,10 +23,19 @@ class ModelsTable
                     ->searchable(),
                 TextColumn::make('slug')
                     ->label('Slug'),
+                TextColumn::make('provider_model_key')
+                    ->label('Provider / Model Key')
+                    ->searchable(),
                 TextColumn::make('version')
                     ->label('Version'),
+                TextColumn::make('cost_per_second_usd')
+                    ->label('Cost / Second (USD)'),
                 TextColumn::make('active')
                     ->label('active'),
+                TextColumn::make('public_visible')
+                    ->label('Visible'),
+                TextColumn::make('sort_order')
+                    ->label('Sort'),
                 TextColumn::make('created_at')->dateTime(),
                 TextColumn::make('updated_at')->dateTime(),
             ])

@@ -7,7 +7,6 @@ use App\Domain\Contacts\Models\Contact;
 use App\Domain\Credits\Models\CreditLedger;
 use App\Domain\Videos\Models\Input;
 use App\Domain\Videos\Models\Prediction;
-use Illuminate\Support\Facades\DB;
 
 class GetMvpKpisUseCase
 {
@@ -26,8 +25,10 @@ class GetMvpKpisUseCase
         $avgReadySeconds = (float) Prediction::query()
             ->whereNotNull('finished_at')
             ->whereIn('status', [Prediction::SUCCEEDED, Prediction::FAILED, Prediction::CANCELLED])
-            ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, created_at, finished_at)) as avg_seconds')
-            ->value('avg_seconds');
+            ->get(['created_at', 'finished_at'])
+            ->avg(fn (Prediction $prediction): int => $prediction->created_at !== null && $prediction->finished_at !== null
+                ? $prediction->created_at->diffInSeconds($prediction->finished_at)
+                : 0);
 
         $totalPredictions = Prediction::query()->count();
         $failedPredictions = Prediction::query()->where('status', Prediction::FAILED)->count();
@@ -49,8 +50,12 @@ class GetMvpKpisUseCase
             ->pluck('id');
 
         $debitedCredits = (int) abs((int) CreditLedger::query()
-            ->where('reference_type', 'input_creation')
             ->whereIn('reference_id', $completedInputIds)
+            ->where(function ($query): void {
+                $query
+                    ->where('operation_type', 'generation_debit')
+                    ->orWhere('reference_type', 'input_creation');
+            })
             ->sum('delta'));
 
         $completedVideos = $completedInputIds->count();
@@ -60,12 +65,16 @@ class GetMvpKpisUseCase
             : 0.0;
 
         $refundCredits = (int) CreditLedger::query()
-            ->whereIn('reference_type', [
-                'input_prediction_creation_failed',
-                'input_prediction_creation_canceled',
-                'input_video_generation_failed',
-                'input_video_generation_canceled',
-            ])
+            ->where(function ($query): void {
+                $query
+                    ->where('operation_type', 'generation_refund')
+                    ->orWhereIn('reference_type', [
+                        'input_prediction_creation_failed',
+                        'input_prediction_creation_canceled',
+                        'input_video_generation_failed',
+                        'input_video_generation_canceled',
+                    ]);
+            })
             ->sum('delta');
 
         $refundRate = $debitedCredits > 0

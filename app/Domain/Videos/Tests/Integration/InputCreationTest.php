@@ -41,6 +41,7 @@ class InputCreationTest extends TestCase
         $image = UploadedFile::fake()->image('tattoo.png', 900, 1600)->size(500);
 
         $response = $this->withJwt($token)->postJson('/api/input/create', [
+            'model_id' => $activeModel->getKey(),
             'preset_id' => $preset->getKey(),
             'title' => 'Meu video de teste',
             'image' => $image,
@@ -51,6 +52,7 @@ class InputCreationTest extends TestCase
         $response->assertJsonStructure([
             'data' => [
                 'id',
+                'model_id',
                 'preset_id',
                 'user_id',
                 'status',
@@ -58,6 +60,10 @@ class InputCreationTest extends TestCase
                 'original_filename',
                 'mime_type',
                 'size_bytes',
+                'duration_seconds',
+                'estimated_cost_usd',
+                'credits_charged',
+                'billing_status',
             ],
         ]);
 
@@ -66,11 +72,14 @@ class InputCreationTest extends TestCase
         $this->assertDatabaseHas('inputs', [
             'id' => $inputId,
             'user_id' => $user->getKey(),
+            'model_id' => $activeModel->getKey(),
             'preset_id' => $preset->getKey(),
             'status' => 'created',
             'title' => 'Meu video de teste',
             'original_filename' => 'tattoo.png',
             'mime_type' => 'image/png',
+            'credits_charged' => 1,
+            'billing_status' => 'charged',
         ]);
 
         $input = Input::query()->findOrFail($inputId);
@@ -107,6 +116,7 @@ class InputCreationTest extends TestCase
         $image = UploadedFile::fake()->image('arquivo-original.png', 900, 1600)->size(500);
 
         $response = $this->withJwt($token)->postJson('/api/input/create', [
+            'model_id' => $activeModel->getKey(),
             'preset_id' => $preset->getKey(),
             'title' => '   ',
             'image' => $image,
@@ -147,11 +157,13 @@ class InputCreationTest extends TestCase
         $image = UploadedFile::fake()->image('landscape.png', 1600, 900)->size(500);
 
         $response = $this->withJwt($token)->postJson('/api/input/create', [
+            'model_id' => $activeModel->getKey(),
             'preset_id' => $preset->getKey(),
             'image' => $image,
         ]);
 
         $response->assertCreated();
+        $response->assertJsonPath('data.model_id', $activeModel->getKey());
         $response->assertJsonPath('data.preset_id', $preset->getKey());
     }
 }

@@ -47,17 +47,21 @@ class CreditsEndpointsTest extends TestCase
 
         $user->creditLedger()->create([
             'delta' => -1,
+            'balance_before' => 3,
             'balance_after' => 2,
-            'reason' => 'Charge for input creation',
-            'reference_type' => 'input_creation',
+            'reason' => 'Video generation charge',
+            'operation_type' => 'generation_debit',
+            'reference_type' => 'input_generation',
             'reference_id' => 1,
         ]);
 
         $otherUser->creditLedger()->create([
             'delta' => -1,
+            'balance_before' => 2,
             'balance_after' => 1,
             'reason' => 'Other user',
-            'reference_type' => 'input_creation',
+            'operation_type' => 'generation_debit',
+            'reference_type' => 'input_generation',
             'reference_id' => 2,
         ]);
 
@@ -65,7 +69,8 @@ class CreditsEndpointsTest extends TestCase
 
         $response->assertOk();
         $response->assertJsonCount(1, 'data');
-        $response->assertJsonPath('data.0.reason', 'Charge for input creation');
+        $response->assertJsonPath('data.0.reason', 'Video generation charge');
+        $response->assertJsonPath('data.0.operation_type', 'generation_debit');
     }
 
     public function test_video_generations_returns_only_authenticated_user_history_with_credit_usage(): void
@@ -87,6 +92,7 @@ class CreditsEndpointsTest extends TestCase
 
         $input = Input::factory()->create([
             'user_id' => $user->getKey(),
+            'model_id' => $model->getKey(),
             'preset_id' => $preset->getKey(),
             'title' => 'Video teste',
             'status' => Input::DONE,
@@ -106,18 +112,27 @@ class CreditsEndpointsTest extends TestCase
 
         $user->creditLedger()->create([
             'delta' => -1,
+            'balance_before' => 3,
             'balance_after' => 2,
-            'reason' => 'Charge for input creation',
-            'reference_type' => 'input_creation',
+            'reason' => 'Video generation charge',
+            'operation_type' => 'generation_debit',
+            'reference_type' => 'input_generation',
             'reference_id' => $input->getKey(),
+            'model_id' => $model->getKey(),
+            'preset_id' => $preset->getKey(),
+            'duration_seconds' => 5,
+            'generation_cost_usd' => '0.3500',
         ]);
 
         $user->creditLedger()->create([
             'delta' => 1,
+            'balance_before' => 2,
             'balance_after' => 3,
             'reason' => 'Failed video generation',
-            'reference_type' => 'input_video_generation_failed',
+            'operation_type' => 'generation_refund',
+            'reference_type' => 'input_generation',
             'reference_id' => $input->getKey(),
+            'metadata' => ['refund_reason' => 'provider_failed'],
         ]);
 
         $otherInput = Input::factory()->create([
@@ -127,9 +142,11 @@ class CreditsEndpointsTest extends TestCase
 
         $otherUser->creditLedger()->create([
             'delta' => -1,
+            'balance_before' => 1,
             'balance_after' => 0,
             'reason' => 'Other user',
-            'reference_type' => 'input_creation',
+            'operation_type' => 'generation_debit',
+            'reference_type' => 'input_generation',
             'reference_id' => $otherInput->getKey(),
         ]);
 
@@ -139,6 +156,7 @@ class CreditsEndpointsTest extends TestCase
         $response->assertJsonCount(1, 'data');
         $response->assertJsonPath('data.0.input_id', $input->getKey());
         $response->assertJsonPath('data.0.title', 'Video teste');
+        $response->assertJsonPath('data.0.model.id', $model->getKey());
         $response->assertJsonPath('data.0.preset.id', $preset->getKey());
         $response->assertJsonPath('data.0.prediction.id', $prediction->getKey());
         $response->assertJsonPath('data.0.prediction.output_video_url', 'https://cdn.example.com/video.mp4');
@@ -150,6 +168,8 @@ class CreditsEndpointsTest extends TestCase
         $response->assertJsonPath('data.0.ledger_entries_count', 2);
         $response->assertJsonPath('data.0.ledger_entries.0.operation', 'debit');
         $response->assertJsonPath('data.0.ledger_entries.1.operation', 'refund');
+        $response->assertJsonPath('data.0.ledger_entries.0.operation_type', 'generation_debit');
+        $response->assertJsonPath('data.0.ledger_entries.1.operation_type', 'generation_refund');
         $response->assertJsonPath('data.0.credit_events.0.type', 'debit');
         $response->assertJsonPath('data.0.credit_events.1.type', 'refund');
     }
@@ -172,6 +192,7 @@ class CreditsEndpointsTest extends TestCase
 
         $input = Input::factory()->create([
             'user_id' => $user->getKey(),
+            'model_id' => $model->getKey(),
             'preset_id' => $preset->getKey(),
             'title' => 'Video cancelado',
             'status' => Input::CANCELLED,
@@ -185,18 +206,23 @@ class CreditsEndpointsTest extends TestCase
 
         $user->creditLedger()->create([
             'delta' => -1,
+            'balance_before' => 3,
             'balance_after' => 2,
-            'reason' => 'Charge for input creation',
-            'reference_type' => 'input_creation',
+            'reason' => 'Video generation charge',
+            'operation_type' => 'generation_debit',
+            'reference_type' => 'input_generation',
             'reference_id' => $input->getKey(),
         ]);
 
         $user->creditLedger()->create([
             'delta' => 1,
+            'balance_before' => 2,
             'balance_after' => 3,
             'reason' => 'Canceled video generation',
-            'reference_type' => 'input_video_generation_canceled',
+            'operation_type' => 'generation_refund',
+            'reference_type' => 'input_generation',
             'reference_id' => $input->getKey(),
+            'metadata' => ['refund_reason' => 'cancelled'],
         ]);
 
         $response = $this->withJwt($token)->getJson('/api/credits/video-generations');

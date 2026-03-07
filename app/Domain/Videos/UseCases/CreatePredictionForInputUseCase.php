@@ -25,7 +25,7 @@ final class CreatePredictionForInputUseCase
     {
         /** @var Input $input */
         $input = Input::query()
-            ->with(['preset', 'preset.model', 'preset.model.platform'])
+            ->with(['model.platform', 'preset'])
             ->findOrFail($inputId);
 
         $preset = $input->preset;
@@ -33,13 +33,13 @@ final class CreatePredictionForInputUseCase
             throw new RuntimeException("Preset not found for input {$inputId}");
         }
 
-        $model = $preset->model;
+        $model = $input->model;
         if (! $model instanceof AIModel || ! $model->platform instanceof Platform) {
-            throw new RuntimeException("Model/platform not configured for preset {$preset->id}");
+            throw new RuntimeException("Model/platform not configured for input {$inputId}");
         }
 
         $providerSlug = (string) $model->platform->slug;
-        $modelSlug = (string) $model->slug;
+        $modelSlug = $model->providerModelKey();
         $modelVersion = $model->version;
 
         $imageUrl = app()->environment('testing')
@@ -57,7 +57,7 @@ final class CreatePredictionForInputUseCase
             prompt: (string) $preset->prompt,
             negativePrompt: $preset->negative_prompt ?: null,
             aspectRatio: (string) ($preset->aspect_ratio ?? '9:16'),
-            durationSeconds: (int) ($preset->duration_seconds ?? 5),
+            durationSeconds: (int) ($input->duration_seconds ?? $preset->duration_seconds ?? 5),
             extra: [
                 'webhook' => route('webhook.replicate'),
             ]
@@ -102,8 +102,8 @@ final class CreatePredictionForInputUseCase
 
             'queued_at' => Carbon::now(),
 
-            'duration_seconds' => (int) ($preset->duration_seconds ?? 5),
-            'cost_estimate_usd' => $preset->cost_estimate_usd,
+            'duration_seconds' => (int) ($input->duration_seconds ?? $preset->duration_seconds ?? 5),
+            'cost_estimate_usd' => $input->estimated_cost_usd,
 
             'request_payload' => $command->payload,
             'response_payload' => $result->responsePayload,
