@@ -2,9 +2,11 @@
 
 namespace App\Domain\Auth\Tests\Integration;
 
+use App\Domain\Broadcasting\Events\UserSessionLoggedOutBroadcast;
 use App\Domain\Auth\Models\User;
 use App\Domain\Auth\Support\RoleNames;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
@@ -97,6 +99,45 @@ class AuthTest extends TestCase
                 'email',
             ],
         ]);
+    }
+
+    public function test_logout_invalidates_token_and_dispatches_logged_out_broadcast(): void
+    {
+        Event::fake([UserSessionLoggedOutBroadcast::class]);
+
+        $user = User::factory()->create([
+            'active' => true,
+            'password' => bcrypt('password'),
+        ]);
+
+        $login = $this->postJson('/api/auth/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $login->assertOk();
+        $token = (string) $login->json('data.access_token');
+        $this->assertNotSame('', $token);
+
+        $logout = $this
+            ->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/auth/logout');
+
+        $logout->assertNoContent();
+
+        Event::assertDispatched(UserSessionLoggedOutBroadcast::class, function (UserSessionLoggedOutBroadcast $event) use ($user): bool {
+            $params = $event->params();
+            $payload = $event->payload();
+
+            return ((int) ($params['userId'] ?? 0) === (int) $user->getKey())
+                && (($payload['reason'] ?? null) === 'manual_logout');
+        });
+
+        $me = $this
+            ->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson('/api/auth/me');
+
+        $me->assertUnauthorized();
     }
 
     public function test_login_fails_when_user_is_inactive(): void
