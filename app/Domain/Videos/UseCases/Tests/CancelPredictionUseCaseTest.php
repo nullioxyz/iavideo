@@ -85,6 +85,7 @@ class CancelPredictionUseCaseTest extends TestCase
             'provider_model_key' => 'kwaivgi/kling-v2.5-turbo-pro',
             'version' => null,
             'cost_per_second_usd' => '0.0700',
+            'credits_per_second' => '5.0000',
             'active' => true,
             'public_visible' => true,
             'created_at' => now(),
@@ -114,7 +115,9 @@ class CancelPredictionUseCaseTest extends TestCase
             'size_bytes' => 12345,
             'duration_seconds' => 5,
             'estimated_cost_usd' => '0.3500',
-            'credits_charged' => 1,
+            'model_cost_per_second_usd' => '0.0700',
+            'model_credits_per_second' => '5.0000',
+            'credits_charged' => 25,
             'billing_status' => 'charged',
             'credit_debited' => true,
             'status' => 'created',
@@ -241,10 +244,20 @@ class CancelPredictionUseCaseTest extends TestCase
             'reference_id' => $input->getKey(),
             'reference_type' => 'input_generation',
             'operation_type' => 'generation_refund',
-            'delta' => 1,
-            'balance_after' => 3,
+            'delta' => 25,
+            'balance_after' => 27,
         ]);
 
-        $this->assertSame(3, $user->fresh()->credit_balance);
+        $refundLedger = \App\Domain\Credits\Models\CreditLedger::query()
+            ->where('user_id', $user->getKey())
+            ->where('reference_id', $input->getKey())
+            ->where('operation_type', 'generation_refund')
+            ->first();
+
+        $this->assertNotNull($refundLedger);
+        $this->assertSame('0.0700', $refundLedger->metadata['cost_per_second_usd'] ?? null);
+        $this->assertSame('5.0000', $refundLedger->metadata['credits_per_second'] ?? null);
+
+        $this->assertSame(27, $user->fresh()->credit_balance);
     }
 }

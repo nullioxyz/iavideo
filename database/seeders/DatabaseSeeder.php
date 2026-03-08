@@ -85,6 +85,7 @@ class DatabaseSeeder extends Seeder
                 'provider_model_key' => 'kwaivgi/kling-v2.5-turbo-pro',
                 'version' => '2.5',
                 'cost_per_second_usd' => '0.0700',
+                'credits_per_second' => '0.2000',
                 'public_visible' => true,
                 'active' => true,
                 'created_at' => now(),

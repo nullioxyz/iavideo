@@ -29,6 +29,8 @@ class VideoGenerationHistoryEntryResource extends JsonResource
             ],
             'duration_seconds' => $this->duration_seconds,
             'estimated_cost_usd' => $this->estimated_cost_usd,
+            'model_cost_per_second_usd' => $this->model_cost_per_second_usd,
+            'model_credits_per_second' => $this->model_credits_per_second,
             'prediction' => [
                 'id' => $this->prediction?->id,
                 'status' => $this->prediction?->status,

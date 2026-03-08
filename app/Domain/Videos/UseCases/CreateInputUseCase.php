@@ -57,6 +57,8 @@ final class CreateInputUseCase
                         'model_id' => $model->getKey(),
                         'duration_seconds' => $quote->durationSeconds,
                         'estimated_cost_usd' => $quote->generationCostUsd,
+                        'model_cost_per_second_usd' => $quote->modelCostPerSecondUsd,
+                        'model_credits_per_second' => $quote->modelCreditsPerSecond,
                     ]
                 )
             );

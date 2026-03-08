@@ -16,8 +16,8 @@ class GenerationEstimateResource extends JsonResource
             'duration_seconds' => $this->durationSeconds,
             'credits_required' => $this->creditsRequired,
             'model_cost_per_second_usd' => $this->modelCostPerSecondUsd,
+            'model_credits_per_second' => $this->modelCreditsPerSecond,
             'estimated_generation_cost_usd' => $this->generationCostUsd,
-            'credit_unit_value_usd' => $this->creditUnitValueUsd,
         ];
     }
 }

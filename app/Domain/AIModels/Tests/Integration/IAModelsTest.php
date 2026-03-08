@@ -67,6 +67,7 @@ class IAModelsTest extends TestCase
                     'public_visible',
                     'available_for_generation',
                     'cost_per_second_usd',
+                    'credits_per_second',
                     'sort_order',
                     'created_at',
                     'updated_at',

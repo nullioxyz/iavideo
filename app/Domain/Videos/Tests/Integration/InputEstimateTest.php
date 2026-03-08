@@ -6,7 +6,6 @@ use App\Domain\AIModels\Models\Model as AIModel;
 use App\Domain\AIModels\Models\Preset;
 use App\Domain\Auth\Models\User;
 use App\Domain\Auth\Tests\Traits\AuthenticatesWithJwt;
-use App\Domain\Settings\Models\Setting;
 use App\Domain\Videos\Events\InputCreated;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -20,16 +19,12 @@ class InputEstimateTest extends TestCase
 
     public function test_estimate_endpoint_returns_credits_and_costs(): void
     {
-        Setting::query()->updateOrCreate(
-            ['key' => 'credit_unit_value_usd'],
-            ['value' => '0.35']
-        );
-
         $user = User::factory()->create(['active' => true, 'password' => bcrypt('password')]);
         $token = $this->loginAndGetToken($user);
 
         $model = AIModel::factory()->create([
             'cost_per_second_usd' => '0.1500',
+            'credits_per_second' => '0.6000',
             'active' => true,
             'public_visible' => true,
         ]);
@@ -51,17 +46,60 @@ class InputEstimateTest extends TestCase
         $response->assertJsonPath('data.duration_seconds', 5);
         $response->assertJsonPath('data.credits_required', 3);
         $response->assertJsonPath('data.model_cost_per_second_usd', '0.1500');
+        $response->assertJsonPath('data.model_credits_per_second', '0.6000');
         $response->assertJsonPath('data.estimated_generation_cost_usd', '0.7500');
+    }
+
+    public function test_estimate_and_generate_use_same_formula_for_high_credit_rate_model(): void
+    {
+        Event::fake([InputCreated::class]);
+
+        $user = User::factory()->create([
+            'active' => true,
+            'password' => bcrypt('password'),
+            'credit_balance' => 200,
+        ]);
+
+        $token = $this->loginAndGetToken($user);
+
+        $model = AIModel::factory()->create([
+            'cost_per_second_usd' => '0.0700',
+            'credits_per_second' => '5.0000',
+            'active' => true,
+            'public_visible' => true,
+        ]);
+
+        $preset = Preset::factory()->create([
+            'default_model_id' => $model->getKey(),
+            'duration_seconds' => 5,
+            'active' => true,
+        ]);
+
+        $estimate = $this->withJwt($token)->postJson('/api/input/estimate', [
+            'model_id' => $model->getKey(),
+            'preset_id' => $preset->getKey(),
+            'duration_seconds' => 5,
+        ]);
+
+        $estimate->assertOk();
+        $estimate->assertJsonPath('data.credits_required', 25);
+
+        $create = $this->withJwt($token)->postJson('/api/input/create', [
+            'model_id' => $model->getKey(),
+            'preset_id' => $preset->getKey(),
+            'duration_seconds' => 5,
+            'credits_required' => 999,
+            'image' => UploadedFile::fake()->image('input.png', 900, 1600)->size(500),
+        ]);
+
+        $create->assertCreated();
+        $create->assertJsonPath('data.credits_charged', 25);
+        $this->assertSame(175, (int) $user->fresh()->credit_balance);
     }
 
     public function test_create_input_recalculates_server_side_and_ignores_frontend_credit_fields(): void
     {
         Event::fake([InputCreated::class]);
-
-        Setting::query()->updateOrCreate(
-            ['key' => 'credit_unit_value_usd'],
-            ['value' => '0.35']
-        );
 
         $user = User::factory()->create([
             'active' => true,
@@ -73,6 +111,7 @@ class InputEstimateTest extends TestCase
 
         $model = AIModel::factory()->create([
             'cost_per_second_usd' => '0.0700',
+            'credits_per_second' => '0.2000',
             'active' => true,
             'public_visible' => true,
         ]);
@@ -99,11 +138,6 @@ class InputEstimateTest extends TestCase
 
     public function test_create_input_fails_when_balance_is_insufficient_for_estimated_credits(): void
     {
-        Setting::query()->updateOrCreate(
-            ['key' => 'credit_unit_value_usd'],
-            ['value' => '0.35']
-        );
-
         $user = User::factory()->create([
             'active' => true,
             'password' => bcrypt('password'),
@@ -114,6 +148,7 @@ class InputEstimateTest extends TestCase
 
         $model = AIModel::factory()->create([
             'cost_per_second_usd' => '0.1500',
+            'credits_per_second' => '0.6000',
             'active' => true,
             'public_visible' => true,
         ]);
@@ -142,6 +177,7 @@ class InputEstimateTest extends TestCase
 
         $model = AIModel::factory()->create([
             'cost_per_second_usd' => null,
+            'credits_per_second' => '0.2000',
             'active' => true,
             'public_visible' => true,
         ]);
@@ -158,5 +194,31 @@ class InputEstimateTest extends TestCase
 
         $response->assertStatus(422);
         $response->assertJsonPath('message', 'Selected model does not have a defined generation cost.');
+    }
+
+    public function test_estimate_fails_when_model_credits_rate_is_missing(): void
+    {
+        $user = User::factory()->create(['active' => true, 'password' => bcrypt('password')]);
+        $token = $this->loginAndGetToken($user);
+
+        $model = AIModel::factory()->create([
+            'cost_per_second_usd' => '0.1500',
+            'credits_per_second' => null,
+            'active' => true,
+            'public_visible' => true,
+        ]);
+
+        $preset = Preset::factory()->create([
+            'default_model_id' => $model->getKey(),
+            'active' => true,
+        ]);
+
+        $response = $this->withJwt($token)->postJson('/api/input/estimate', [
+            'model_id' => $model->getKey(),
+            'preset_id' => $preset->getKey(),
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonPath('message', 'Selected model does not have a defined credits rate.');
     }
 }

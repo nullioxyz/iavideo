@@ -35,6 +35,8 @@ class CreatePredictionForInputListenerTest extends TestCase
 
         $input = Input::factory()->create([
             'user_id' => $user->getKey(),
+            'model_cost_per_second_usd' => '0.0700',
+            'model_credits_per_second' => '5.0000',
             'credits_charged' => 1,
             'billing_status' => 'charged',
             'credit_debited' => true,
@@ -59,6 +61,8 @@ class CreatePredictionForInputListenerTest extends TestCase
             ->first();
 
         $this->assertNotNull($ledger);
+        $this->assertSame('0.0700', $ledger->metadata['cost_per_second_usd'] ?? null);
+        $this->assertSame('5.0000', $ledger->metadata['credits_per_second'] ?? null);
         $this->assertSame(1, (int) $user->fresh()->credit_balance);
 
         Event::assertDispatched(UserJobUpdatedBroadcast::class);

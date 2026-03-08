@@ -5,8 +5,8 @@
 - Pricing is calculated only on the backend.
 - The frontend may estimate cost with `POST /api/input/estimate`, but `POST /api/input/create` always recalculates credits on the server.
 - Credit consumption formula:
-  - `generation_cost_usd = model.cost_per_second_usd * duration_seconds`
-  - `credits_required = ceil(generation_cost_usd / credit_unit_value_usd)`
+- `generation_cost_usd = model.cost_per_second_usd * duration_seconds`
+- `credits_required = ceil(duration_seconds * model.credits_per_second)`
 - Billing flow:
   - the wallet is charged before the external provider call
   - failed, canceled, timed out or output-less generations are refunded automatically
@@ -39,7 +39,7 @@ Payload:
 
 ### `GET /api/models`
 
-Lists models available for generation. Only active, public models with a defined `cost_per_second_usd` are returned.
+Lists models available for generation. Only active, public models with defined `cost_per_second_usd` and `credits_per_second` are returned.
 
 Query params:
 
@@ -56,6 +56,7 @@ Returned model fields:
 - `public_visible`
 - `available_for_generation`
 - `cost_per_second_usd`
+- `credits_per_second`
 - `sort_order`
 
 ### `GET /api/models/{model}/presets`
@@ -128,8 +129,8 @@ Response:
     "duration_seconds": 5,
     "credits_required": 3,
     "model_cost_per_second_usd": "0.1500",
-    "estimated_generation_cost_usd": "0.7500",
-    "credit_unit_value_usd": "0.3500"
+    "model_credits_per_second": "0.6000",
+    "estimated_generation_cost_usd": "0.7500"
   }
 }
 ```

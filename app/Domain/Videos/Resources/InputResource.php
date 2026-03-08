@@ -22,6 +22,8 @@ class InputResource extends JsonResource
             'size_bytes' => $this->size_bytes,
             'duration_seconds' => $this->duration_seconds,
             'estimated_cost_usd' => $this->estimated_cost_usd,
+            'model_cost_per_second_usd' => $this->model_cost_per_second_usd,
+            'model_credits_per_second' => $this->model_credits_per_second,
             'credits_charged' => (int) ($this->credits_charged ?? 0),
             'billing_status' => $this->billing_status,
         ];

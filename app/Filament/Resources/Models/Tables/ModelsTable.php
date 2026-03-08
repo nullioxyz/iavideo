@@ -30,6 +30,8 @@ class ModelsTable
                     ->label('Version'),
                 TextColumn::make('cost_per_second_usd')
                     ->label('Cost / Second (USD)'),
+                TextColumn::make('credits_per_second')
+                    ->label('Credits / Second'),
                 TextColumn::make('active')
                     ->label('active'),
                 TextColumn::make('public_visible')

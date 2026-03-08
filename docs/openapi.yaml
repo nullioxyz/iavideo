@@ -665,9 +665,9 @@ components:
           type: integer
         model_cost_per_second_usd:
           type: string
-        estimated_generation_cost_usd:
+        model_credits_per_second:
           type: string
-        credit_unit_value_usd:
+        estimated_generation_cost_usd:
           type: string
     ModelSummary:
       type: object

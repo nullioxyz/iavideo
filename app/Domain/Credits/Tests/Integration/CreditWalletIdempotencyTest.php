@@ -34,4 +34,28 @@ class CreditWalletIdempotencyTest extends TestCase
         $this->assertSame(3, (int) $user->fresh()->credit_balance);
         $this->assertSame(1, $user->creditLedger()->where('idempotency_key', 'input:10:generation:charge')->count());
     }
+
+    public function test_refund_with_same_idempotency_key_is_applied_once(): void
+    {
+        $user = User::factory()->create([
+            'credit_balance' => 1,
+        ]);
+
+        /** @var CreditWalletInterface $wallet */
+        $wallet = app(CreditWalletInterface::class);
+
+        $payload = [
+            'reason' => 'Video generation refund',
+            'operation_type' => 'generation_refund',
+            'reference_type' => 'input_generation',
+            'reference_id' => 10,
+            'idempotency_key' => 'input:10:generation:refund',
+        ];
+
+        $wallet->refund($user, 2, $payload);
+        $wallet->refund($user, 2, $payload);
+
+        $this->assertSame(3, (int) $user->fresh()->credit_balance);
+        $this->assertSame(1, $user->creditLedger()->where('idempotency_key', 'input:10:generation:refund')->count());
+    }
 }

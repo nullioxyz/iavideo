@@ -29,6 +29,7 @@ class ModelFactory extends Factory
             'provider_model_key' => $providerModelKey,
             'version' => null,
             'cost_per_second_usd' => '0.0700',
+            'credits_per_second' => '0.2000',
             'public_visible' => true,
             'sort_order' => 0,
             'created_at' => Carbon::now(),

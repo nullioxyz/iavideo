@@ -31,6 +31,7 @@ class AIModelsRepository implements AIModelsRepositoryInterface
             ->where('active', true)
             ->where('public_visible', true)
             ->whereNotNull('cost_per_second_usd')
+            ->whereNotNull('credits_per_second')
             ->whereHas('presets', function ($query): void {
                 $query->where('active', true);
             })

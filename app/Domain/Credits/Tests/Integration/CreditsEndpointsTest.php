@@ -53,6 +53,10 @@ class CreditsEndpointsTest extends TestCase
             'operation_type' => 'generation_debit',
             'reference_type' => 'input_generation',
             'reference_id' => 1,
+            'metadata' => [
+                'cost_per_second_usd' => '0.0700',
+                'credits_per_second' => '5.0000',
+            ],
         ]);
 
         $otherUser->creditLedger()->create([
@@ -71,6 +75,8 @@ class CreditsEndpointsTest extends TestCase
         $response->assertJsonCount(1, 'data');
         $response->assertJsonPath('data.0.reason', 'Video generation charge');
         $response->assertJsonPath('data.0.operation_type', 'generation_debit');
+        $response->assertJsonPath('data.0.cost_per_second_usd', '0.0700');
+        $response->assertJsonPath('data.0.credits_per_second', '5.0000');
     }
 
     public function test_video_generations_returns_only_authenticated_user_history_with_credit_usage(): void

@@ -21,6 +21,8 @@ class ModelsInfolist
                     ->label('Version'),
                 TextEntry::make('cost_per_second_usd')
                     ->label('Cost / Second (USD)'),
+                TextEntry::make('credits_per_second')
+                    ->label('Credits / Second'),
                 TextEntry::make('sort_order')
                     ->label('Sort Order'),
 

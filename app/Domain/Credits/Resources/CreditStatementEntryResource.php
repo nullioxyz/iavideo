@@ -31,6 +31,8 @@ class CreditStatementEntryResource extends JsonResource
             ] : null,
             'duration_seconds' => $this->duration_seconds,
             'generation_cost_usd' => $this->generation_cost_usd,
+            'cost_per_second_usd' => $this->metadata['cost_per_second_usd'] ?? null,
+            'credits_per_second' => $this->metadata['credits_per_second'] ?? null,
             'metadata' => $this->metadata,
             'created_at' => $this->created_at?->toISOString(),
         ];

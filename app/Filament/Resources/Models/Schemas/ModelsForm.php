@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Models\Schemas;
 
 use App\Domain\Languages\Models\Language;
+use Filament\Forms\Get;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -36,6 +37,15 @@ class ModelsForm
                 TextInput::make('cost_per_second_usd')
                     ->label('Cost / Second (USD)')
                     ->numeric()
+                    ->minValue(0.0001)
+                    ->required(fn (Get $get): bool => (bool) $get('active') || (bool) $get('public_visible'))
+                    ->nullable(),
+                TextInput::make('credits_per_second')
+                    ->label('Credits / Second')
+                    ->numeric()
+                    ->minValue(0.0001)
+                    ->required(fn (Get $get): bool => (bool) $get('active') || (bool) $get('public_visible'))
+                    ->helperText('Used to calculate user charges. Active/public models must define this value.')
                     ->nullable(),
                 TextInput::make('sort_order')
                     ->label('Sort Order')

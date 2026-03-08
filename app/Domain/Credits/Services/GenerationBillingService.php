@@ -38,7 +38,8 @@ final class GenerationBillingService
             'generation_cost_usd' => $quote->generationCostUsd,
             'idempotency_key' => $idempotencyKey,
             'metadata' => array_merge([
-                'credit_unit_value_usd' => $quote->creditUnitValueUsd,
+                'cost_per_second_usd' => $quote->modelCostPerSecondUsd,
+                'credits_per_second' => $quote->modelCreditsPerSecond,
             ], $metadata),
         ]);
 
@@ -52,6 +53,8 @@ final class GenerationBillingService
             'credits_charged' => $quote->creditsRequired,
             'billing_status' => 'charged',
             'estimated_cost_usd' => $quote->generationCostUsd,
+            'model_cost_per_second_usd' => $quote->modelCostPerSecondUsd,
+            'model_credits_per_second' => $quote->modelCreditsPerSecond,
             'duration_seconds' => $quote->durationSeconds,
             'model_id' => $quote->modelId,
         ]);
@@ -84,7 +87,10 @@ final class GenerationBillingService
             'duration_seconds' => $input->duration_seconds,
             'generation_cost_usd' => $input->estimated_cost_usd,
             'idempotency_key' => $idempotencyKey,
-            'metadata' => $metadata,
+            'metadata' => array_merge([
+                'cost_per_second_usd' => $input->model_cost_per_second_usd,
+                'credits_per_second' => $input->model_credits_per_second,
+            ], $metadata),
         ]);
 
         $input->update([

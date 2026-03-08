@@ -206,6 +206,69 @@ class ReceivePredictionWebhookUseCaseTest extends TestCase
         $this->assertSame(1, $effects->dispatchCalls);
     }
 
+    public function test_it_does_not_refund_when_prediction_succeeds_with_output(): void
+    {
+        $prediction = new Prediction([
+            'status' => 'processing',
+            'input_id' => 10,
+            'model_id' => 20,
+            'source' => 'web',
+            'attempt' => 1,
+        ]);
+
+        $repository = new class($prediction) implements PredictionWebhookRepositoryInterface
+        {
+            public function __construct(private ?Prediction $prediction) {}
+
+            public function findByExternalId(string $externalId): ?Prediction
+            {
+                return $this->prediction;
+            }
+
+            public function updatePrediction(Prediction $prediction, array $data): Prediction
+            {
+                if (isset($data['status'])) {
+                    $prediction->status = $data['status'];
+                }
+
+                return $prediction;
+            }
+
+            public function createOutput(Prediction $prediction, string $path, string $kind = 'video'): void {}
+
+            public function updateInputStatus(Prediction $prediction, string $status): void {}
+        };
+
+        $effects = new class implements PredictionWebhookEffectsInterface
+        {
+            public int $dispatchCalls = 0;
+
+            public int $refundCalls = 0;
+
+            public function dispatchDownloadOutputs(Prediction $prediction): void
+            {
+                $this->dispatchCalls++;
+            }
+
+            public function refundUnsuccessfulGenerationIfCharged(Prediction $prediction, string $reason, array $metadata = []): void
+            {
+                $this->refundCalls++;
+            }
+        };
+
+        $useCase = new ReceivePredictionWebhookUseCase($repository, $effects);
+
+        $useCase->execute(PredictionWebhookDTO::fromArray([
+            'id' => 'pred-3b',
+            'version' => 'v1',
+            'status' => 'succeeded',
+            'output' => 'https://cdn.example.com/video.mp4',
+        ]));
+
+        $this->assertSame(1, $effects->dispatchCalls);
+        $this->assertSame(0, $effects->refundCalls);
+    }
+
     public function test_it_handles_failed_with_refund_side_effect(): void
     {
         $prediction = new Prediction([

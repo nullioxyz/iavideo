@@ -34,6 +34,8 @@ class Input extends EloquentModel implements HasMedia
         'size_bytes',
         'duration_seconds',
         'estimated_cost_usd',
+        'model_cost_per_second_usd',
+        'model_credits_per_second',
         'credits_charged',
         'billing_status',
         'credit_debited',
@@ -65,6 +67,8 @@ class Input extends EloquentModel implements HasMedia
             'updated_at' => 'datetime',
             'credit_debited' => 'boolean',
             'estimated_cost_usd' => 'decimal:4',
+            'model_cost_per_second_usd' => 'decimal:4',
+            'model_credits_per_second' => 'decimal:4',
             'credits_charged' => 'integer',
             'duration_seconds' => 'integer',
         ];

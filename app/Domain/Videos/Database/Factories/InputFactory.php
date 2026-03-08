@@ -34,6 +34,8 @@ class InputFactory extends Factory
             'size_bytes' => 10, // 2KB
             'duration_seconds' => 5,
             'estimated_cost_usd' => '0.3500',
+            'model_cost_per_second_usd' => '0.0700',
+            'model_credits_per_second' => '0.2000',
             'credits_charged' => 1,
             'billing_status' => 'charged',
             'credit_debited' => 1,

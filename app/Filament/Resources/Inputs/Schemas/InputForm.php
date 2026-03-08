@@ -64,6 +64,16 @@ class InputForm
                     ->numeric()
                     ->nullable(),
 
+                TextInput::make('model_cost_per_second_usd')
+                    ->label('Cost / Second Snapshot (USD)')
+                    ->numeric()
+                    ->nullable(),
+
+                TextInput::make('model_credits_per_second')
+                    ->label('Credits / Second Snapshot')
+                    ->numeric()
+                    ->nullable(),
+
                 TextInput::make('credits_charged')
                     ->label('Credits Charged')
                     ->numeric()

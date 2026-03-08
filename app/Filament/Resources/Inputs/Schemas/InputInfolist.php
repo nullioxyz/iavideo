@@ -53,6 +53,12 @@ class InputInfolist
                 TextEntry::make('estimated_cost_usd')
                     ->label('Estimated Cost (USD)'),
 
+                TextEntry::make('model_cost_per_second_usd')
+                    ->label('Cost / Second Snapshot (USD)'),
+
+                TextEntry::make('model_credits_per_second')
+                    ->label('Credits / Second Snapshot'),
+
                 TextEntry::make('credits_charged')
                     ->label('Credits Charged'),
 

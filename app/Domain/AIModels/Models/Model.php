@@ -26,6 +26,7 @@ class Model extends EloquentModel
         'provider_model_key',
         'version',
         'cost_per_second_usd',
+        'credits_per_second',
         'active',
         'public_visible',
         'sort_order',
@@ -44,6 +45,7 @@ class Model extends EloquentModel
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'cost_per_second_usd' => 'decimal:4',
+            'credits_per_second' => 'decimal:4',
             'active' => 'boolean',
             'public_visible' => 'boolean',
             'sort_order' => 'integer',
@@ -64,7 +66,8 @@ class Model extends EloquentModel
     {
         return $this->isActive()
             && $this->isPubliclyVisible()
-            && $this->cost_per_second_usd !== null;
+            && $this->cost_per_second_usd !== null
+            && $this->credits_per_second !== null;
     }
 
     public function presets(): HasMany

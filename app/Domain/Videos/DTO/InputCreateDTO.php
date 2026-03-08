@@ -45,6 +45,8 @@ final class InputCreateDTO
             'credit_debited' => false,
             'credit_ledger_id' => null,
             'estimated_cost_usd' => null,
+            'model_cost_per_second_usd' => null,
+            'model_credits_per_second' => null,
             'credits_charged' => 0,
             'billing_status' => 'none',
         ];

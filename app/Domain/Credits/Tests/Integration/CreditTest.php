@@ -28,12 +28,17 @@ class CreditTest extends TestCase
         $user = User::factory()->create([
             'active' => true,
             'password' => bcrypt('password'),
-            'credit_balance' => 3,
+            'credit_balance' => 30,
         ]);
 
         $token = $this->loginAndGetToken($user);
 
-        $activeModel = AIModel::factory()->create(['active' => true]);
+        $activeModel = AIModel::factory()->create([
+            'active' => true,
+            'public_visible' => true,
+            'cost_per_second_usd' => '0.0700',
+            'credits_per_second' => '5.0000',
+        ]);
 
         $preset = Preset::factory()->create([
             'default_model_id' => $activeModel->getKey(),
@@ -45,6 +50,7 @@ class CreditTest extends TestCase
         $response = $this->withJwt($token)->postJson('/api/input/create', [
             'model_id' => $activeModel->getKey(),
             'preset_id' => $preset->getKey(),
+            'duration_seconds' => 5,
             'image' => $image,
         ]);
 
@@ -77,7 +83,11 @@ class CreditTest extends TestCase
             'status' => 'created',
             'original_filename' => 'tattoo.png',
             'mime_type' => 'image/png',
-            'credits_charged' => 1,
+            'duration_seconds' => 5,
+            'estimated_cost_usd' => '0.3500',
+            'model_cost_per_second_usd' => '0.0700',
+            'model_credits_per_second' => '5.0000',
+            'credits_charged' => 25,
             'billing_status' => 'charged',
         ]);
 
@@ -86,11 +96,21 @@ class CreditTest extends TestCase
             'reference_id' => $inputId,
             'reference_type' => 'input_generation',
             'operation_type' => 'generation_debit',
-            'delta' => -1,
-            'balance_after' => 2,
+            'delta' => -25,
+            'balance_after' => 5,
         ]);
 
-        $this->assertEquals(2, $user->fresh()->credit_balance);
+        $ledger = CreditLedger::query()
+            ->where('user_id', $user->getKey())
+            ->where('reference_id', $inputId)
+            ->where('operation_type', 'generation_debit')
+            ->first();
+
+        $this->assertNotNull($ledger);
+        $this->assertSame('0.0700', $ledger->metadata['cost_per_second_usd'] ?? null);
+        $this->assertSame('5.0000', $ledger->metadata['credits_per_second'] ?? null);
+
+        $this->assertEquals(5, $user->fresh()->credit_balance);
 
         $input = Input::query()->findOrFail($inputId);
 
@@ -105,10 +125,15 @@ class CreditTest extends TestCase
         $user = User::factory()->create([
             'active' => true,
             'password' => bcrypt('password'),
-            'credit_balance' => 3,
+            'credit_balance' => 30,
         ]);
 
-        $activeModel = Model::factory()->create(['active' => true]);
+        $activeModel = Model::factory()->create([
+            'active' => true,
+            'public_visible' => true,
+            'cost_per_second_usd' => '0.0700',
+            'credits_per_second' => '5.0000',
+        ]);
 
         $preset = Preset::factory()->create([
             'default_model_id' => $activeModel->getKey(),
@@ -121,7 +146,9 @@ class CreditTest extends TestCase
             'preset_id' => $preset->getKey(),
             'duration_seconds' => 5,
             'estimated_cost_usd' => '0.3500',
-            'credits_charged' => 1,
+            'model_cost_per_second_usd' => '0.0700',
+            'model_credits_per_second' => '5.0000',
+            'credits_charged' => 25,
             'billing_status' => 'charged',
             'status' => 'created',
         ]);
@@ -136,9 +163,9 @@ class CreditTest extends TestCase
 
         $creditLedger = CreditLedger::factory()->create([
             'user_id' => $user->getKey(),
-            'delta' => -1,
-            'balance_before' => 3,
-            'balance_after' => 2,
+            'delta' => -25,
+            'balance_before' => 30,
+            'balance_after' => 5,
             'reason' => 'Video generation charge',
             'operation_type' => 'generation_debit',
             'reference_type' => 'input_generation',
@@ -147,12 +174,16 @@ class CreditTest extends TestCase
             'preset_id' => $preset->getKey(),
             'duration_seconds' => 5,
             'generation_cost_usd' => '0.3500',
+            'metadata' => [
+                'cost_per_second_usd' => '0.0700',
+                'credits_per_second' => '5.0000',
+            ],
         ]);
 
         $input->credit_debited = true;
         $input->credit_ledger_id = $creditLedger->getKey();
         $input->save();
-        $user->credit_balance = 2;
+        $user->credit_balance = 5;
         $user->save();
 
         $response = $this->post('/api/webhook/replicate', [
@@ -191,8 +222,8 @@ class CreditTest extends TestCase
             'reference_id' => $input->getKey(),
             'reference_type' => 'input_generation',
             'operation_type' => 'generation_debit',
-            'delta' => -1,
-            'balance_after' => 2,
+            'delta' => -25,
+            'balance_after' => 5,
         ]);
 
         $this->assertDatabaseHas('credit_ledger', [
@@ -200,9 +231,20 @@ class CreditTest extends TestCase
             'reference_id' => $input->getKey(),
             'reference_type' => 'input_generation',
             'operation_type' => 'generation_refund',
-            'delta' => 1,
-            'balance_after' => 3,
+            'delta' => 25,
+            'balance_after' => 30,
         ]);
+
+        $refundLedger = CreditLedger::query()
+            ->where('user_id', $user->getKey())
+            ->where('reference_id', $input->getKey())
+            ->where('operation_type', 'generation_refund')
+            ->first();
+
+        $this->assertNotNull($refundLedger);
+        $this->assertSame('0.0700', $refundLedger->metadata['cost_per_second_usd'] ?? null);
+        $this->assertSame('5.0000', $refundLedger->metadata['credits_per_second'] ?? null);
+        $this->assertSame(30, (int) $user->fresh()->credit_balance);
 
         $prediction->refresh();
         $this->assertEquals('failed', $prediction->status);
