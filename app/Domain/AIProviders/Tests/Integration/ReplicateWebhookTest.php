@@ -10,7 +10,6 @@ use App\Domain\Videos\Models\Input;
 use App\Domain\Videos\Models\Prediction;
 use App\Domain\Videos\Models\PredictionOutput;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
@@ -18,10 +17,8 @@ class ReplicateWebhookTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_rejects_webhook_when_secret_is_invalid(): void
+    public function test_rejects_webhook_when_prediction_external_id_is_unknown(): void
     {
-        Config::set('services.replicate.webhook_secret', 'test-webhook-secret');
-
         $response = $this->post(route('webhook.replicate', [], false), [
             'id' => 'unknown-prediction',
             'version' => 'hidden',
