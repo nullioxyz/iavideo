@@ -29,12 +29,14 @@ class PresetMediaDispatchTest extends TestCase
 
         Queue::assertPushed(AttachPresetMediaJob::class, function (AttachPresetMediaJob $job): bool {
             return $job->kind === 'image'
-                && $job->path === 'presets/uploads/images/one.jpg';
+                && $job->path === 'presets/uploads/images/one.jpg'
+                && $job->disk === 'local';
         });
 
         Queue::assertPushed(AttachPresetMediaJob::class, function (AttachPresetMediaJob $job): bool {
             return $job->kind === 'video'
-                && $job->path === 'presets/uploads/videos/one.mp4';
+                && $job->path === 'presets/uploads/videos/one.mp4'
+                && $job->disk === 'local';
         });
 
         Queue::assertPushed(AttachPresetMediaJob::class, 2);

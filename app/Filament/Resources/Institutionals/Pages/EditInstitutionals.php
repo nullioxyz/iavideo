@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Institutionals\Pages;
 
 use App\Filament\Resources\Institutionals\InstitutionalsResource;
 use App\Filament\Support\FilamentUpload;
+use App\Filament\Support\NotifiesAboutPendingMedia;
 use App\Filament\Support\SyncsLanguageTranslations;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 
 class EditInstitutionals extends EditRecord
 {
+    use NotifiesAboutPendingMedia;
     use SyncsLanguageTranslations;
 
     protected static string $resource = InstitutionalsResource::class;
@@ -53,7 +55,8 @@ class EditInstitutionals extends EditRecord
 
     protected function afterSave(): void
     {
-        $disk = FilamentUpload::disk();
+        $sourceDisk = FilamentUpload::disk();
+        $targetDisk = FilamentUpload::mediaDisk();
 
         $this->syncTranslations(
             $this->record,
@@ -62,13 +65,19 @@ class EditInstitutionals extends EditRecord
         );
 
         foreach ($this->imageUploadPaths as $path) {
-            if (! is_string($path) || $path === '' || ! Storage::disk($disk)->exists($path)) {
+            if (! is_string($path) || $path === '' || ! Storage::disk($sourceDisk)->exists($path)) {
                 continue;
             }
 
             $this->record
-                ->addMediaFromDisk($path, $disk)
-                ->toMediaCollection('images', $disk);
+                ->addMediaFromDisk($path, $sourceDisk)
+                ->toMediaCollection('images', $targetDisk);
+
+            Storage::disk($sourceDisk)->delete($path);
+        }
+
+        if ($this->imageUploadPaths !== []) {
+            $this->notifyPendingMedia(count($this->imageUploadPaths));
         }
     }
 }

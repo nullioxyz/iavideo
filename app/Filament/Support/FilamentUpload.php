@@ -8,6 +8,11 @@ class FilamentUpload
 {
     public static function disk(): string
     {
+        return UploadStorageResolver::tempDisk();
+    }
+
+    public static function mediaDisk(): string
+    {
         return UploadStorageResolver::mediaDisk();
     }
 

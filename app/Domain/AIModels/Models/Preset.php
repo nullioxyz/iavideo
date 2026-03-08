@@ -128,7 +128,7 @@ class Preset extends EloquentModel implements HasMedia
                     (int) $preset->getKey(),
                     'image',
                     $imagePath,
-                    UploadStorageResolver::mediaDisk(),
+                    UploadStorageResolver::tempDisk(),
                 )->onQueue('media');
             }
 
@@ -142,7 +142,7 @@ class Preset extends EloquentModel implements HasMedia
                     (int) $preset->getKey(),
                     'video',
                     $videoPath,
-                    UploadStorageResolver::mediaDisk(),
+                    UploadStorageResolver::tempDisk(),
                 )->onQueue('media');
             }
         });
