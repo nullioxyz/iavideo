@@ -2,13 +2,8 @@
 
 namespace App\Domain\Broadcasting\Events;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
-use Illuminate\Contracts\Queue\ShouldQueue;
-
-class UserSessionLoggedOutBroadcast extends BroadcastAbstractEvent implements ShouldQueue
+class UserSessionLoggedOutBroadcast extends BroadcastAbstractEvent
 {
-    use Queueable;
     public function __construct(
         private readonly int $userId,
         private readonly string $reason = 'manual_logout',

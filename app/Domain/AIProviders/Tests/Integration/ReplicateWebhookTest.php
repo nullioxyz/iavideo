@@ -5,11 +5,13 @@ namespace App\Domain\AIProviders\Tests\Integration;
 use App\Domain\AIModels\Models\Model;
 use App\Domain\AIModels\Models\Preset;
 use App\Domain\Auth\Models\User;
+use App\Domain\Broadcasting\Events\UserJobUpdatedBroadcast;
 use App\Domain\Videos\Jobs\DownloadPredictionOutputsJob;
 use App\Domain\Videos\Models\Input;
 use App\Domain\Videos\Models\Prediction;
 use App\Domain\Videos\Models\PredictionOutput;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
@@ -31,6 +33,8 @@ class ReplicateWebhookTest extends TestCase
 
     public function test_receive_replicate_prediction_starting_data(): void
     {
+        Event::fake([UserJobUpdatedBroadcast::class]);
+
         $user = User::factory()->create([
             'active' => true,
             'password' => bcrypt('password'),
@@ -79,11 +83,13 @@ class ReplicateWebhookTest extends TestCase
 
         $this->assertEquals('starting', $prediction->status);
         $this->assertCount(0, $prediction->outputs);
+        Event::assertDispatched(UserJobUpdatedBroadcast::class);
     }
 
     public function test_receive_replicate_prediction_completed_data(): void
     {
         Queue::fake();
+        Event::fake([UserJobUpdatedBroadcast::class]);
         $user = User::factory()->create([
             'active' => true,
             'password' => bcrypt('password'),
@@ -145,6 +151,7 @@ class ReplicateWebhookTest extends TestCase
 
         $this->assertEquals('succeeded', $prediction->status);
         $this->assertCount(1, $prediction->outputs);
+        Event::assertDispatched(UserJobUpdatedBroadcast::class);
     }
 
     public function test_receive_replicate_prediction_completed_dispatches_download_job_and_creates_output_row(): void

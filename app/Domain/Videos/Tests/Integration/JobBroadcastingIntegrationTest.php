@@ -8,7 +8,9 @@ use App\Domain\Auth\Models\User;
 use App\Domain\Auth\Tests\Traits\AuthenticatesWithJwt;
 use App\Domain\Broadcasting\Events\UserJobUpdatedBroadcast;
 use App\Domain\Videos\Events\InputCreated;
+use App\Domain\Videos\Models\Input;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
@@ -48,5 +50,14 @@ class JobBroadcastingIntegrationTest extends TestCase
         $response->assertCreated();
 
         Event::assertDispatched(UserJobUpdatedBroadcast::class);
+    }
+
+    public function test_user_job_updated_broadcast_is_sent_synchronously(): void
+    {
+        $input = Input::factory()->create();
+
+        $event = UserJobUpdatedBroadcast::fromInput($input);
+
+        $this->assertInstanceOf(ShouldBroadcastNow::class, $event);
     }
 }

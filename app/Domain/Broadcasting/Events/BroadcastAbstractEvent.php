@@ -7,12 +7,12 @@ use App\Domain\Broadcasting\Support\ChannelRegistry;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Str;
 
-abstract class BroadcastAbstractEvent implements ShouldBroadcast, BroadcastEventContract
+abstract class BroadcastAbstractEvent implements ShouldBroadcastNow, BroadcastEventContract
 {
     use Dispatchable;
     use SerializesModels;
