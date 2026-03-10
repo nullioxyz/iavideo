@@ -29,6 +29,7 @@ class Model extends EloquentModel
         'credits_per_second',
         'active',
         'public_visible',
+        'default',
         'sort_order',
         'created_at',
         'updated_at',
@@ -48,6 +49,7 @@ class Model extends EloquentModel
             'credits_per_second' => 'decimal:4',
             'active' => 'boolean',
             'public_visible' => 'boolean',
+            'default' => 'boolean',
             'sort_order' => 'integer',
         ];
     }

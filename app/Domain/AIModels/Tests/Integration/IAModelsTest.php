@@ -23,6 +23,7 @@ class IAModelsTest extends TestCase
 
         $activeModel = AIModel::factory()->create([
             'active' => true,
+            'default' => true,
         ]);
 
         $inactiveModel = AIModel::factory()->create([
@@ -65,6 +66,7 @@ class IAModelsTest extends TestCase
                     'version',
                     'active',
                     'public_visible',
+                    'default',
                     'available_for_generation',
                     'cost_per_second_usd',
                     'credits_per_second',
@@ -94,6 +96,7 @@ class IAModelsTest extends TestCase
         $response->assertJsonPath('data.0.id', $activeModel->id);
         $response->assertJsonPath('data.0.active', true);
         $response->assertJsonPath('data.0.public_visible', true);
+        $response->assertJsonPath('data.0.default', true);
         $response->assertJsonPath('data.0.available_for_generation', true);
 
         $returnedIds = collect($response->json('data'))->pluck('id')->all();

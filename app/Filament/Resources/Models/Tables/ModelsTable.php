@@ -36,6 +36,8 @@ class ModelsTable
                     ->label('active'),
                 TextColumn::make('public_visible')
                     ->label('Visible'),
+                TextColumn::make('default')
+                    ->label('Default'),
                 TextColumn::make('sort_order')
                     ->label('Sort'),
                 TextColumn::make('created_at')->dateTime(),

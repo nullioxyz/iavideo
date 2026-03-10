@@ -24,6 +24,7 @@ class AIModelResource extends JsonResource
             'version' => $this->version,
             'active' => (bool) $this->active,
             'public_visible' => (bool) $this->public_visible,
+            'default' => (bool) $this->default,
             'available_for_generation' => $this->isAvailableForGeneration(),
             'cost_per_second_usd' => $this->cost_per_second_usd,
             'credits_per_second' => $this->credits_per_second,

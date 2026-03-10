@@ -25,6 +25,7 @@ class AIModelsSeederTest extends TestCase
             'credits_per_second' => '1.1429',
             'active' => true,
             'public_visible' => true,
+            'default' => true,
         ]);
 
         $this->assertDatabaseHas('models', [
@@ -33,6 +34,7 @@ class AIModelsSeederTest extends TestCase
             'credits_per_second' => '0.2000',
             'active' => true,
             'public_visible' => true,
+            'default' => false,
         ]);
 
         $this->assertDatabaseHas('models', [
@@ -41,6 +43,7 @@ class AIModelsSeederTest extends TestCase
             'credits_per_second' => null,
             'active' => false,
             'public_visible' => false,
+            'default' => false,
         ]);
     }
 }

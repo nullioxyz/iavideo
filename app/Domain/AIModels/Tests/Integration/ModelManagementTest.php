@@ -19,6 +19,7 @@ class ModelManagementTest extends TestCase
             'credits_per_second' => '0.1500',
             'active' => true,
             'public_visible' => true,
+            'default' => false,
             'sort_order' => 5,
         ]);
 
@@ -28,6 +29,7 @@ class ModelManagementTest extends TestCase
             'credits_per_second' => '0.2000',
             'active' => false,
             'public_visible' => false,
+            'default' => true,
             'sort_order' => 10,
         ]);
 
@@ -39,6 +41,7 @@ class ModelManagementTest extends TestCase
             'credits_per_second' => '0.2000',
             'active' => false,
             'public_visible' => false,
+            'default' => true,
             'sort_order' => 10,
         ]);
     }

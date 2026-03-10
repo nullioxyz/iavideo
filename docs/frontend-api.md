@@ -54,6 +54,7 @@ Returned model fields:
 - `provider_model_key`
 - `active`
 - `public_visible`
+- `default`
 - `available_for_generation`
 - `cost_per_second_usd`
 - `credits_per_second`

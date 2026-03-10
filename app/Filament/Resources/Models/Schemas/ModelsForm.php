@@ -59,6 +59,10 @@ class ModelsForm
                 Toggle::make('public_visible')
                     ->label('Visible to Users')
                     ->required(),
+                Toggle::make('default')
+                    ->label('Default')
+                    ->default(false)
+                    ->required(),
 
                 DateTimePicker::make('created_at'),
                 DateTimePicker::make('updated_at'),

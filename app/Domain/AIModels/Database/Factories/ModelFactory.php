@@ -31,6 +31,7 @@ class ModelFactory extends Factory
             'cost_per_second_usd' => '0.0700',
             'credits_per_second' => '0.2000',
             'public_visible' => true,
+            'default' => false,
             'sort_order' => 0,
             'created_at' => Carbon::now(),
             'active' => true,

@@ -30,6 +30,8 @@ class ModelsInfolist
                     ->boolean(),
                 IconEntry::make('public_visible')
                     ->boolean(),
+                IconEntry::make('default')
+                    ->boolean(),
 
                 TextEntry::make('created_at'),
                 TextEntry::make('updated_at'),

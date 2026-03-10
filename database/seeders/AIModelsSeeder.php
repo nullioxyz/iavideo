@@ -27,6 +27,7 @@ class AIModelsSeeder extends Seeder
                 'credits_per_second' => '1.1429',
                 'active' => true,
                 'public_visible' => true,
+                'default' => true,
                 'sort_order' => 10,
             ],
             [
@@ -37,6 +38,7 @@ class AIModelsSeeder extends Seeder
                 'credits_per_second' => '0.1429',
                 'active' => true,
                 'public_visible' => true,
+                'default' => false,
                 'sort_order' => 20,
             ],
             [
@@ -47,6 +49,7 @@ class AIModelsSeeder extends Seeder
                 'credits_per_second' => '0.1429',
                 'active' => true,
                 'public_visible' => true,
+                'default' => false,
                 'sort_order' => 30,
             ],
             [
@@ -57,6 +60,7 @@ class AIModelsSeeder extends Seeder
                 'credits_per_second' => '0.4286',
                 'active' => true,
                 'public_visible' => true,
+                'default' => false,
                 'sort_order' => 40,
             ],
             [
@@ -67,6 +71,7 @@ class AIModelsSeeder extends Seeder
                 'credits_per_second' => null,
                 'active' => false,
                 'public_visible' => false,
+                'default' => false,
                 'sort_order' => 50,
             ],
             [
@@ -77,6 +82,7 @@ class AIModelsSeeder extends Seeder
                 'credits_per_second' => '1.1429',
                 'active' => true,
                 'public_visible' => true,
+                'default' => false,
                 'sort_order' => 60,
             ],
             [
@@ -87,6 +93,7 @@ class AIModelsSeeder extends Seeder
                 'credits_per_second' => '0.2000',
                 'active' => true,
                 'public_visible' => true,
+                'default' => false,
                 'sort_order' => 70,
             ],
             [
@@ -97,6 +104,7 @@ class AIModelsSeeder extends Seeder
                 'credits_per_second' => '0.1143',
                 'active' => true,
                 'public_visible' => true,
+                'default' => false,
                 'sort_order' => 80,
             ],
             [
@@ -107,6 +115,7 @@ class AIModelsSeeder extends Seeder
                 'credits_per_second' => '1.4286',
                 'active' => true,
                 'public_visible' => true,
+                'default' => false,
                 'sort_order' => 90,
             ],
         ];
