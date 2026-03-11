@@ -2,14 +2,19 @@
 
 namespace App\Domain\Videos\Controllers;
 
-use App\Domain\Videos\Events\CancelPredictionInput;
-use App\Domain\Videos\Requests\CancelInputPredictionRequest;
 use App\Domain\Auth\Models\User;
+use App\Domain\Videos\Requests\CancelInputPredictionRequest;
+use App\Domain\Videos\Resources\InputJobResource;
+use App\Domain\Videos\UseCases\CancelInputPredictionUseCase;
 use App\Http\Controllers\Controller;
 
 class CancelInputPredictionController extends Controller
 {
-    public function __invoke(CancelInputPredictionRequest $request)
+    public function __construct(
+        private readonly CancelInputPredictionUseCase $useCase,
+    ) {}
+
+    public function __invoke(CancelInputPredictionRequest $request): InputJobResource
     {
         $inputId = (int) $request->input('input_id');
         $user = auth('api')->user();
@@ -17,8 +22,8 @@ class CancelInputPredictionController extends Controller
             abort(401);
         }
 
-        CancelPredictionInput::dispatch((int) $user->getKey(), $inputId);
+        $input = $this->useCase->execute((int) $user->getKey(), $inputId);
 
-        return response()->noContent();
+        return new InputJobResource($input);
     }
 }

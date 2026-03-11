@@ -311,8 +311,15 @@ paths:
       parameters:
         - $ref: '#/components/parameters/JobIdPath'
       responses:
-        '204':
-          description: Cancellation accepted
+        '200':
+          description: Updated cancelled job detail
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/JobResource'
         '422':
           $ref: '#/components/responses/ValidationError'
   /api/jobs/{job}/download:
@@ -348,8 +355,15 @@ paths:
                 input_id:
                   type: integer
       responses:
-        '204':
-          description: Cancellation accepted
+        '200':
+          description: Updated cancelled job detail
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/JobResource'
   /api/credits/balance:
     get:
       tags: [Credits]

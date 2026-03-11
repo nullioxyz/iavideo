@@ -215,13 +215,15 @@ class CancelPredictionUseCaseTest extends TestCase
         /** @var CancelInputPredictionUseCase $useCase */
         $useCase = $this->app->make(CancelInputPredictionUseCase::class);
 
-        $prediction = $useCase->execute((int) $user->getKey(), (int) $input->getKey());
+        $updatedInput = $useCase->execute((int) $user->getKey(), (int) $input->getKey());
 
-        $this->assertInstanceOf(Prediction::class, $prediction);
-        $this->assertSame('2wbzrawha9rmw0cv9h5ajeyyn4', $prediction->external_id);
-        $this->assertSame(Prediction::CANCELLED, $prediction->status);
-        $this->assertSame($input->id, $prediction->input_id);
-        $this->assertSame($model->id, $prediction->model_id);
+        $this->assertInstanceOf(Input::class, $updatedInput);
+        $this->assertSame($input->id, $updatedInput->getKey());
+        $this->assertSame(Input::CANCELLED, $updatedInput->status);
+        $this->assertNotNull($updatedInput->prediction);
+        $this->assertSame('2wbzrawha9rmw0cv9h5ajeyyn4', $updatedInput->prediction->external_id);
+        $this->assertSame(Prediction::CANCELLED, $updatedInput->prediction->status);
+        $this->assertSame($model->id, $updatedInput->prediction->model_id);
 
         $this->assertDatabaseHas('inputs', [
             'id' => $input->id,
@@ -229,7 +231,7 @@ class CancelPredictionUseCaseTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('predictions', [
-            'id' => $prediction->id,
+            'id' => $updatedInput->prediction->id,
             'external_id' => '2wbzrawha9rmw0cv9h5ajeyyn4',
             'status' => Prediction::CANCELLED,
         ]);
@@ -259,5 +261,93 @@ class CancelPredictionUseCaseTest extends TestCase
         $this->assertSame('5.0000', $refundLedger->metadata['credits_per_second'] ?? null);
 
         $this->assertSame(27, $user->fresh()->credit_balance);
+    }
+
+    public function test_it_cancels_locally_when_prediction_has_no_external_id(): void
+    {
+        $user = User::factory()->create([
+            'credit_balance' => 2,
+        ]);
+
+        $platform = ModelsPlatform::query()->create([
+            'name' => 'Replicate',
+            'slug' => 'replicate',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $model = AIModel::query()->create([
+            'platform_id' => $platform->id,
+            'name' => 'Kling v2.5 Turbo Pro',
+            'slug' => 'kwaivgi/kling-v2.5-turbo-pro',
+            'provider_model_key' => 'kwaivgi/kling-v2.5-turbo-pro',
+            'version' => null,
+            'cost_per_second_usd' => '0.0700',
+            'credits_per_second' => '5.0000',
+            'active' => true,
+            'public_visible' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $preset = Preset::query()->create([
+            'name' => 'Preset 9:16',
+            'prompt' => 'Go until to the start of the universe. Go to the Big Bang.',
+            'negative_prompt' => null,
+            'aspect_ratio' => '9:16',
+            'duration_seconds' => 5,
+            'default_model_id' => $model->id,
+            'cost_estimate_usd' => 0.3500,
+            'active' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $input = Input::query()->create([
+            'user_id' => $user->getKey(),
+            'model_id' => $model->getKey(),
+            'preset_id' => $preset->id,
+            'duration_seconds' => 5,
+            'estimated_cost_usd' => '0.3500',
+            'model_cost_per_second_usd' => '0.0700',
+            'model_credits_per_second' => '5.0000',
+            'credits_charged' => 25,
+            'billing_status' => 'charged',
+            'credit_debited' => true,
+            'status' => Input::PROCESSING,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $prediction = Prediction::factory()->create([
+            'input_id' => $input->getKey(),
+            'model_id' => $model->getKey(),
+            'external_id' => null,
+            'status' => Prediction::STARTING,
+            'source' => 'web',
+            'attempt' => 1,
+            'queued_at' => Carbon::now(),
+        ]);
+
+        /** @var CancelInputPredictionUseCase $useCase */
+        $useCase = $this->app->make(CancelInputPredictionUseCase::class);
+
+        $updatedInput = $useCase->execute((int) $user->getKey(), (int) $input->getKey());
+
+        $this->assertSame(Input::CANCELLED, $updatedInput->status);
+        $this->assertNotNull($updatedInput->prediction);
+        $this->assertSame($prediction->getKey(), $updatedInput->prediction->getKey());
+        $this->assertSame(Prediction::CANCELLED, $updatedInput->prediction->status);
+
+        $this->assertDatabaseHas('inputs', [
+            'id' => $input->getKey(),
+            'status' => Input::CANCELLED,
+            'credit_debited' => false,
+        ]);
+
+        $this->assertDatabaseHas('predictions', [
+            'id' => $prediction->getKey(),
+            'status' => Prediction::CANCELLED,
+        ]);
     }
 }

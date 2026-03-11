@@ -3,14 +3,19 @@
 namespace App\Domain\Videos\Controllers;
 
 use App\Domain\Auth\Models\User;
-use App\Domain\Videos\Events\CancelPredictionInput;
 use App\Domain\Videos\Models\Input;
+use App\Domain\Videos\Resources\InputJobResource;
+use App\Domain\Videos\UseCases\CancelInputPredictionUseCase;
 use App\Http\Controllers\Controller;
 use Illuminate\Validation\ValidationException;
 
 class CancelJobController extends Controller
 {
-    public function __invoke(int $job)
+    public function __construct(
+        private readonly CancelInputPredictionUseCase $useCase,
+    ) {}
+
+    public function __invoke(int $job): InputJobResource
     {
         $user = auth('api')->user();
         if (! $user instanceof User) {
@@ -31,8 +36,8 @@ class CancelJobController extends Controller
             ]);
         }
 
-        CancelPredictionInput::dispatch((int) $user->getKey(), (int) $input->getKey());
+        $updatedInput = $this->useCase->execute((int) $user->getKey(), (int) $input->getKey());
 
-        return response()->noContent();
+        return new InputJobResource($updatedInput);
     }
 }

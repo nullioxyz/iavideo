@@ -213,11 +213,11 @@ Payload:
 
 ### `POST /api/jobs/{job}/cancel`
 
-Cancels an in-flight generation. Successful cancellation may trigger an automatic refund.
+Cancels an in-flight generation and returns the updated job immediately with status `cancelled`. Successful cancellation may trigger an automatic refund.
 
 ### `POST /api/prediction/cancel`
 
-Legacy-compatible cancellation endpoint.
+Legacy-compatible cancellation endpoint. It also returns the updated job immediately with status `cancelled`.
 
 Payload:
 
